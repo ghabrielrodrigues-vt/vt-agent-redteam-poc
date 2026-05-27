@@ -1,72 +1,68 @@
-# Conexão com a Moderação do Nerdy Tutor — Resumo Não-Técnico
+# Nerdy Tutor Moderation Connection — Non-Technical Summary
 
-## O que parece igual e o que de fato é diferente
+## What looks the same and what is actually different
 
-Quando o chefe disse "a gente tem alguma lógica que é largamente copiada", ele
-estava certo — **mas só em alto nível**. No nível onde você de fato escreve código,
-as duas coisas são jobs diferentes.
+When the action item stated "we have some logic that is largely copied", that was
+right — **but only at a high level**. At the level where you actually write code, the
+two things are different jobs.
 
-O trabalho de moderação do Nerdy Tutor que eu fiz nas últimas semanas é como um
-**porteiro na porta** da IA. Quando um aluno digita algo arriscado, o porteiro
-decide se deixa a mensagem entrar. Se sim, a IA vê; se não, a IA nunca fica sabendo
-que o aluno tentou.
+The Nerdy Tutor moderation work from recent weeks is like a **bouncer at the AI's
+door**. When a student types something risky, the bouncer decides whether to let the
+message in. If yes, the AI sees it; if no, the AI never learns the student tried.
 
-O POC de red-team é como um **cliente oculto**. Ele se aproxima da IA, diz algo
-projetado pra fazer ela tropeçar, escuta o que a IA responde, e dá nota se a IA se
-saiu bem. O ponto **não é proteger a IA de input ruim** — é **verificar que a IA
-se comporta bem quando algo ruim passa**.
+The red-team POC is like a **mystery shopper**. It approaches the AI, says something
+designed to make it stumble, listens to what the AI answers, and grades whether the AI
+did well. The point **is not to protect the AI from bad input** — it is **to verify
+the AI behaves well when something bad gets through**.
 
-Ambos os jobs são necessários. Você quer um porteiro **e** quer clientes ocultos.
-Eles checam modos de falha diferentes.
+Both jobs are necessary. You want a bouncer **and** mystery shoppers. They check
+different failure modes.
 
-## O que do trabalho de moderação eu vou reaproveitar
+## What from the moderation work I will reuse
 
-O trabalho não foi duplicado. Três pedaços concretos se transferem direto para o
-POC de red-team:
+The work was not duplicated. Three concrete pieces transfer directly to the red-team
+POC:
 
-1. **A lista de prompts arriscados e categorias.** Eu passei semanas curando a
-   lista específica de educação de palavras, frases e intenções ruins que aparecem
-   no nosso contexto de tutoria. Essa lista vira o **menu inicial** de prompts de
-   teste que a ferramenta de red-team manda pra IA. Um time começando do zero
-   precisaria de meses de revisões de incidente pra montar algo equivalente.
+1. **The list of risky prompts and categories.** I spent weeks curating the
+   education-specific list of bad words, phrases, and intents that appear in our
+   tutoring context. That list becomes the **initial menu** of test prompts the
+   red-team tool sends to the AI. A team starting from scratch would need months of
+   incident review to build something equivalent.
 
-2. **A integração da OpenAI Moderation API.** Eu pluguei o classificador de
-   segurança da OpenAI no pipeline de moderação pra decidir se um texto que chega é
-   arriscado. O POC de red-team usa **o mesmo classificador** pra decidir se a
-   resposta que a IA está mandando é arriscada. Mesmos padrões de código, direção
-   oposta.
+2. **The OpenAI Moderation API integration.** I plugged OpenAI's safety classifier
+   into the moderation pipeline to decide whether incoming text is risky. The red-team
+   POC uses **the same classifier** to decide whether the response the AI is sending is
+   risky. Same code patterns, opposite direction.
 
-3. **A forma como armazenamos os dados.** O schema, a categorização, o tratamento
-   de language-code, o padrão de detalhes em JSON — eu construí tudo isso pro banco
-   de moderação. O POC de red-team reusa as mesmas convenções pra tabela de
-   resultados, pra que qualquer um lendo qualquer das duas tabelas se sinta em
-   casa.
+3. **How we store data.** The schema, categorization, language-code handling, JSON
+   detail pattern — I built all of that for the moderation database. The red-team POC
+   reuses the same conventions for the results table so anyone reading either table
+   feels at home.
 
-## O que não posso reaproveitar, e por que tudo bem
+## What I cannot reuse, and why that is fine
 
-Duas coisas precisam ficar pra trás:
+Two things must stay behind:
 
-1. **A arquitetura do pipeline em si.** A stack L1/L2/L3 mora dentro do repo
-   student-onboarding como uma rota de servidor Next.js. Ainda não é biblioteca, e
-   extrair daí é projeto diferente. Pro POC de red-team, eu não preciso da stack —
-   eu só preciso de pedaços dos inputs dela e de uma das chamadas de API.
+1. **The pipeline architecture itself.** The L1/L2/L3 stack lives inside the
+   student-onboarding repo as a Next.js server route. It is not a library yet, and
+   extracting it is a different project. For the red-team POC, I do not need the stack
+   — only pieces of its inputs and one of its API calls.
 
-2. **A ideia de "bloquear antes da IA ver".** Voz LiveKit não tem um passo onde eu
-   consiga interceptar a fala do usuário antes que a IA escute; no momento em que o
-   áudio chega, ele já está dentro do speech-to-text interno da IA. Tudo bem.
-   Bloquear inputs é o job do pipeline de moderação de produção. Testar outputs é
-   o job do POC de red-team.
+2. **The idea of "block before the AI sees it".** LiveKit voice has no step where I
+   can intercept user speech before the AI listens; by the time audio arrives, it is
+   already inside the AI's internal speech-to-text. That is fine. Blocking inputs is
+   the production moderation pipeline's job. Testing outputs is the red-team POC's
+   job.
 
-## O que vou contar pro time
+## What I will tell the team
 
-A história que eu vou defender no spike doc é:
+The story I will defend in the spike doc is:
 
-> "O trabalho de moderação que eu fiz (PR #1667 e PR #1669) sai como **filtragem
-> de input em produção** — o porteiro. O POC de red-team sai como um **pacote
-> Python separado** que cada repo de agent LiveKit pode importar — o cliente
-> oculto. Eles compartilham as categorias, a chamada de OpenAI Moderation, e os
-> padrões de armazenamento, mas rodam em lugares diferentes, em momentos
-> diferentes, pra objetivos diferentes."
+> "The moderation work I did (PR #1667 and PR #1669) ships as **production input
+> filtering** — the bouncer. The red-team POC ships as a **separate Python package**
+> that each LiveKit agent repo can import — the mystery shopper. They share
+> categories, the OpenAI Moderation call, and storage patterns, but run in different
+> places, at different times, for different goals."
 
-Isso é honesto, defensável, e claro. Evita supervender — dizer "isso unifica toda
-moderação" seria tecnicamente errado e convidaria crítica.
+That is honest, defensible, and clear. It avoids overselling — saying "this unifies
+all moderation" would be technically wrong and invite criticism.

@@ -1,91 +1,87 @@
-# Primer de LiveKit
+# LiveKit Primer
 
-LiveKit é uma plataforma de mídia em tempo real — WebRTC por baixo. Pense nele como
-"Zoom-as-a-service, mas programável". É a fundação sobre a qual todo agent de voz e
-avatar da VT é construído.
+LiveKit is a real-time media platform — WebRTC underneath. Think of it as
+"Zoom-as-a-service, but programmable". It is the foundation every VT voice and avatar
+agent is built on.
 
-A confusão que a maioria das pessoas enfrenta é que **o nome "LiveKit" se refere a
-três coisas diferentes** que vêm juntas. Uma vez que você as separa, a arquitetura
-fica simples.
+The confusion most people hit is that **the name "LiveKit" refers to three different
+things** that come together. Once you separate them, the architecture becomes simple.
 
-## As três camadas
+## The three layers
 
-| Camada | O que é | Onde aparece no stack da VT |
+| Layer | What it is | Where it appears in the VT stack |
 | --- | --- | --- |
-| **LiveKit Server** | Servidor WebRTC open source (binário Go). Hospeda "rooms", roteia áudio/vídeo/dados entre participantes. Pode rodar localmente via Docker. | Não está em nenhum repo da VT — não hospedamos. Consumimos a versão Cloud. |
-| **LiveKit Cloud** | Versão hospedada do LiveKit Server, gerida pela LiveKit Inc. É o que usamos em produção e staging hoje. | Nossos agents autenticam contra o secret AWS `tutors-service/st/livekit`. |
-| **LiveKit Agents SDK** | Framework Node e Python para escrever "bots" que entram em rooms como participantes com poderes extras (capturar áudio, rodar STT→LLM→TTS, publicar áudio de volta). | É exatamente sobre o que `varsitytutors/livekit-agents` foi construído (`@livekit/agents` v1.2.2). |
+| **LiveKit Server** | Open-source WebRTC server (Go binary). Hosts "rooms", routes audio/video/data between participants. Can run locally via Docker. | Not in any VT repo — we do not self-host. We consume the Cloud version. |
+| **LiveKit Cloud** | Hosted version of LiveKit Server, managed by LiveKit Inc. That is what we use in production and staging today. | Our agents authenticate against AWS secret `tutors-service/st/livekit`. |
+| **LiveKit Agents SDK** | Node and Python framework for writing "bots" that join rooms as participants with extra powers (capture audio, run STT→LLM→TTS, publish audio back). | Exactly what `varsitytutors/livekit-agents` was built on (`@livekit/agents` v1.2.2). |
 
-O "agent" sobre o qual o chefe fala é um **processo** (um worker Node, no nosso caso)
-que se conecta a uma room LiveKit **como se fosse um participante**, mas com a
-capacidade de ouvir o áudio do humano, rodar um modelo, e falar de volta.
+The "agent" referenced in the action item is a **process** (a Node worker, in our case)
+that connects to a LiveKit room **as if it were a participant**, but with the ability
+to hear human audio, run a model, and speak back.
 
-## Por que isso importa para red-teaming
+## Why this matters for red-teaming
 
-Fazer red-team de um agent significa: mandar input adversarial pra ele, observar o
-output, pontuar se o output é seguro. Com LiveKit, "input" e "output" são ambos
-**streams de áudio roteados através de uma room**.
+Red-teaming an agent means: send adversarial input to it, observe the output, score
+whether the output is safe. With LiveKit, "input" and "output" are both **audio
+streams routed through a room**.
 
-Isso significa que um harness de red-team precisa ou:
+That means a red-team harness must either:
 
-1. **Ser um participante sintético** — entrar numa room como usuário falso, enviar
-   texto adversarial (ou áudio sintetizado), capturar a resposta do agent, pontuar.
-   Esse caminho é agnóstico de linguagem (funciona para agents TS ou Python) e
-   espelha o runtime real do LiveKit.
-2. **Ou rodar o agent in-process** sob um harness de teste — pula a room. Mais
-   rápido, mas só funciona se o harness estiver na mesma linguagem do agent. Como
-   nossos agents são TypeScript e o pacote que o chefe quer é Python, esse caminho
-   está fechado.
+1. **Be a synthetic participant** — join a room as a fake user, send adversarial text
+   (or synthesized audio), capture the agent's response, score it. This path is
+   language-agnostic (works for TS or Python agents) and mirrors real LiveKit runtime.
+2. **Or run the agent in-process** under a test harness — skips the room. Faster, but
+   only works if the harness is in the same language as the agent. Because our agents
+   are TypeScript and the spike requires a Python package, that path is closed.
 
-Implicação: o POC vai ser "participante sintético" contra um servidor LiveKit real
-(local ou staging).
+Implication: the POC will be a "synthetic participant" against a real LiveKit server
+(local or staging).
 
-## Anatomia de uma sessão (passo a passo concreto)
+## Anatomy of a session (concrete step by step)
 
-Isso é o que acontece quando um candidato a tutor inicia uma entrevista hoje:
+This is what happens when a tutor candidate starts an interview today:
 
 ```
-1. Dashboard admin chama o tutors-service em Go
-2. tutors-service chama o LiveKit Server SDK:
-     - Cria room "interview-<uuid>"
-     - Define metadata da room (interview_id, subject, system_prompt, storage creds)
-     - Dispatcha o agent (agentName = "interview-agent")
-3. LiveKit Cloud roteia o dispatch pra um worker no pool livekit-agents
-4. Processo worker (Node) acorda:
-     - Faz parse da metadata
-     - Conecta no websocket do OpenAI Realtime (a "Mouth")
-     - Inicia Room Composite Egress (gravação para Supabase Storage)
-     - Entra na room como participante
-5. Candidato abre o browser, recebe um token, entra na mesma room
-6. Negociação WebRTC: áudio flui nas duas direções via LiveKit Cloud
-7. Loop da entrevista roda (ver docs/02-agent-architecture.md)
-8. Candidato desconecta:
-     - Agent faz merge do transcript + state machine na metadata da room
-     - Egress para, gravação termina de subir
-     - LiveKit dispara webhook room_finished → tutors-service consome
+1. Admin dashboard calls the Go tutors-service
+2. tutors-service calls the LiveKit Server SDK:
+     - Creates room "interview-<uuid>"
+     - Sets room metadata (interview_id, subject, system_prompt, storage creds)
+     - Dispatches the agent (agentName = "interview-agent")
+3. LiveKit Cloud routes the dispatch to a worker in the livekit-agents pool
+4. Worker process (Node) wakes up:
+     - Parses metadata
+     - Connects to OpenAI Realtime websocket (the "Mouth")
+     - Starts Room Composite Egress (recording to Supabase Storage)
+     - Joins the room as a participant
+5. Candidate opens the browser, receives a token, joins the same room
+6. WebRTC negotiation: audio flows both directions via LiveKit Cloud
+7. Interview loop runs (see docs/02-agent-architecture.md)
+8. Candidate disconnects:
+     - Agent merges transcript + state machine into room metadata
+     - Egress stops, recording finishes uploading
+     - LiveKit fires room_finished webhook → tutors-service consumes it
 ```
 
-O candidato e o agent **nunca conversam diretamente**. Cada byte passa pelo
-LiveKit Cloud. Essa é a razão de rooms serem a única unidade sensata de isolamento
-para red-team: uma room = um cenário de teste.
+The candidate and agent **never talk directly**. Every byte passes through LiveKit
+Cloud. That is why rooms are the only sensible isolation unit for red-team: one room
+= one test scenario.
 
-## Glossário de vocabulário
+## Vocabulary glossary
 
-Esses termos aparecem o tempo todo no código LiveKit:
+These terms appear constantly in LiveKit code:
 
-- **Room** — o container da sessão. Uma room = uma conversa. Tem metadata, participantes, tracks.
-- **Participant** — qualquer um na room: candidato humano, agent worker, recorder.
-- **Track** — um stream de áudio ou vídeo publicado por um participante.
-- **Data channel** — mensagens de texto trocadas entre participantes (sem áudio).
-- **Egress** — gravação server-side ou streaming dos tracks de uma room. Usado para os MP4s das entrevistas.
-- **Dispatch** — LiveKit Cloud avisando um pool de workers "esta room precisa de um agent chamado X".
-- **Metadata** — JSON arbitrário anexado a uma room ou participante. Usada extensivamente como canal de config do agent.
-- **Token** — JWT que um cliente apresenta para entrar numa room. Codifica identidade, nome da room, permissões.
+- **Room** — session container. One room = one conversation. Has metadata, participants, tracks.
+- **Participant** — anyone in the room: human candidate, agent worker, recorder.
+- **Track** — an audio or video stream published by a participant.
+- **Data channel** — text messages exchanged between participants (no audio).
+- **Egress** — server-side recording or streaming of room tracks. Used for interview MP4s.
+- **Dispatch** — LiveKit Cloud telling a worker pool "this room needs an agent named X".
+- **Metadata** — arbitrary JSON attached to a room or participant. Used extensively as agent config channel.
+- **Token** — JWT a client presents to join a room. Encodes identity, room name, permissions.
 
-## Dimensão de custo (para contexto)
+## Cost dimension (for context)
 
-LiveKit Cloud cobra por participant-minutes. Uma execução de red-team que abre N
-rooms × M turnos × ~30s por turno acumula. O design do pacote precisa ser barato por
-teste, e é por isso que "servidor local via Docker para testes em PR-time, Cloud
-staging para canary semanal" é a divisão proposta — ver `docs/03-running-local.md`
-e `docs/04-poc-design.md`.
+LiveKit Cloud charges per participant-minute. A red-team run that opens N rooms × M
+turns × ~30s per turn adds up. The package design must be cheap per test, which is
+why "local Docker server for PR-time tests, Cloud staging for weekly canary" is the
+proposed split — see `docs/03-running-local.md` and `docs/04-poc-design.md`.

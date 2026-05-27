@@ -76,8 +76,7 @@ relevance, recommended adoption verdict for the VT stack).
 
 Suggested 30-minute review path:
 
-1. **`docs/00-spike-for-slack.md`** (5 min) — Slack-ready spike summary
-   you can paste in `#avatar-sync`.
+1. **`docs/00-spike-overview.md`** (5 min) — spike summary.
 2. **`docs/04-poc-design.md`** (10 min) — package architecture, public
    API, lifecycle, Supabase schema.
 3. **`docs/08-tooling-dossier.md`** (10 min) — tooling comparison and
@@ -97,7 +96,7 @@ evidence section above.
 ├── STATUS.md                       # current state of each component
 │
 ├── docs/                           # 14 docs, EN/PT pairs for the deeper ones
-│   ├── 00-spike-for-slack.md       # Slack-ready 1-pager
+│   ├── 00-spike-overview.md       # Spike overview
 │   ├── 01-livekit-primer.md        # how LiveKit works, mental model
 │   ├── 02-agent-architecture.md    # how livekit-agents (interview agent) works
 │   ├── 03-running-local.md         # 3 ways to run LiveKit locally
@@ -200,7 +199,7 @@ These are documented in `STATUS.md` as residual work for v0.1 MVP:
    subclass that drives the real agent is v0.2 work, ~3–5 days.
 3. **GitHub Actions workflow** — YAML sketch in `docs/06-implementation-plan.md`
    §6.2, not yet active in any consuming repo.
-4. **Slack webhook alerting** — design documented, not wired.
+4. **Notification webhook alerting** — design documented, not wired.
 
 ## Open questions for the team
 
@@ -212,7 +211,7 @@ The five decisions I'd like aligned before MVP kickoff (full list in
    PyPI mirror first?
 3. **Threshold tuning** — proposed 100% / 90% / 85% for PR /
    deploy / canary.
-4. **Alert channel** — `#avatar-sync`, `#trust-safety`, or dedicated?
+4. **Alert channel** — Trust+Safety team channel or dedicated red-team alerts?
 5. **Scope** — red-team only the Mouth output, or also the Brain
    (Assessor LLM tool calls)?
 
@@ -225,7 +224,7 @@ The five decisions I'd like aligned before MVP kickoff (full list in
 - Adversarial scenario seeds drawn from
   `student-onboarding-orchestration/lib/ai/moderation.ts`
   (`CONTENT_MODERATION_PROMPT`).
-- Boss's spike request in `#avatar-sync` (May 21, 2026).
+- Avatar Sync action item (May 21, 2026).
 
 ## License
 

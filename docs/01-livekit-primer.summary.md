@@ -1,58 +1,54 @@
-# Primer de LiveKit — Resumo Não-Técnico
+# LiveKit Primer — Non-Technical Summary
 
-## O que é LiveKit?
+## What is LiveKit?
 
-LiveKit é a tecnologia que permite a duas pessoas (ou uma pessoa e uma IA) ter uma
-conversa de áudio ou vídeo ao vivo pelo browser. É o mesmo tipo de encanamento que
-Zoom ou Google Meet usam, mas projetado para ser embutido nos nossos próprios produtos
-em vez de ser uma ferramenta de reunião isolada.
+LiveKit is the technology that lets two people (or a person and an AI) have a live
+audio or video conversation in the browser. It is the same kind of plumbing Zoom or
+Google Meet use, but designed to be embedded in our own products instead of being a
+standalone meeting tool.
 
-## Por que a VT usa?
+## Why does VT use it?
 
-Todos os nossos produtos com avatar falante — o AI Interviewer, os tutores Lemon
-Slice, os futuros avatares Nerdy — precisam de três coisas:
+All of our speaking-avatar products — the AI Interviewer, Lemon Slice tutors,
+future Nerdy avatars — need three things:
 
-1. Uma forma de o aluno ou candidato **falar** pelo browser.
-2. Um lugar onde o áudio é **roteado** em tempo real, com latência baixa.
-3. Uma forma de a **nossa IA escutar e responder**.
+1. A way for the student or candidate to **speak** in the browser.
+2. A place where audio is **routed** in real time with low latency.
+3. A way for **our AI to listen and respond**.
 
-LiveKit fornece (2) diretamente, e nos dá o toolkit para construir (1) e (3) em cima.
+LiveKit provides (2) directly, and gives us the toolkit to build (1) and (3) on top.
 
-## As três coisas chamadas de "LiveKit"
+## The three things called "LiveKit"
 
-Quando alguém diz "LiveKit", geralmente está se referindo a uma de três coisas. As
-pessoas confundem constantemente:
+When someone says "LiveKit", they usually mean one of three things. People confuse
+them constantly:
 
-- **LiveKit Server**: o programa de computador propriamente dito que cuida do
-  roteamento de áudio. Conseguimos rodar ele no laptop para desenvolvimento local.
-- **LiveKit Cloud**: uma versão paga hospedada do mesmo programa, gerida pela empresa
-  LiveKit. É o que está rodando em produção e staging hoje.
-- **LiveKit Agents SDK**: uma biblioteca separada que ajuda a escrever "bots de IA"
-  que entram numa conversa como se fossem uma pessoa. É a parte sobre a qual nossos
-  engenheiros realmente escrevem código.
+- **LiveKit Server**: the actual computer program that handles audio routing. We can
+  run it on a laptop for local development.
+- **LiveKit Cloud**: a paid hosted version of the same program, managed by LiveKit
+  Inc. That is what runs in production and staging today.
+- **LiveKit Agents SDK**: a separate library that helps write "AI bots" that join a
+  conversation as if they were a person. That is the part our engineers actually
+  write code against.
 
-Quando o chefe diz "os agents estão hospedados no LiveKit", ele quer dizer que nossos
-bots de IA rodam dentro do LiveKit Cloud, escutando a conversa através do roteamento
-do LiveKit.
+When stakeholders say "the agents are hosted on LiveKit", they mean our AI bots run
+inside LiveKit Cloud, listening to the conversation through LiveKit routing.
 
-## Por que isso importa para o trabalho de red-team
+## Why this matters for red-team work
 
-A gente quer testar se a IA lida com prompts perigosos de forma segura. Para isso, a
-ferramenta de red-team tem que **fingir ser uma pessoa na conversa**, enviar à IA um
-prompt arriscado, escutar o que a IA responde, e julgar se foi uma resposta segura.
+We want to test whether the AI handles dangerous prompts safely. For that, the
+red-team tool must **pretend to be a person in the conversation**, send the AI a
+risky prompt, listen to what the AI answers, and judge whether it was a safe response.
 
-LiveKit é o meio onde essa conversa acontece. Então nossa ferramenta de red-team
-precisa falar LiveKit também — abrir uma room, entrar, enviar algo adversarial,
-capturar a resposta.
+LiveKit is the medium where that conversation happens. So our red-team tool must speak
+LiveKit too — open a room, join, send something adversarial, capture the response.
 
-É por isso que o chefe citou LiveKit especificamente: cada um dos nossos produtos com
-avatar compartilha esse mesmo encanamento, então uma única ferramenta que conhece
-LiveKit consegue testar todos.
+That is why LiveKit was specified: every one of our avatar products shares this same
+plumbing, so a single tool that knows LiveKit can test all of them.
 
-## O que a ferramenta de red-team NÃO vai fazer
+## What the red-team tool will NOT do
 
-Ela não vai substituir nenhum dos filtros de segurança que já bloqueiam inputs ruins
-no Nerdy Tutor. Esses impedem alunos de mandar coisas prejudiciais para a IA logo de
-cara. A ferramenta de red-team faz o trabalho inverso: força a IA a ouvir algo
-prejudicial para a gente verificar se a IA **responde** de forma segura. As duas
-camadas são complementares.
+It will not replace any of the safety filters that already block bad inputs in Nerdy
+Tutor. Those stop students from sending harmful things to the AI up front. The
+red-team tool does the inverse job: forces the AI to hear something harmful so we
+can verify the AI **responds** safely. The two layers are complementary.

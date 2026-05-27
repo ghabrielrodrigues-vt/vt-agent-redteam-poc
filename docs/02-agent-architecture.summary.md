@@ -1,66 +1,64 @@
-# Arquitetura do Agent — Resumo Não-Técnico
+# Agent Architecture — Non-Technical Summary
 
-## Como o AI Interviewer realmente é por dentro?
+## What is the AI Interviewer really like inside?
 
-O AI Interviewer não é uma IA só. São **duas IAs trabalhando juntas**, com jobs bem
-diferentes.
+The AI Interviewer is not a single AI. It is **two AIs working together**, with very
+different jobs.
 
-- A **Mouth** é a voz que o candidato escuta. O único job dela é falar naturalmente,
-  escutar, e seguir instruções. Ela não tem permissão de decidir que pergunta fazer
-  em seguida ou se a resposta do candidato foi boa.
-- A **Brain** é invisível para o candidato. Ela lê cada resposta que o candidato dá,
-  **pontua** como uma professora corrigindo dever de casa, e aí **escreve a próxima
-  instrução** para a Mouth — "faz um follow-up", "vai pro próximo tópico", "encerra,
-  o tempo está acabando", e assim por diante.
+- The **Mouth** is the voice the candidate hears. Its only job is to speak naturally,
+  listen, and follow instructions. It is not allowed to decide which question to ask
+  next or whether the candidate's answer was good.
+- The **Brain** is invisible to the candidate. It reads each answer the candidate
+  gives, **scores** it like a teacher grading homework, then **writes the next
+  instruction** for the Mouth — "ask a follow-up", "move to the next topic", "wrap
+  up, time is running out", and so on.
 
-A gente separou as duas dessa forma por três razões:
+We separated the two that way for three reasons:
 
-1. A Mouth nunca pode acidentalmente revelar o score para o candidato, porque ela
-   não conhece.
-2. A Brain corrige cada resposta **de forma independente**, sem ver o resto da
-   conversa. Isso impede que uma resposta ruim arraste scores posteriores ou que uma
-   resposta boa dê benefício da dúvida ao candidato.
-3. O flow da entrevista é **código baseado em regras**, não LLM. Isso torna a
-   experiência consistente em milhares de entrevistas.
+1. The Mouth can never accidentally reveal the score to the candidate, because it
+   does not know it.
+2. The Brain grades each answer **independently**, without seeing the rest of the
+   conversation. That prevents a bad answer from dragging down later scores or a
+   good answer from giving undue benefit of the doubt.
+3. Interview flow is **rule-based code**, not LLM. That keeps the experience
+   consistent across thousands of interviews.
 
-## Por que isso é relevante para testes de red-team?
+## Why is this relevant for red-team testing?
 
-Por causa de três escolhas arquiteturais, nosso agent é **incomumente fácil de
-fazer red-team**:
+Because of three architectural choices, our agent is **unusually easy to red-team**:
 
-1. **Toda configuração mora na "metadata da room".** Quando uma nova entrevista
-   começa, o servidor anexa um pequeno documento JSON à room LiveKit com o system
-   prompt, matéria, tipo de entrevista, e credenciais de storage. O agent lê isso
-   e roda a entrevista de acordo. O agent **não tem banco, nem conhecimento de API**
-   próprio.
+1. **All configuration lives in "room metadata".** When a new interview starts, the
+   server attaches a small JSON document to the LiveKit room with the system prompt,
+   subject, interview type, and storage credentials. The agent reads that and runs the
+   interview accordingly. The agent **has no database and no API knowledge** of its
+   own.
 
-   Para nós, isso significa que um teste de red-team pode disparar uma room com a
-   configuração que quisermos e exercitar o agent em qualquer estado — diferentes
-   matérias, diferentes prompts, diferentes personas — sem tocar dados de produção.
+   For us, that means a red-team test can spin up a room with whatever configuration
+   we want and exercise the agent in any state — different subjects, different prompts,
+   different personas — without touching production data.
 
-2. **No fim de toda entrevista, o agent escreve tudo de volta na metadata da room**
-   — o transcript completo, cada score, o caminho da gravação. É o lugar perfeito
-   para uma ferramenta de red-team ler a conversa e julgar.
+2. **At the end of every interview, the agent writes everything back to room
+   metadata** — the full transcript, every score, the recording path. That is the
+   perfect place for a red-team tool to read the conversation and judge it.
 
-3. **O formato do sistema é o mesmo em todos os nossos agents LiveKit.** Todos rodam
-   pelo mesmo padrão Mouth-Brain, mesmo canal de config via metadata da room, mesmo
-   passo de finalização. Uma ferramenta de red-team que aprende esse padrão uma vez
-   funciona contra cada agent que produzimos.
+3. **The system format is the same across all our LiveKit agents.** They all follow
+   the same Mouth-Brain pattern, the same metadata configuration channel, the same
+   finalization step. A red-team tool that learns that pattern once works against
+   every agent we ship.
 
-## O que isso significa para o POC
+## What this means for the POC
 
-O POC não vai mudar o código do agent. Ele vai ficar do lado, como ferramenta
-externa que:
+The POC will not change agent code. It will sit beside the agent as an external tool
+that:
 
-1. **Finge ser um candidato**: abre uma room LiveKit com um cenário escolhido na
-   metadata, entra, e "conversa" com o agent.
-2. **Lê o transcript final e os scores da metadata da room** depois que a conversa
-   termina.
-3. **Julga as respostas do agent** contra os critérios de segurança que a empresa
-   considera importantes.
-4. **Escreve o resultado numa pequena tabela Supabase** para termos registro de
-   cada execução.
+1. **Pretends to be a candidate**: opens a LiveKit room with a chosen scenario in
+   metadata, joins, and "talks" to the agent.
+2. **Reads the final transcript and scores from room metadata** after the
+   conversation ends.
+3. **Judges the agent's responses** against the safety criteria the company cares
+   about.
+4. **Writes the result to a small Supabase table** so we have a record of every run.
 
-Como todos os nossos agents LiveKit compartilham a mesma estrutura, a mesma
-ferramenta funciona contra o AI Interviewer hoje, contra os tutores Lemon Slice em
-seguida, e contra qualquer avatar futuro que a empresa vier a construir.
+Because all our LiveKit agents share the same structure, the same tool works against
+the AI Interviewer today, Lemon Slice tutors next, and any future avatar the company
+builds.

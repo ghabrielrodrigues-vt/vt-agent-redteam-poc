@@ -144,7 +144,7 @@ this synthetic teardown, would not happen in a real candidate-leaves flow.
    - `.env.local` with `DISABLE_EGRESS=true` and local LiveKit creds
    - One-line guard in `src/lib/egress.ts` that returns a stub
      `EgressHandle` when `DISABLE_EGRESS=true`
-5. **Gap 1 from the spike** (the boss's "use LiveKit agent tests"
+5. **Gap 1 from the spike** (the Avatar Sync "use LiveKit agent tests"
    suggestion) is partially addressed: the real agent now runs locally
    against a real LiveKit, dispatched via our Python harness, with
    real OpenAI Realtime initialization. The remaining piece — a

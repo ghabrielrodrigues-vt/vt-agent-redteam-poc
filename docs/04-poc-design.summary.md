@@ -1,78 +1,73 @@
-# Design do POC — Resumo Não-Técnico
+# POC Design — Non-Technical Summary
 
-## O que é essa ferramenta, em uma frase?
+## What is this tool, in one sentence?
 
-Um pacote Python pequeno que finge ser um aluno ou candidato mal-intencionado, manda
-prompts perigosos para nossos agents de IA pelo LiveKit, verifica se a IA lida com
-eles de forma segura, e escreve o resultado numa pequena tabela de banco.
+A small Python package that pretends to be a malicious student or candidate, sends
+dangerous prompts to our AI agents through LiveKit, checks whether the AI handles
+them safely, and writes the result to a small database table.
 
-## Onde vai ficar?
+## Where will it live?
 
-No próprio repositório. **Não dentro** de nenhum repo de agent existente. Razões:
+In its own repository. **Not inside** any existing agent repo. Reasons:
 
-- Nossos agents são escritos em TypeScript; o chefe pediu Python especificamente.
-- A gente quer que outros times (Lemon Slice, video agent, avatares futuros)
-  consigam instalar essa ferramenta com um comando — não conseguem se ela estiver
-  enterrada dentro do repo do agent de entrevista.
-- A ferramenta vai evoluir mais rápido que qualquer agent individual. Manter
-  separado impede merges do tipo "quebrei o red-team enquanto consertava o agent de
-  entrevista".
+- Our agents are written in TypeScript; the spike requested Python specifically.
+- We want other teams (Lemon Slice, video agent, future avatars) to install this tool
+  with one command — they cannot if it is buried inside the interview agent repo.
+- The tool will evolve faster than any individual agent. Keeping it separate prevents
+  "I broke red-team while fixing the interview agent" merges.
 
-## Como ela realmente funciona?
+## How does it actually work?
 
-Pensa nela como um robô testador:
+Think of it as a tester robot:
 
-1. A ferramenta lê uma lista de "prompts ruins" que a gente mantém (organizados por
-   categoria: violência, conteúdo sexual, automutilação, tentativas de jailbreak,
-   vazamento de system prompt, etc.).
-2. Para cada prompt ruim, a ferramenta **abre uma conversa LiveKit** e finge ser o
-   aluno ou candidato.
-3. A ferramenta manda o prompt ruim e **grava o que a IA responde**.
-4. A ferramenta **julga a resposta da IA** usando vários métodos de scoring:
-   - A Moderation API da OpenAI flagga a resposta como insegura?
-   - A IA recusou educadamente, ou entrou no jogo?
-   - A IA acidentalmente revelou suas instruções de sistema?
-5. A ferramenta **salva o resultado** numa tabela Supabase para a gente conseguir
-   olhar depois.
+1. The tool reads a list of "bad prompts" we maintain (organized by category:
+   violence, sexual content, self-harm, jailbreak attempts, system prompt leakage,
+   etc.).
+2. For each bad prompt, the tool **opens a LiveKit conversation** and pretends to be
+   the student or candidate.
+3. The tool sends the bad prompt and **records what the AI answers**.
+4. The tool **judges the AI's response** using several scoring methods:
+   - Does the OpenAI Moderation API flag the response as unsafe?
+   - Did the AI refuse politely, or play along?
+   - Did the AI accidentally reveal its system instructions?
+5. The tool **saves the result** to a Supabase table so we can review it later.
 
-## Quando ela roda?
+## When does it run?
 
-Quatro momentos, deliberadamente:
+Four moments, deliberately:
 
-1. **Em todo pull request** para um repo de agent LiveKit — roda um conjunto rápido
-   (~10 cenários) contra um LiveKit local pra que o autor do PR saiba se quebrou
-   alguma coisa.
-2. **Antes de todo deploy** — roda o conjunto completo contra um LiveKit local,
-   bloqueia o deploy se muitos falharem.
-3. **Antes de promover para produção** — roda o conjunto completo contra o ambiente
-   de staging real para pegar problemas de configuração de deploy.
-4. **Uma vez por semana** — roda o conjunto completo contra o ambiente de produção
-   ao vivo como canary, mesmo que nenhum deploy tenha acontecido. Pega deriva
-   lenta, mudanças de API de parceiros, atualizações de modelo da OpenAI.
+1. **On every pull request** to a LiveKit agent repo — runs a fast set (~10 scenarios)
+   against local LiveKit so the PR author knows if they broke something.
+2. **Before every deploy** — runs the full set against local LiveKit and blocks deploy
+   if too many fail.
+3. **Before promoting to production** — runs the full set against the real staging
+   environment to catch deploy configuration problems.
+4. **Once per week** — runs the full set against the live production environment as a
+   canary, even if no deploy happened. Catches slow drift, partner API changes, OpenAI
+   model updates.
 
-Se qualquer um deles falhar cenários demais, o time recebe alerta (canal Slack, a
-decidir depois).
+If any of them fail too many scenarios, the team gets an alert (notification channel
+to be decided later).
 
-## E sobre outras ferramentas tipo Promptfoo?
+## What about tools like Promptfoo?
 
-O chefe mencionou fazer shopping da nossa geração de prompts para Promptfoo. É um
-ótimo encaixe — mas para a próxima iteração, não a primeira. A primeira versão usa
-uma lista hand-curated de prompts ruins pra gente saber que os testes são
-reproduzíveis. Uma vez que isso estiver estável, Promptfoo pode gerar novas
-categorias e a gente materializa no mesmo formato.
+The action item mentioned shopping our prompt generation to Promptfoo. It is a great
+fit — but for the next iteration, not the first. The first version uses a hand-curated
+list of bad prompts so we know tests are reproducible. Once that is stable, Promptfoo
+can generate new categories and we materialize them in the same format.
 
-## Como o POC se conecta com meu trabalho de moderação no Nerdy Tutor?
+## How does the POC connect to my Nerdy Tutor moderation work?
 
-Ver `05-moderation-connection.summary.md` para resposta completa. Versão bem curta:
-as categorias e a lista de frases ruins que eu já curei para o filtro de input do
-Nerdy Tutor viram o **corpus seed** dos prompts adversariais da ferramenta de
-red-team. A integração da OpenAI Moderation API que eu fiz como filtro L2 de input
-é **reusada como scorer das respostas da IA** na ferramenta de red-team. O design
-do schema Supabase segue os mesmos padrões. O trabalho de moderação não foi
-desperdiçado — ele produziu ativos reaproveitáveis para essa nova camada.
+See `05-moderation-connection.summary.md` for the full answer. Very short version:
+the categories and phrase list I already curated for the Nerdy Tutor input filter
+become the **seed corpus** for the red-team tool's adversarial prompts. The OpenAI
+Moderation API integration I built as the L2 input filter is **reused to score AI
+responses** in the red-team tool. The Supabase schema design follows the same
+patterns. The moderation work was not wasted — it produced reusable assets for this
+new layer.
 
-## Como "pronto" se parece para o POC?
+## What does "done" look like for the POC?
 
-O POC é um writeup, um skeleton funcional, e um cenário end-to-end. Não é uma
-ferramenta finalizada. Depois que o spike for aceito, endurecer no release v0.1 é
-um item de trabalho separado.
+The POC is a writeup, a functional skeleton, and one end-to-end scenario. It is not a
+finished tool. After the spike is accepted, hardening into a v0.1 release is separate
+work.

@@ -1,17 +1,11 @@
 # Spike — Red-Team Harness for LiveKit Agents
 
-> Drop-in message for the `#avatar-sync` Slack thread. The intent is to make this
-> postable as-is, with only the author's name in the closing line.
-
----
-
-Following up on the Avatar Sync action item — here is the spike write-up for
-the red-team harness. I'd appreciate feedback on the four open questions at the
-end before we kick off the MVP.
+Overview of the red-team harness spike from the Avatar Sync action item (May 2026).
+Feedback on the open questions at the end is welcome before MVP kickoff.
 
 ## TL;DR
 
-- **One Python package**, new repo `varsitytutors/vt-agent-redteam`, distributed
+- **One Python package**, target repo `varsitytutors/vt-agent-redteam`, distributed
   via `pip install git+ssh://...@vX.Y.Z` for v0.1 (private PyPI is a v0.2 question).
 - **Plug-and-play** for any LiveKit-hosted agent: the harness creates a real
   LiveKit room with adversarial metadata, joins as a synthetic candidate
@@ -88,16 +82,16 @@ artifact for output testing.
 
 ## Promptfoo
 
-The boss called this out. v0.1 ships a hand-curated corpus (~40 scenarios at
-spike close, 30 minimum required at MVP, expanding from there) because
-reproducibility beats novelty when we are establishing a regression baseline.
-v0.2 lets Promptfoo generate candidate scenarios that humans review and commit
-into the corpus YAML. That keeps the test set version-controlled while still
-broadening over time.
+The Avatar Sync action item called for exploring Promptfoo for scenario generation.
+v0.1 ships a hand-curated corpus (~40 scenarios at spike close, 30 minimum required
+at MVP, expanding from there) because reproducibility beats novelty when we are
+establishing a regression baseline. v0.2 lets Promptfoo generate candidate scenarios
+that humans review and commit into the corpus YAML. That keeps the test set
+version-controlled while still broadening over time.
 
 ## What is built today (spike artifacts)
 
-A working `prototype/` skeleton in the `poc_moderation_red_team/` folder:
+A working `prototype/` skeleton in this repository:
 
 - Installable Python 3.13 package (`pip install -e .`)
 - ~40 scenarios across 9 categories (violence, sexual, self_harm, hate,
@@ -120,7 +114,7 @@ $ vt-redteam run --tags smoke --dry-run
 → DRY-RUN: would write 13 rows to redteam.redteam_runs
 ```
 
-The full design lives in `docs/` (six tech docs + six non-technical companions).
+The full design lives in `docs/` (tech docs + non-technical companion summaries).
 
 ## What is intentionally stubbed at spike close
 
@@ -137,9 +131,9 @@ These are MVP-phase work, scoped out from the spike:
 Per the phased plan, MVP v0.1 is ~3 weeks of work, with the audio path being
 the biggest single piece (~2-3 days).
 
-## Open questions for the channel
+## Open questions for the team
 
-Before MVP kickoff, I'd like the team to weigh in on:
+Before MVP kickoff, alignment is needed on:
 
 1. **Ownership** — who owns `vt-agent-redteam`? Trust+Safety, VT4S, or AI
    Infra? Affects on-call and review cadence.
@@ -151,10 +145,8 @@ Before MVP kickoff, I'd like the team to weigh in on:
    output, or also the Brain (the Assessor LLM's `assess_answer` tool)? The
    Brain has its own potential injection surface that input filtering does
    not cover.
-5. **Alert channel** — `#avatar-sync`, `#trust-safety`, or a dedicated
-   `#red-team-alerts`?
+5. **Alert channel** — Trust+Safety team channel, dedicated `#red-team-alerts`,
+   or email/on-call integration?
 
-Happy to walk anyone through the prototype or the docs in person. Will plan
-to assign MVP once we have alignment on the four points above.
-
-— [author]
+The prototype and docs are available for walkthroughs. MVP planning can proceed
+once the team aligns on the points above.

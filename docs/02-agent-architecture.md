@@ -1,63 +1,64 @@
-# Arquitetura do Agent — `livekit-agents` (Tutor Interview)
+# Agent Architecture — `livekit-agents` (Tutor Interview)
 
-Este documento descreve a arquitetura interna de `varsitytutors/livekit-agents`, o
-repo que contém os agents LiveKit em produção na VT. Hoje tem um agent
-(`tutor-interview`); a estrutura foi projetada para hospedar mais.
+This document describes the internal architecture of `varsitytutors/livekit-agents`, the
+repo that contains VT's production LiveKit agents. It currently has one agent
+(`tutor-interview`); the structure was designed to host more.
 
-## Visão geral: Mouth + Brain
+## Overview: Mouth + Brain
 
-Dois papéis de LLM trabalhando juntos. **A Mouth nunca decide o que fazer a seguir
-— a Brain decide.**
+Two LLM roles working together. **The Mouth never decides what to do next — the Brain
+decides.**
 
-- **Mouth**: OpenAI Realtime (`gpt-realtime-mini`). Fala, escuta, segue instruções.
-  Tem uma tool relevante ao job: `assess_answer`. Nunca avalia. Nunca decide o flow.
-- **Brain**: Assessor LLM (LLM-as-judge, não-realtime) + State machine (código
-  determinístico). Pontua cada resposta, decide o que acontece em seguida, gera as
-  próximas instruções para a Mouth.
+- **Mouth**: OpenAI Realtime (`gpt-realtime-mini`). Speaks, listens, follows
+  instructions. Has one job-relevant tool: `assess_answer`. Never evaluates. Never
+  decides flow.
+- **Brain**: Assessor LLM (LLM-as-judge, non-realtime) + state machine (deterministic
+  code). Scores each answer, decides what happens next, generates the next instructions
+  for the Mouth.
 
-Essa separação é forçada arquiteturalmente: a Mouth não tem acesso a scores ou
-state. O Assessor não tem acesso ao histórico de conversa (julga cada resposta em
-isolamento, para evitar viés de ancoragem).
+That separation is enforced architecturally: the Mouth has no access to scores or
+state. The Assessor has no access to conversation history (judges each answer in
+isolation, to avoid anchoring bias).
 
-## Mapa de pastas
+## Folder map
 
 ```
 src/
   agents/tutor-interview/
-    agent.ts            — Entry point. Liga Mouth + Brain, tool calling, egress, escrita de metadata
-    state-machine.ts    — Fases, tracking de questões, gestão de tempo, scores
-    assessor.ts         — Pontua respostas do candidato (LLM-as-judge)
-    prompt-builder.ts   — Constrói prompts de intro e wrap-up a partir da config
-    greeting-controller.ts — Saudação condicional ao tipo (HIRING vs SUBJECT)
+    agent.ts            — Entry point. Wires Mouth + Brain, tool calling, egress, metadata write
+    state-machine.ts    — Phases, question tracking, time management, scores
+    assessor.ts         — Scores candidate answers (LLM-as-judge)
+    prompt-builder.ts   — Builds intro and wrap-up prompts from config
+    greeting-controller.ts — Conditional greeting by type (HIRING vs SUBJECT)
     models.ts           — Multi-model factory (OpenAI / Google Gemini)
-    types.ts            — Schemas Zod para metadata da room, types de state interno
-    constants.ts        — Thresholds de timing
+    types.ts            — Zod schemas for room metadata, internal state types
+    constants.ts        — Timing thresholds
   lib/
-    logger.ts           — Logging estruturado com Winston
-    metadata.ts         — Parser de metadata da room (snake_case → camelCase)
-    egress.ts           — Room Composite Egress gravando para Supabase Storage
-    monitoring.ts       — Session tracking, alertas de erro, handlers globais
-    langfuse.ts         — Observabilidade de chamadas LLM
-    otel.ts             — Export OpenTelemetry
-  index.ts              — Registro do agent, filtro por nome de room, entry CLI
+    logger.ts           — Structured logging with Winston
+    metadata.ts         — Room metadata parser (snake_case → camelCase)
+    egress.ts           — Room Composite Egress recording to Supabase Storage
+    monitoring.ts       — Session tracking, error alerts, global handlers
+    langfuse.ts         — LLM call observability
+    otel.ts             — OpenTelemetry export
+  index.ts              — Agent registration, room-name filter, CLI entry
 ```
 
 Stack: TypeScript, Node.js 22, LiveKit Agents SDK 1.2.2, Zod, Winston.
 
-## Modelo de configuração: zero database, tudo via room-metadata
+## Configuration model: zero database, everything via room metadata
 
-Este é o fato arquitetural mais importante para o POC de red-team.
+This is the most important architectural fact for the red-team POC.
 
-O agent tem **zero acesso a banco**, **zero conhecimento da API do tutors-service**,
-e **zero credenciais hardcoded**. Tudo o que ele precisa chega na metadata da room
-LiveKit, definida pelo tutors-service em Go quando a room é criada:
+The agent has **zero database access**, **zero knowledge of the tutors-service API**,
+and **zero hardcoded credentials**. Everything it needs arrives in LiveKit room
+metadata, set by the Go tutors-service when the room is created:
 
 ```json
 {
   "interview_id": "uuid",
   "subject_name": "Portugues",
   "interview_type": "HIRING",
-  "system_prompt": "Instruções completas da entrevista do dashboard admin...",
+  "system_prompt": "Full interview instructions from admin dashboard...",
   "storage": {
     "endpoint": "...", "access_key": "...", "secret_key": "...",
     "bucket": "...", "region": "..."
@@ -65,107 +66,106 @@ LiveKit, definida pelo tutors-service em Go quando a room é criada:
 }
 ```
 
-O `system_prompt` contém toda a estrutura da entrevista — persona, áreas de
-habilidade, orientação de perguntas, guardrails — montada pelo tutors-service a
-partir do dashboard admin. Adicionar uma nova matéria ou mudar comportamento da
-entrevista significa atualizar dados no admin UI; nenhuma mudança de código de
-agent, nenhum redeploy.
+The `system_prompt` contains the full interview structure — persona, skill areas,
+question guidance, guardrails — assembled by tutors-service from the admin dashboard.
+Adding a new subject or changing interview behavior means updating admin UI data; no
+agent code change, no redeploy.
 
-**Por que isso importa para red-teaming**: um teste de red-team pode subir uma room
-com metadata arbitrária (diferente `system_prompt`, diferente `interview_type`, etc.)
-e exercitar o agent em qualquer configuração sem precisar de acesso ao banco admin
-de produção. A "superfície de configuração" é a metadata da room, e ela está sob
-nosso controle.
+**Why this matters for red-teaming**: a red-team test can spin up a room with arbitrary
+metadata (different `system_prompt`, different `interview_type`, etc.) and exercise
+the agent in any configuration without production admin database access. The
+"configuration surface" is room metadata, and it is under our control.
 
-## Fluxo por turno
+## Per-turn flow
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                        MOUTH                             │
 │                  (Realtime LLM)                          │
 │                                                          │
-│  1. Fala a pergunta (seguindo instruções da Brain)       │
-│  2. Escuta a resposta do candidato                       │
-│  3. Chama assess_answer(question, candidateResponse)     │
+│  1. Speaks the question (following Brain instructions)   │
+│  2. Listens to the candidate's answer                    │
+│  3. Calls assess_answer(question, candidateResponse)     │
 │                         │                                │
 │                         ▼                                │
-│  6. Recebe instruções ← ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
-│  7. Fala naturalmente seguindo instruções                │ │
+│  6. Receives instructions ← ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐ │
+│  7. Speaks naturally following instructions              │ │
 └─────────────────────────────────────────────────────────┘ │
                           │                                 │
                           ▼                                 │
 ┌─────────────────────────────────────────────────────────┐ │
 │                        BRAIN                             │ │
 │                                                          │ │
-│  4a. Assessor LLM pontua a resposta                      │ │
+│  4a. Assessor LLM scores the answer                      │ │
 │      → { score: 7, quality: "adequate", reasoning, ... } │ │
 │                                                          │ │
-│  4b. State machine processa o score                      │ │
-│      → decide: follow-up / próximo tópico / wrap-up      │ │
+│  4b. State machine processes the score                   │ │
+│      → decides: follow-up / next topic / wrap-up         │ │
 │                                                          │ │
-│  5. Prompt builder gera instruções                       │ │
+│  5. Prompt builder generates instructions                │ │
 │      → "Ask a follow-up about their teaching method"  ──┘ │
 │                                                          │
 └─────────────────────────────────────────────────────────┘
 ```
 
-## Tools com escopo por fase
+## Phase-scoped tools
 
-O conjunto de tools da Mouth muda conforme a fase da entrevista. A Brain troca tools
-da lista da Mouth conforme o state avança:
+The Mouth's tool set changes by interview phase. The Brain swaps tools on the Mouth's
+list as state advances:
 
-| Fase | Tools disponíveis para a Mouth |
+| Phase | Tools available to the Mouth |
 | --- | --- |
 | `introduction` | `start_interview` |
 | `interviewing` | `assess_answer`, `request_end_interview` |
 | `wrap_up` | `end_interview` |
 
-Transições de state são determinísticas:
+State transitions are deterministic:
 
-| De | Para | Trigger |
+| From | To | Trigger |
 | --- | --- | --- |
-| `introduction` | `interviewing` | Mouth chama `start_interview` após candidato sinalizar prontidão |
-| `interviewing` | `wrap_up` | Tempo restante abaixo do threshold, OU Mouth chama `request_end_interview` |
-| `wrap_up` | `ended` | Mouth chama `end_interview`, OU candidato desconecta, OU watchdog de wrap-up dispara |
+| `introduction` | `interviewing` | Mouth calls `start_interview` after candidate signals readiness |
+| `interviewing` | `wrap_up` | Remaining time below threshold, OR Mouth calls `request_end_interview` |
+| `wrap_up` | `ended` | Mouth calls `end_interview`, OR candidate disconnects, OR wrap-up watchdog fires |
 
-## Superfície condicional ao tipo
+## Type-conditional surface
 
-O agent roda dois tipos de entrevista (`HIRING` e `SUBJECT`). A superfície de
-customização por tipo é deliberadamente pequena — **apenas três arquivos ramificam
-por `interview_type`**:
+The agent runs two interview types (`HIRING` and `SUBJECT`). Type-specific
+customization is deliberately small — **only three files branch on
+`interview_type`**:
 
-1. `greeting-controller.ts` — frase de enquadramento da saudação falada
-2. `prompt-builder.ts` `buildIntroductionPrompt` — `typeLabel` e bullet de
-   explicação de formato
-3. `assessor.ts` — system prompt do assessor inclui o tipo para que o LLM julgador
-   ajuste a régua
+1. `greeting-controller.ts` — spoken greeting framing phrase
+2. `prompt-builder.ts` `buildIntroductionPrompt` — `typeLabel` and format explanation
+   bullet
+3. `assessor.ts` — assessor system prompt includes type so the judge LLM adjusts
+   standards
 
-Todo o resto (state machine, tools, fases, finalização) é agnóstico de tipo.
-Adicionar um tipo futuro toca apenas esses três arquivos.
+Everything else (state machine, tools, phases, finalization) is type-agnostic. Adding a
+future type touches only those three files.
 
-## Finalização (quando o candidato desconecta)
+## Finalization (when the candidate disconnects)
 
-1. Agent extrai transcript do histórico de conversa do Realtime LLM
-2. Dados da state machine (fases, scores, timing) são serializados
-3. Ambos são feitos merge na metadata da room via
-   `RoomServiceClient.updateRoomMetadata` (a room ainda está viva nesse momento)
-4. Webhook local dispara se `WEBHOOK_LOCAL_URL` estiver setado (teste em dev)
-5. Egress para → gravação termina de subir para Supabase Storage
-6. Room fecha → LiveKit envia webhook `room_finished` para o tutors-service com a
-   metadata atualizada
+1. Agent extracts transcript from Realtime LLM conversation history
+2. State machine data (phases, scores, timing) is serialized
+3. Both are merged into room metadata via `RoomServiceClient.updateRoomMetadata` (room
+   is still alive at this moment)
+4. Local webhook fires if `WEBHOOK_LOCAL_URL` is set (dev testing)
+5. Egress stops → recording finishes uploading to Supabase Storage
+6. Room closes → LiveKit sends `room_finished` webhook to tutors-service with updated
+   metadata
 
-O backend recebe transcript, scores e caminho da gravação em um payload único.
+The backend receives transcript, scores, and recording path in one payload.
 
-## O que isso diz sobre pontos de integração para red-team
+## What this says about red-team integration points
 
-Há três costuras naturais nessa arquitetura onde um harness de red-team pode plugar:
+There are three natural seams in this architecture where a red-team harness can plug
+in:
 
-| Costura | O que dá | Custo |
+| Seam | What it gives | Cost |
 | --- | --- | --- |
-| **Metadata da room** (canal de config) | Levar o agent para qualquer persona, matéria, configuração de prompt via injeção de metadata. Sem mudança de código. | Grátis. É como o POC vai configurar cenários. |
-| **Resposta da tool `assess_answer`** | O score/reasoning do assessor por turno é JSON estruturado. Um scorer de red-team poderia observar. | Requer acesso ao log stream interno do agent ou traces do Langfuse. |
-| **Transcript final na metadata da room** | Conversa completa, scores e caminho de gravação são escritos de volta na metadata no fim da sessão. Read-only. | Grátis. Fonte primária de dados para scoring post-hoc. |
+| **Room metadata** (config channel) | Drive the agent to any persona, subject, prompt config via metadata injection. No code change. | Free. How the POC configures scenarios. |
+| **`assess_answer` tool response** | Per-turn assessor score/reasoning is structured JSON. A red-team scorer could observe it. | Requires access to agent internal log stream or Langfuse traces. |
+| **Final transcript in room metadata** | Full conversation, scores, and recording path written back to metadata at session end. Read-only. | Free. Primary data source for post-hoc scoring. |
 
-O POC deve consumir o **transcript final** (costura 3) para scoring e usar **injeção
-de metadata da room** (costura 1) para configuração de cenário. A costura 2 é para
-integração futura mais profunda se quisermos alerta por turno.
+The POC should consume the **final transcript** (seam 3) for scoring and use **room
+metadata injection** (seam 1) for scenario configuration. Seam 2 is for deeper future
+integration if we want per-turn alerting.

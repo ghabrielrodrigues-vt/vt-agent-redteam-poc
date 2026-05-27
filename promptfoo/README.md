@@ -28,9 +28,7 @@ vt-redteam list-scenarios                    # now includes the generated ones
 vt-redteam run --tags promptfoo-generated --dry-run
 ```
 
-## Workflow philosophy
-
-The boss's Slack request:
+## Workflow philosophy (from the action item):
 
 > "Layer in Promptfoo or PyRIT to **generate broader adversarial cases** and
 > run them through the **same local/canary harness**. Good for

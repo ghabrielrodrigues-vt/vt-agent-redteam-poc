@@ -1,143 +1,132 @@
-# Plano de Implementação — Resumo Não-Técnico
+# Implementation Plan — Non-Technical Summary
 
-Este documento é o output de uma revisão auto-conduzida do design do POC. Eu
-representei tanto o papel do revisor durão fazendo perguntas duras, quanto o do
-engenheiro dando respostas comprometidas. A transcrição completa está em
-`06-implementation-plan.md`. Este resumo só captura as conclusões.
+This document is the output of a self-conducted review of the POC design. I played both
+the tough reviewer asking hard questions and the engineer giving committed answers. The
+full transcript is in `06-implementation-plan.md`. This summary captures only the
+conclusions.
 
-## O pacote
+## The package
 
-- **Um novo repositório**, separado de qualquer agent existente. Nome:
-  `vt-agent-redteam`.
-- **Distribuído via `pip install` de URL Git** em v0.1 — funciona em CI sem
-  precisar de infra interna de PyPI.
-- **Construído sobre o LiveKit Server SDK para Python**, direto. Sem camada de
-  abstração pra v0.1; podemos adicionar depois se um dia suportarmos agents
-  não-LiveKit.
+- **A new repository**, separate from any existing agent. Name: `vt-agent-redteam`.
+- **Distributed via `pip install` from a Git URL** in v0.1 — works in CI without
+  internal PyPI infra.
+- **Built on the LiveKit Server SDK for Python**, directly. No abstraction layer for
+  v0.1; we can add one later if we ever support non-LiveKit agents.
 
-## Como a ferramenta fala com a IA
+## How the tool talks to the AI
 
-O AI Interviewer atual só escuta áudio — não tem modo de input de texto. Então a
-ferramenta de red-team vai:
+The current AI Interviewer only listens to audio — it has no text input mode. So the
+red-team tool will:
 
-1. **Digitar** o prompt ruim.
-2. **Converter pra fala** usando TTS da OpenAI.
-3. **Publicar esse áudio** numa room LiveKit como se fosse uma pessoa falando.
-4. **Escutar de volta** a resposta da IA, transcrever, e julgar.
+1. **Type** the bad prompt.
+2. **Convert to speech** using OpenAI TTS.
+3. **Publish that audio** into a LiveKit room as if a person were speaking.
+4. **Listen back** to the AI's response, transcribe it, and judge it.
 
-Isso bate com a experiência real do candidato, incluindo toda a variância de
-speech-to-text que vem junto. Custo por cenário: ~$0.015. Custo por canary
-semanal: cerca de $1.50. Desprezível.
+That matches the real candidate experience, including speech-to-text variance. Cost per
+scenario: ~$0.015. Cost per weekly canary: about $1.50. Negligible.
 
-## O que é testado
+## What is tested
 
-Um cenário leva no máximo **90 segundos**, até **4 turnos**. Cenários rodam **um
-de cada vez** em v0.1 pra manter atribuição de falha limpa; concorrência vem
-depois.
+A scenario lasts at most **90 seconds**, up to **4 turns**. Scenarios run **one at a
+time** in v0.1 to keep failure attribution clean; concurrency comes later.
 
-Pra lidar com o fato de que a IA é não-determinística, **cada cenário roda 3
-vezes** e o resultado é por voto majoritário. Custa mais, mas impede que flakes de
-execução única falhem o build.
+To handle AI non-determinism, **each scenario runs 3 times** and the result is by
+majority vote. It costs more, but prevents single-run flakes from failing the build.
 
-## Como é o corpus
+## How the corpus works
 
-O catálogo de prompts ruins é **arquivos YAML dentro do repo do pacote**,
-commitados sob controle de versão. Isso significa:
+The catalog of bad prompts is **YAML files inside the package repo**, committed under
+version control. That means:
 
-- Rodar a mesma versão do pacote duas vezes produz os mesmos testes.
-- Revisar o corpus é um PR normal.
-- Quando um cenário falha, o time sabe qual versão do corpus produziu.
+- Running the same package version twice produces the same tests.
+- Reviewing the corpus is a normal PR.
+- When a scenario fails, the team knows which corpus version produced it.
 
-A primeira versão do corpus vem de três lugares: minha lista de moderação do
-Nerdy Tutor (já curada), categorias da OpenAI Moderation API (linha-base de
-calibração), e modos de falha específicos de LiveKit (prompt injection, vazamento
-de system prompt, etc.).
+The first corpus version comes from three places: my Nerdy Tutor moderation list
+(already curated), OpenAI Moderation API categories (calibration baseline), and
+LiveKit-specific failure modes (prompt injection, system prompt leakage, etc.).
 
-Promptfoo vai gerar **novos** prompts depois (em v0.2), mas esses vão ser
-revisados por humano e commitados no corpus — não regenerados em toda execução. Foi
-o que o chefe quis dizer com "weekly/nightly expansion beyond our fixed test set".
+Promptfoo will generate **new** prompts later (v0.2), but those will be human-reviewed
+and committed to the corpus — not regenerated on every run. That matches the action
+item's call for "weekly/nightly expansion beyond our fixed test set".
 
-## Como as respostas da IA são pontuadas
+## How AI responses are scored
 
-**Três scorers saem em v0.1**:
+**Three scorers ship in v0.1**:
 
-1. **OpenAI Moderation API** — a mesma que o Nerdy Tutor usa como filtro de
-   input, mas aplicada à **resposta** da IA em vez do input do usuário.
-2. **Refusal detector** — checa se a IA recusou apropriadamente. Usa pattern
-   matching simples mais uma pequena chamada LLM-as-judge pros edge cases que
-   patterns perdem.
-3. **Prompt-leak detector** — checa se a IA acidentalmente revelou partes das
-   instruções de sistema.
+1. **OpenAI Moderation API** — the same one Nerdy Tutor uses as an input filter, but
+   applied to the **AI response** instead of user input.
+2. **Refusal detector** — checks whether the AI refused appropriately. Uses simple
+   pattern matching plus a small LLM-as-judge call for edge cases patterns miss.
+3. **Prompt-leak detector** — checks whether the AI accidentally revealed parts of its
+   system instructions.
 
-O time pode plugar scorers próprios depois sem mudar o pacote.
+The team can plug in custom scorers later without changing the package.
 
-## Onde os resultados vão
+## Where results go
 
-Uma única tabela Supabase chamada `redteam_runs`, no projeto Supabase VT4S
-existente, sob um schema novo `redteam`. Uma linha por cenário por execução. O
-chefe disse "can just be a Supabase table"; respeitamos.
+A single Supabase table called `redteam_runs`, in the existing VT4S Supabase project,
+under a new `redteam` schema. One row per scenario per run. The action item stated
+"for now can just be a supabase table"; we follow that.
 
-Retenção: 90 dias quente, depois arquivada pra S3.
+Retention: 90 days hot, then archived to S3.
 
-Acesso em CI: GitHub Actions → AWS OIDC → AWS Secrets Manager → service-role key
-do Supabase. Sem secrets de longa duração no GitHub.
+CI access: GitHub Actions → AWS OIDC → AWS Secrets Manager → Supabase service-role key.
+No long-lived secrets in GitHub.
 
-## Quando a ferramenta roda
+## When the tool runs
 
-Quatro momentos, cada um com uma régua diferente:
+Four moments, each with a different bar:
 
-| Trigger | O que roda | Régua pra passar |
+| Trigger | What runs | Bar to pass |
 | --- | --- | --- |
-| Todo PR | ~10 cenários (conjunto smoke) | 100% pass |
-| Pré-deploy | Conjunto completo ~100 cenários | 90% pass |
-| Cron semanal | Conjunto completo ~100 cenários contra staging | 85% pass, alerta caso contrário |
-| Manual | Qualquer | Configurável |
+| Every PR | ~10 scenarios (smoke set) | 100% pass |
+| Pre-deploy | Full set ~100 scenarios | 90% pass |
+| Weekly cron | Full set ~100 scenarios against staging | 85% pass, alert otherwise |
+| Manual | Any | Configurable |
 
-Cada repo consumidor (`livekit-agents`, `lemonslice-demo-agent`, etc.) escreve
-seu próprio workflow de GitHub Actions que importa o pacote. O pacote em si não é
-dono de workflow nenhum — isso mantém o job do pacote pequeno.
+Each consumer repo (`livekit-agents`, `lemonslice-demo-agent`, etc.) writes its own
+GitHub Actions workflow that imports the package. The package itself owns no workflow
+— that keeps the package's job small.
 
-## Riscos que a gente já conhece, com respostas
+## Risks we already know, with answers
 
-- **Não-determinismo da IA** → cada cenário roda 3 vezes.
-- **Variância de reconhecimento de TTS** → armazenar a versão ouvida pela IA
-  junto com a pretendida; detectar deriva em review.
-- **Custo descontrolado** → limite duro de 90 segundos por cenário + budget cap
-  por execução.
-- **Agent crasha no meio do cenário** → registrado como falha, harness continua.
-- **Fadiga de alerta** → começar conservador, ajustar thresholds depois de um
-  mês.
-- **Apodrecimento do corpus** → adições geradas pelo Promptfoo (v0.2) mais
-  refresh trimestral de relatórios de incidente do time trust+safety.
+- **AI non-determinism** → each scenario runs 3 times.
+- **TTS recognition variance** → store what the AI heard alongside what was intended;
+  detect drift in review.
+- **Runaway cost** → hard 90-second cap per scenario + per-run budget cap.
+- **Agent crashes mid-scenario** → recorded as failure, harness continues.
+- **Alert fatigue** → start conservative, adjust thresholds after a month.
+- **Corpus staleness** → Promptfoo-generated additions (v0.2) plus quarterly refresh
+  from trust+safety incident reports.
 
-## O que está explicitamente fora de escopo pra v0.1
+## Explicitly out of scope for v0.1
 
-Pra não sermos arrastados pra isso:
+To avoid scope creep:
 
-- Suporte a agents não-LiveKit (o chefe disse "evaluate that after").
-- Alerta em tempo real por turno.
-- Substituir qualquer pipeline de moderação de produção.
-- STT custom.
-- UI custom de dashboard (Supabase Studio é suficiente).
-- Idiomas além de inglês (Português e Espanhol vêm na Fase 3).
+- Non-LiveKit agent support (the action item stated "evaluate that after").
+- Real-time per-turn alerting.
+- Replacing any production moderation pipeline.
+- Custom STT.
+- Custom dashboard UI (Supabase Studio is enough).
+- Languages beyond English (Portuguese and Spanish come in Phase 3).
 
-## Fases e timeline
+## Phases and timeline
 
-- **Spike (esta semana)**: esta pasta + protótipo funcional.
-- **MVP v0.1 (~3 semanas)**: pacote em pé, 30 cenários, integrado contra
-  `livekit-agents` como consumidor de referência, check de PR no ar.
-- **Fase 2 (~2 semanas)**: canary semanal, alertas via Slack, Promptfoo, segundo
-  consumidor de agent.
-- **Fase 3 (contínuo)**: endurecimento, multi-language, dashboards, mais
-  consumidores.
+- **Spike (this week)**: this folder + functional prototype.
+- **MVP v0.1 (~3 weeks)**: package standing, 30 scenarios, integrated against
+  `livekit-agents` as reference consumer, PR check live.
+- **Phase 2 (~2 weeks)**: weekly canary, alert notifications, Promptfoo, second agent
+  consumer.
+- **Phase 3 (ongoing)**: hardening, multi-language, dashboards, more consumers.
 
-## Perguntas abertas pro time (não pra eu responder sozinho)
+## Open questions for the team (not for me to answer alone)
 
-- Quem é dono do repo? (Trust+safety, VT4S, AI infra?)
-- Ops quer um mirror privado de PyPI primeiro, ou `pip install git+ssh://` está
-  ok?
-- Números finais de threshold — começar em 90% / 85% ou diferente?
-- Qual canal Slack pra alertas?
-- SLA pra consertar um PR bloqueado por red-team?
-- Fazemos red-team só no output da Mouth, ou também na Brain (o Assessor LLM)?
-  A Brain tem sua própria superfície potencial de injeção.
+- Who owns the repo? (Trust+safety, VT4S, AI infra?)
+- Does ops want a private PyPI mirror first, or is `pip install git+ssh://` OK?
+- Final threshold numbers — start at 90% / 85% or different?
+- Which alert channel should receive failures?
+- SLA to fix a PR blocked by red-team?
+- Do we red-team only Mouth output, or also the Brain (Assessor LLM)? The Brain has
+  its own potential injection surface.

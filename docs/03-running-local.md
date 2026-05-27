@@ -1,45 +1,45 @@
-# Rodando LiveKit Localmente
+# Running LiveKit Locally
 
-Há três formas de "rodar LiveKit localmente". Elas servem a propósitos diferentes e
-têm custos de setup muito diferentes. Escolha pelo que você está tentando fazer.
+There are three ways to "run LiveKit locally". They serve different purposes and have
+very different setup costs. Choose based on what you are trying to do.
 
-## Opção A — Agent local + LiveKit Cloud staging
+## Option A — Local agent + LiveKit Cloud staging
 
-**Use quando**: você quer debugar o código do agent num ambiente o mais próximo
-possível de produção.
+**Use when**: you want to debug agent code in an environment as close to production
+as possible.
 
-O agent worker roda no seu laptop, em watch mode, e se conecta à instância de
-staging do LiveKit Cloud. As rooms são reais. As chamadas para OpenAI Realtime vão
-pra API real do OpenAI. A gravação faz upload para o Supabase Storage de staging.
+The agent worker runs on your laptop in watch mode and connects to the LiveKit Cloud
+staging instance. Rooms are real. OpenAI Realtime calls go to the real OpenAI API.
+Recording uploads to staging Supabase Storage.
 
 ```bash
 git clone git@github.com:varsitytutors/livekit-agents.git
 cd livekit-agents
 npm install
-aws sso login  # ou o método de auth que dá acesso a tutors-service/st/livekit
+aws sso login  # or whichever auth method grants tutors-service/st/livekit access
 npm run dev
 ```
 
-O script `dev` puxa todos os secrets (LiveKit URL/key/secret, OpenAI key, creds do
-Supabase Storage) do AWS Secrets Manager. Nenhum arquivo `.env` é necessário.
+The `dev` script pulls all secrets (LiveKit URL/key/secret, OpenAI key, Supabase
+Storage creds) from AWS Secrets Manager. No `.env` file is required.
 
-Prós:
+Pros:
 
-- Comportamento idêntico ao de produção.
-- Sem infra para gerir.
-- Múltiplos devs podem rodar agents simultaneamente contra o mesmo cluster de staging.
+- Behavior identical to production.
+- No infra to manage.
+- Multiple devs can run agents simultaneously against the same staging cluster.
 
-Contras:
+Cons:
 
-- Requer acesso AWS. Se você estiver travado no SSO ou VPN, não consegue rodar.
-- Consome minutos de staging do LiveKit Cloud.
-- "Local" só se refere ao processo do agent — todo o resto fica na cloud.
+- Requires AWS access. If you are stuck on SSO or VPN, you cannot run.
+- Consumes LiveKit Cloud staging minutes.
+- "Local" only refers to the agent process — everything else is in the cloud.
 
-## Opção B — LiveKit Server local via Docker
+## Option B — Local LiveKit Server via Docker
 
-**Use quando**: você quer isolar de qualquer infra na cloud, ou testar comportamento
-de rede e roteamento de mídia offline. Também é o caminho certo para **testes de
-red-team em PR-time** que precisam ser baratos e rápidos.
+**Use when**: you want isolation from any cloud infra, or to test network behavior and
+media routing offline. Also the right path for **PR-time red-team tests** that must be
+cheap and fast.
 
 ```bash
 docker run --rm -p 7880:7880 -p 7881:7881 -p 7882:7882/udp \
@@ -47,74 +47,72 @@ docker run --rm -p 7880:7880 -p 7881:7881 -p 7882:7882/udp \
   livekit/livekit-server --dev
 ```
 
-Isso sobe um LiveKit Server single-node escutando em localhost. As credenciais
-padrão de dev são `devkey` / `secret`.
+That starts a single-node LiveKit Server listening on localhost. Default dev
+credentials are `devkey` / `secret`.
 
-Aí aponta o agent pra ele:
+Then point the agent at it:
 
 ```bash
 LIVEKIT_URL=ws://localhost:7880 \
 LIVEKIT_API_KEY=devkey \
 LIVEKIT_API_SECRET=secret \
-OPENAI_API_KEY=sk-...sua-chave... \
+OPENAI_API_KEY=sk-...your-key... \
 npm run dev
 ```
 
-(Pode colocar isso num `.env.local` e dar source antes do `npm run dev`.)
+(You can put this in `.env.local` and source it before `npm run dev`.)
 
-Prós:
+Pros:
 
-- Sem dependências de cloud para roteamento.
-- Sem auth AWS necessária.
-- Grátis — não custa nada por sessão.
-- Reproduzível: o mesmo `docker run` funciona em qualquer máquina.
+- No cloud dependencies for routing.
+- No AWS auth required.
+- Free — no per-session cost.
+- Reproducible: the same `docker run` works on any machine.
 
-Contras:
+Cons:
 
-- OpenAI Realtime ainda chama a API real do OpenAI. Teste isolado de rede
-  exigiria um substituto local de LLM (fora do escopo do POC).
-- Upload do Supabase Storage ainda requer credenciais reais. O POC vai pular a
-  gravação em modo local e só capturar transcript.
-- Algumas features do LiveKit (servidores TURN, gravação para S3) precisam de
-  configuração extra para funcionar localmente; não precisamos delas para o POC.
+- OpenAI Realtime still calls the real OpenAI API. Fully isolated network testing
+  would require a local LLM substitute (out of POC scope).
+- Supabase Storage upload still requires real credentials. The POC skips recording in
+  local mode and only captures transcript.
+- Some LiveKit features (TURN servers, S3 recording) need extra config to work locally;
+  we do not need them for the POC.
 
-A imagem Docker é pequena (~80MB). Disco e footprint de memória são desprezíveis.
+The Docker image is small (~80MB). Disk and memory footprint are negligible.
 
-## Opção C — Modo in-process de teste (não viável para nós)
+## Option C — In-process test mode (not viable for us)
 
-O LiveKit Agents SDK tem um modo test-harness onde você instancia um `AgentSession`
-em memória e injeta turnos sem uma room real. Isso é rápido — milissegundos por
-turno — e ideal para testes unitários dentro do repo do agent.
+The LiveKit Agents SDK has a test-harness mode where you instantiate an `AgentSession`
+in memory and inject turns without a real room. It is fast — milliseconds per turn — and
+ideal for unit tests inside the agent repo.
 
-**Por que não conseguimos usar para o POC**: esse modo só funciona quando o código
-de teste está na **mesma linguagem e processo** do agent. O chefe quer o pacote
-red-team em Python. Nossos agents são em TypeScript. Os dois não compartilham
-processo.
+**Why we cannot use it for the POC**: that mode only works when test code is in the
+**same language and process** as the agent. The spike requires the red-team package in
+Python. Our agents are TypeScript. The two do not share a process.
 
-O lugar certo para testes in-process seria **dentro do próprio `livekit-agents`**,
-como checks unitários do assessor ou da state machine. Esse é um escopo de
-trabalho diferente.
+The right place for in-process tests is **inside `livekit-agents` itself**, as unit
+checks for the assessor or state machine. That is a different scope of work.
 
-## Matriz de decisão
+## Decision matrix
 
-| Objetivo | Opção recomendada |
+| Goal | Recommended option |
 | --- | --- |
-| Debugar bug do agent | A (Cloud staging, condições reais) |
-| Desenvolver o pacote de red-team | B (Docker, sem custo de cloud, isolamento total) |
-| Rodar testes de red-team em cada PR no CI | B (Docker iniciado pelo GitHub Actions) |
-| Canary semanal pegando deriva de deploy/config | A (Cloud staging, ambiente real) |
-| Teste unitário puro da lógica Mouth/Brain | C (in-process, mas mora no repo TS, não no pacote Python) |
+| Debug agent bug | A (Cloud staging, real conditions) |
+| Develop red-team package | B (Docker, no cloud cost, full isolation) |
+| Run red-team tests on every PR in CI | B (Docker started by GitHub Actions) |
+| Weekly canary catching deploy/config drift | A (Cloud staging, real environment) |
+| Pure unit test of Mouth/Brain logic | C (in-process, but lives in TS repo, not Python package) |
 
-## O que `livekit-local/` nesta pasta contém
+## What `livekit-local/` in this folder contains
 
-A subpasta `livekit-local/` deste POC tem:
+The `livekit-local/` subfolder of this POC has:
 
-- `docker-compose.yml` — stack LiveKit Server + turn server opcional
-- `.env.template` — template de ambiente para o agent apontando pra localhost
-- `scripts/dispatch-test-room.sh` — usa a CLI `livekit-cli` (`lk`) para criar uma
-  room com metadata de red-team e dispatchar o agent
-- `scripts/install-livekit-cli.sh` — instala a CLI `lk` via Homebrew
+- `docker-compose.yml` — LiveKit Server stack + optional turn server
+- `.env.template` — environment template for agent pointing at localhost
+- `scripts/dispatch-test-room.sh` — uses `livekit-cli` (`lk`) to create a room with
+  red-team metadata and dispatch the agent
+- `scripts/install-livekit-cli.sh` — installs `lk` CLI via Homebrew
 
-A intenção é que, dado um laptop limpo, um dev consiga rodar `docker compose up` e
-`./scripts/dispatch-test-room.sh` e ver o cenário protótipo de red-team rodando
-end-to-end contra um agent rodando localmente.
+The intent is that, given a clean laptop, a dev can run `docker compose up` and
+`./scripts/dispatch-test-room.sh` and see the prototype red-team scenario running
+end-to-end against a locally running agent.
