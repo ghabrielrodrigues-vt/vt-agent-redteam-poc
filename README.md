@@ -105,7 +105,9 @@ evidence section above.
 │   ├── 05-moderation-connection.md # how this connects to PRs #1667/#1669
 │   ├── 06-implementation-plan.md   # phased MVP plan, grilled
 │   ├── 07-corpus-policy-coverage.md# line-by-line of CONTENT_MODERATION_PROMPT
-│   └── 08-tooling-dossier.md       # 12-tool comparative research
+│   ├── 08-tooling-dossier.md       # 12-tool comparative research
+│   ├── 09-nerdy-moderation-architecture-diagrams.md  # Mermaid diagrams of L1/L2/L3 stack
+│   └── 10-livekit-real-agent-proof.md# Option D evidence (real worker lifecycle)
 │
 ├── prototype/                      # the Python package — install with `pip install -e .`
 │   ├── src/vt_agent_redteam/
