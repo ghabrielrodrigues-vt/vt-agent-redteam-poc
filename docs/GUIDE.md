@@ -188,9 +188,18 @@ Details: `STATUS.md`.
 | Phase | Deliverables |
 |-------|----------------|
 | **0 Spike** | Docs + skeleton (done) |
-| **1 MVP v0.1** | Audio E2E, package publish, live writes (~3 wk) |
-| **2 Canary** | Weekly run, Promptfoo in CI, second agent (~2 wk) |
-| **3 Hardening** | Dashboards, multi-language, Brain scoring |
+| **1 MVP v0.1** | Audio E2E, package publish, live writes, cover Conversation Club + Tutor Interviewer + Nerdy Avatar (3 of 6 prod agents) — see `docs/11` (~3 wk) |
+| **2 Canary** | Weekly run vs staging-focused (also prod), Promptfoo in CI, Maya + Course Platform + Checkout Avatar onboarded (~2 wk) |
+| **3 Hardening** | Dashboards (3 buckets: content_safety / policy_compliance / privacy_integrity), Slack alerting, multi-language, Brain scoring |
+
+**Decisions locked in this round** (revisit if needed):
+- Ownership: VT4S provisional (reviewable)
+- Canary cadence: weekly against staging + production, focus on staging
+- CI: GitHub Actions hooks (no specific tooling chosen for red-team layer yet)
+- Slack alerting: deferred to Phase 3 (not summarily required)
+- Cost tracking: `usd_cost_estimate` column added to `redteam_runs` schema (per scenario, summed per run)
+- Exec dashboard buckets: content_safety / policy_compliance / privacy_integrity (3 high-level groups)
+- Metrics: none pre-defined by leadership; capture all and iterate after first 4 weeks of data
 
 ---
 
@@ -205,6 +214,7 @@ Details: `STATUS.md`.
 | `docs/04-poc-design.md` | Package API + schema |
 | `docs/08-tooling-dossier.md` | 12-tool comparison |
 | `docs/09`–`10` | Moderation diagrams + real-agent proof |
+| `docs/11-agent-coverage-matrix.md` | 16 LiveKit agents in varsitytutors + MVP priorities |
 | `promptfoo/` | Scenario generator |
 | `pyrit/` | Multi-turn attacks |
 | `prototype/` | `vt_agent_redteam` Python package |

@@ -20,6 +20,7 @@ paths, corpus, Promptfoo/PyRIT workflows, local setup, status, roadmap).
 | Component status | [`STATUS.md`](STATUS.md) |
 | 12-tool safety comparison | [`docs/08-tooling-dossier.md`](docs/08-tooling-dossier.md) |
 | Real agent lifecycle proof | [`docs/10-livekit-real-agent-proof.md`](docs/10-livekit-real-agent-proof.md) |
+| 16 LiveKit agents + MVP priorities | [`docs/11-agent-coverage-matrix.md`](docs/11-agent-coverage-matrix.md) |
 | Promptfoo generator | [`promptfoo/README.md`](promptfoo/README.md) |
 
 Other files under `docs/` are optional deep dives.
