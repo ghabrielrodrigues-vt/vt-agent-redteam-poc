@@ -1,0 +1,21 @@
+# Postgres single-node — local stand-in for the Supabase project's database.
+# The full Supabase stack is too heavy for the laptop right now; we just need
+# a real Postgres to apply the redteam.redteam_runs schema against and write
+# rows from the harness for the MVP.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: poc-redteam-postgres
+    environment:
+      POSTGRES_USER: redteam
+      POSTGRES_PASSWORD: redteam-local
+      POSTGRES_DB: redteam
+    ports:
+      - "54322:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U redteam -d redteam"]
+      interval: 3s
+      timeout: 2s
+      retries: 10

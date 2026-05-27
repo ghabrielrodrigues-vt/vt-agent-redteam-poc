@@ -1,0 +1,19 @@
+{
+  "name": "vt-agent-redteam-promptfoo",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Promptfoo adversarial scenario generator for vt-agent-redteam corpus expansion.",
+  "scripts": {
+    "generate": "promptfoo redteam generate -c promptfooconfig.yaml -o generated/raw-output.yaml --no-cache",
+    "generate:small": "promptfoo redteam generate -c promptfooconfig.yaml -o generated/raw-output.yaml --num-tests 1 --no-cache",
+    "import": "python3.13 import_to_corpus.py generated/raw-output.yaml ../prototype/src/vt_agent_redteam/corpus/promptfoo_generated.yaml",
+    "preview": "python3.13 import_to_corpus.py generated/raw-output.yaml /tmp/promptfoo-preview.yaml --preview",
+    "all": "npm run generate && npm run preview"
+  },
+  "dependencies": {
+    "promptfoo": "latest"
+  },
+  "engines": {
+    "node": ">=20.20.0"
+  }
+}

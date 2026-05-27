@@ -1,0 +1,32 @@
+# LiveKit Server — local development stack for the red-team POC
+#
+# Spins up a single-node LiveKit Server bound to localhost with dev credentials.
+# This is the substrate the synthetic candidate (in `prototype/`) joins as a
+# participant, and the substrate the agent (in `./livekit-agents/`, cloned
+# alongside this file) connects to as a worker.
+#
+# Default dev credentials match LiveKit's documented defaults:
+#   LIVEKIT_API_KEY    = devkey
+#   LIVEKIT_API_SECRET = secret
+#   LIVEKIT_URL        = ws://localhost:7880
+#
+# Bring up:  docker compose up
+# Tear down: docker compose down
+
+services:
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: poc-livekit-server
+    command: --dev --bind 0.0.0.0
+    ports:
+      - "7880:7880"      # WebSocket signaling + API
+      - "7881:7881"      # TCP fallback / TURN
+      - "7882:7882/udp"  # WebRTC media
+    environment:
+      LIVEKIT_KEYS: "devkey: secret"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:7880"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
