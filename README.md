@@ -10,14 +10,16 @@ and an **HTTP moderation runner** for Nerdy Tutor API testing.
 
 ## Start here
 
-**Read [`docs/GUIDE.md`](docs/GUIDE.md)** — consolidated guide (purpose, validated
-paths, corpus, Promptfoo/PyRIT workflows, local setup, status, roadmap).
+**Read [`docs/GUIDE.md`](docs/GUIDE.md)** for the consolidated POC guide.
+For the leadership-ready operational answer, read
+[`docs/12-livekit-redteam-hardening-solution.md`](docs/12-livekit-redteam-hardening-solution.md).
 
 | If you need… | Open |
 |--------------|------|
 | Everything in one place | [`docs/GUIDE.md`](docs/GUIDE.md) |
 | Step-by-step local setup | [`SETUP.md`](SETUP.md) |
 | Component status | [`STATUS.md`](STATUS.md) |
+| LiveKit deploy/reuse solution | [`docs/12-livekit-redteam-hardening-solution.md`](docs/12-livekit-redteam-hardening-solution.md) |
 | 12-tool safety comparison | [`docs/08-tooling-dossier.md`](docs/08-tooling-dossier.md) |
 | Real agent lifecycle proof | [`docs/10-livekit-real-agent-proof.md`](docs/10-livekit-real-agent-proof.md) |
 | 16 LiveKit agents + MVP priorities | [`docs/11-agent-coverage-matrix.md`](docs/11-agent-coverage-matrix.md) |

@@ -1,4 +1,40 @@
-# POC Status — v0.0.4 (Promptfoo Copy)
+# POC Status — v0.0.5 (Direct-LLM runner + Phase 1 schema)
+
+## v0.0.5 highlights (post boss-role review)
+
+Three boss-review blockers addressed in code (one demoable end-to-end):
+
+1. **Real non-stub agent_response in Postgres** — `direct_llm_runner.py`
+   bypasses LiveKit audio, calls the agent's LLM directly with the
+   agent's `known_system_prompt`, captures the real response, hashes it,
+   estimates cost, writes a row with `is_stub_response=false` +
+   `transcript_source="direct_llm"`. Validated end-to-end:
+   `run_id=7a48a9b6-bb58-4b66-8f5c-e46cfe3cbc7f` — 40 real rows, 60%
+   pass rate, $0.0015 estimated cost.
+2. **CLI threshold enforcement** — `--enforce-threshold` +
+   `--pass-threshold` exit non-zero on threshold failure.
+   `--write-summary run_summary.json` produces the CI artifact in the
+   spike doc shape. Stub-row guarantee: `threshold_passed` is forced
+   to NULL when any row has `is_stub_response=true`.
+3. **Manifest validation** — `vt-redteam validate-manifest <path>`
+   loads + validates `.redteam/manifest.yaml`. Reference manifest at
+   `manifests/conversation-club.yaml`.
+
+Schema additions applied to Postgres: `is_stub_response`,
+`transcript_source`, `response_hash`, `artifact_uri`, `timeout_flag`,
+`retry_count`, `threshold_passed`, `run_summary` (jsonb, attached to
+last row of each run). New view `pass_rate_by_bucket_with_stubs` for
+stub inspection; primary `pass_rate_by_bucket` now excludes stubs by
+default.
+
+Side-effect of running against real LLM: exposed that our
+`RefusalDetector` regex misses **soft refusals** ("I understand ...
+violence or harmful actions ...") that the production LLM in practice
+uses. Logged as known issue; LLM-as-judge fallback is the v0.2 fix.
+
+---
+
+## v0.0.4 (Promptfoo Copy)
 
 This is a copy of the original `poc_moderation_red_team/` with Promptfoo integration
 added as a **scenario generation layer** (not execution).

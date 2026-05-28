@@ -11,6 +11,8 @@ from rich import print as rprint
 from rich.console import Console
 from rich.table import Table
 
+from typing import Any
+
 from vt_agent_redteam.runners import (
     HttpModerationRunner,
     LiveKitRoomRunner,
@@ -18,13 +20,102 @@ from vt_agent_redteam.runners import (
 )
 from vt_agent_redteam.scorers import Scorer
 from vt_agent_redteam.storage import SupabaseWriter
-from vt_agent_redteam.types import AgentConfig, Scenario, ScenarioResult, ScoreResult
+from vt_agent_redteam.types import (
+    AgentConfig,
+    Scenario,
+    ScenarioResult,
+    ScoreResult,
+    TranscriptSource,
+)
+
+
+def _bucket_for(category: str) -> str:
+    """Mirror the Postgres `category_bucket` generated column in Python."""
+    if category in {"violence", "sexual", "self_harm", "hate", "harassment"}:
+        return "content_safety"
+    if category in {
+        "politics", "forbidden_topics", "dating_romance",
+        "diversity_framing", "off_topic_academic",
+    }:
+        return "policy_compliance"
+    if category in {
+        "personal_information", "cheating_integrity", "prompt_leakage",
+        "brand_protection", "impersonation", "stakeholder_protection",
+        "emotional_manipulation", "misinformation", "medical_legal_advice",
+        "illicit", "jailbreak",
+    }:
+        return "privacy_integrity"
+    return "other"
+
+
+def build_run_summary(
+    *,
+    run_id: uuid.UUID,
+    agent: AgentConfig,
+    agent_environment: str,
+    agent_commit_sha: str | None,
+    triggered_by: str,
+    workflow_run_id: str | None,
+    results: list[ScenarioResult],
+    pass_threshold: float | None,
+) -> dict[str, Any]:
+    """Assemble the run_summary.json payload (matches spike doc schema)."""
+    passed_count = sum(1 for r in results if r.passed)
+    failed_count = len(results) - passed_count
+    pass_rate = passed_count / len(results) if results else 1.0
+    is_stub_present = any(r.is_stub_response for r in results)
+    threshold_passed: bool | None = None
+    if pass_threshold is not None and not is_stub_present:
+        threshold_passed = pass_rate >= pass_threshold
+
+    bucket_summary: dict[str, dict[str, int]] = {}
+    for r in results:
+        b = _bucket_for(r.category)
+        bucket_summary.setdefault(b, {"passed": 0, "failed": 0})
+        if r.passed:
+            bucket_summary[b]["passed"] += 1
+        else:
+            bucket_summary[b]["failed"] += 1
+
+    failure_summaries = [
+        {
+            "scenario_id": r.scenario_id,
+            "category": r.category,
+            "bucket": _bucket_for(r.category),
+            "reason": r.failure_reason or "scenario failed",
+        }
+        for r in results if not r.passed
+    ]
+
+    estimated_cost = sum(
+        (r.usd_cost_estimate or 0.0) for r in results
+    )
+
+    return {
+        "run_id": str(run_id),
+        "agent_name": agent.name,
+        "environment": agent_environment,
+        "triggered_by": triggered_by,
+        "commit_sha": agent_commit_sha,
+        "workflow_run_id": workflow_run_id,
+        "scenario_count": len(results),
+        "passed": passed_count,
+        "failed": failed_count,
+        "pass_rate": round(pass_rate, 4),
+        "pass_threshold": pass_threshold,
+        "threshold_passed": threshold_passed,
+        "is_stub_response_present": is_stub_present,
+        "bucket_summary": bucket_summary,
+        "estimated_cost_usd": round(estimated_cost, 4),
+        "failure_summaries": failure_summaries,
+    }
 
 
 @dataclass
 class RunResult:
     run_id: uuid.UUID
     scenario_results: list[ScenarioResult] = field(default_factory=list)
+    summary: dict[str, Any] | None = None
 
     @property
     def pass_rate(self) -> float:
@@ -66,6 +157,7 @@ class RedTeamHarness:
         triggered_by: str = "manual",
         pr_number: int | None = None,
         workflow_run_id: str | None = None,
+        pass_threshold: float | None = None,
     ) -> RunResult:
         run_id = uuid.uuid4()
         console = Console()
@@ -102,6 +194,18 @@ class RedTeamHarness:
             )
             elapsed = time.perf_counter() - start
 
+            # Pull provenance fields off the dispatch result. Runners that
+            # don't set these default to stub_canned + is_stub=True for safety.
+            is_stub = getattr(dispatch, "is_stub_response", True)
+            transcript_source: TranscriptSource = getattr(
+                dispatch, "transcript_source", "stub_canned"
+            )
+            response_hash = getattr(dispatch, "response_hash", None)
+            artifact_uri = getattr(dispatch, "artifact_uri", None)
+            usd_cost = getattr(dispatch, "usd_cost_estimate", None)
+            timeout_flag = getattr(dispatch, "timeout_flag", False)
+            retry_count = getattr(dispatch, "retry_count", 0)
+
             results.append(
                 ScenarioResult(
                     scenario_id=scenario.id,
@@ -112,11 +216,32 @@ class RedTeamHarness:
                     passed=passed,
                     failure_reason=failure_reason,
                     duration_seconds=elapsed,
+                    is_stub_response=is_stub,
+                    transcript_source=transcript_source,
+                    response_hash=response_hash,
+                    artifact_uri=artifact_uri,
+                    timeout_flag=timeout_flag,
+                    retry_count=retry_count,
+                    usd_cost_estimate=usd_cost,
                 )
             )
 
         run_result = RunResult(run_id=run_id, scenario_results=results)
         self._print_summary(console, run_result)
+
+        # Compute run_summary + threshold_passed
+        summary = build_run_summary(
+            run_id=run_id,
+            agent=agent,
+            agent_environment=agent_environment,
+            agent_commit_sha=agent_commit_sha,
+            triggered_by=triggered_by,
+            workflow_run_id=workflow_run_id,
+            results=results,
+            pass_threshold=pass_threshold,
+        )
+        run_result.summary = summary
+        threshold_passed = summary["threshold_passed"]
 
         if self.writer is not None:
             written = self.writer.write(
@@ -128,6 +253,8 @@ class RedTeamHarness:
                 pr_number=pr_number,
                 workflow_run_id=workflow_run_id,
                 results=results,
+                threshold_passed=threshold_passed,
+                run_summary=summary,
             )
             rprint(f"[dim]Wrote {written} row(s) to storage.[/dim]")
 

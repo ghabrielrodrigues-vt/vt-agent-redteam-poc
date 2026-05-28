@@ -215,6 +215,7 @@ Details: `STATUS.md`.
 | `docs/08-tooling-dossier.md` | 12-tool comparison |
 | `docs/09`–`10` | Moderation diagrams + real-agent proof |
 | `docs/11-agent-coverage-matrix.md` | 16 LiveKit agents in varsitytutors + MVP priorities |
+| `docs/12-livekit-redteam-hardening-solution.md` | Leadership-ready LiveKit/deploy/reuse solution |
 | `promptfoo/` | Scenario generator |
 | `pyrit/` | Multi-turn attacks |
 | `prototype/` | `vt_agent_redteam` Python package |

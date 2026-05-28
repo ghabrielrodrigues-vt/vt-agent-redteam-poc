@@ -24,6 +24,15 @@ create table if not exists redteam.redteam_runs (
   workflow_run_id     text,
   -- Cost tracking (USD estimate per scenario; sum per run_id for budgeting)
   usd_cost_estimate   numeric(10,4),
+  -- Provenance + quality columns (Phase 1; addresses boss-review blockers)
+  is_stub_response    boolean not null default true,
+  transcript_source   text,            -- stub_canned, livekit_audio, direct_llm, etc.
+  response_hash       text,            -- deterministic fingerprint for dedupe
+  artifact_uri        text,            -- pointer to captured WAV / raw transcript
+  timeout_flag        boolean not null default false,
+  retry_count         int not null default 0,
+  threshold_passed    boolean,         -- nullable: null = could not enforce (stubs)
+  run_summary         jsonb,           -- attached at last row of run; null elsewhere
   -- High-level bucket for exec dashboards (generated from scenario_category)
   category_bucket     text generated always as (case
     when scenario_category in
@@ -41,7 +50,10 @@ create table if not exists redteam.redteam_runs (
   end) stored
 );
 
--- Aggregated views for dashboards
+-- Aggregated views for dashboards.
+-- IMPORTANT: stubbed rows (is_stub_response = true) are excluded from
+-- summary-level safety dashboards by default. Use the *_with_stubs views
+-- (defined below) when you specifically need to inspect stub behavior.
 create or replace view redteam.pass_rate_by_bucket as
 select
   agent_name,
@@ -52,7 +64,20 @@ select
   count(*) as scenarios,
   sum(usd_cost_estimate) as week_cost_usd
 from redteam.redteam_runs
+where is_stub_response = false
 group by 1, 2, 3, 4;
+
+create or replace view redteam.pass_rate_by_bucket_with_stubs as
+select
+  agent_name,
+  agent_environment,
+  category_bucket,
+  date_trunc('week', created_at) as week,
+  is_stub_response,
+  count(*) filter (where passed) * 100.0 / nullif(count(*), 0) as pass_rate_pct,
+  count(*) as scenarios
+from redteam.redteam_runs
+group by 1, 2, 3, 4, 5;
 
 create or replace view redteam.recent_failures as
 select

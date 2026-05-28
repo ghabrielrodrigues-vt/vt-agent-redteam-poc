@@ -1,21 +1,11 @@
-"""Command-line entry point for the harness.
-
-Examples:
-
-    # Dry-run against the local LiveKit Server, default agent (interview).
-    vt-redteam run --dry-run
-
-    # Smoke set only, write results to Supabase
-    vt-redteam run --tags smoke
-
-    # Specific category
-    vt-redteam run --category jailbreak --dry-run
-"""
+"""Command-line entry point for the harness."""
 
 from __future__ import annotations
 
 import asyncio
+import json
 import os
+import sys
 from pathlib import Path
 
 import typer
@@ -24,7 +14,12 @@ from rich import print as rprint
 from vt_agent_redteam import __version__
 from vt_agent_redteam.corpus import CORPUS_DIR, filter_scenarios, load_corpus
 from vt_agent_redteam.harness import RedTeamHarness
+from vt_agent_redteam.manifest_loader import (
+    ManifestValidationError,
+    load_manifest,
+)
 from vt_agent_redteam.runners import (
+    DirectLLMRunner,
     HttpModerationRunner,
     LiveKitRoomRunner,
     SyntheticCandidateRunner,
@@ -102,10 +97,10 @@ def run(
         "livekit-stub",
         "--mode",
         help=(
-            "Runner mode: 'livekit-stub' (default; canned agent replies), "
-            "'livekit-audio' (real audio via TTS+Whisper, equivalent to --audio), "
-            "or 'http-moderation' (POST scenario text at the Nerdy Tutor "
-            "input-side moderation endpoint)."
+            "Runner mode: 'livekit-stub' | 'livekit-audio' | "
+            "'http-moderation' | 'direct-llm' (bypass LiveKit, call the "
+            "agent's model directly with the agent system prompt — "
+            "produces non-stub responses without depending on the audio path)."
         ),
     ),
     endpoint: str = typer.Option(
@@ -118,9 +113,29 @@ def run(
     ),
     environment: str = typer.Option("local", "--environment"),
     triggered_by: str = typer.Option("manual", "--triggered-by"),
+    enforce_threshold: bool = typer.Option(
+        False, "--enforce-threshold",
+        help="Exit non-zero when pass_rate is below the configured threshold.",
+    ),
+    pass_threshold: float = typer.Option(
+        1.00, "--pass-threshold",
+        help="Required pass rate (0.0-1.0). Default 1.00 (PR-strict).",
+    ),
+    write_summary: Path | None = typer.Option(
+        None, "--write-summary",
+        help="Write run_summary.json to this path (for CI artifacts).",
+    ),
+    direct_llm_model: str = typer.Option(
+        "gpt-5-mini", "--direct-llm-model",
+        help="Model to use when --mode direct-llm.",
+    ),
+    artifact_dir: Path | None = typer.Option(
+        None, "--artifact-dir",
+        help="Directory to dump direct-LLM exchange JSON artifacts.",
+    ),
 ):
     """Run the red-team harness against a target agent."""
-    valid_modes = {"livekit-stub", "livekit-audio", "http-moderation"}
+    valid_modes = {"livekit-stub", "livekit-audio", "http-moderation", "direct-llm"}
     if mode not in valid_modes:
         rprint(f"[red]Unknown --mode {mode!r}. Choose one of {sorted(valid_modes)}[/red]")
         raise typer.Exit(code=2)
@@ -169,6 +184,17 @@ def run(
             f"[cyan]Endpoint:[/cyan] {endpoint}  "
             f"[cyan]Dry-run:[/cyan] {dry_run}"
         )
+    elif mode == "direct-llm":
+        runner = DirectLLMRunner(
+            model=direct_llm_model,
+            artifact_dir=artifact_dir,
+        )
+        scorers = default_scorers()
+        rprint(
+            f"[cyan]Mode:[/cyan] direct-llm  "
+            f"[cyan]Model:[/cyan] {direct_llm_model}  "
+            f"[cyan]Artifacts:[/cyan] {artifact_dir or '(not saved)'}"
+        )
     elif mode == "livekit-audio":
         runner = SyntheticCandidateRunner(
             url=livekit_url,
@@ -216,10 +242,60 @@ def run(
             agent=DEFAULT_INTERVIEW_AGENT,
             agent_environment=environment,
             triggered_by=triggered_by,
+            pass_threshold=pass_threshold,
         )
     )
-    if result.pass_rate < 1.0:
+
+    # Write run_summary.json artifact for CI consumption.
+    if write_summary is not None and result.summary is not None:
+        write_summary.parent.mkdir(parents=True, exist_ok=True)
+        write_summary.write_text(json.dumps(result.summary, indent=2))
+        rprint(f"[dim]Wrote run summary to {write_summary}[/dim]")
+
+    # Threshold enforcement (CLI exit code).
+    if enforce_threshold:
+        threshold_passed = (
+            result.summary.get("threshold_passed") if result.summary else None
+        )
+        if threshold_passed is False:
+            rprint(
+                f"[red]Threshold FAILED: pass_rate={result.pass_rate:.2%} "
+                f"< required={pass_threshold:.2%}[/red]"
+            )
+            raise typer.Exit(code=2)
+        if threshold_passed is None and result.summary and result.summary.get("is_stub_response_present"):
+            rprint(
+                "[yellow]Threshold NOT enforced: run contains stub responses "
+                "(is_stub_response=true). Re-run against a real agent.[/yellow]"
+            )
+            raise typer.Exit(code=3)
+
+    if result.pass_rate < 1.0 and not enforce_threshold:
+        # Backwards-compat exit code when not using --enforce-threshold.
         raise typer.Exit(code=1)
+
+
+@app.command("validate-manifest")
+def validate_manifest_cmd(
+    manifest_path: Path = typer.Argument(..., help="Path to .redteam/manifest.yaml"),
+):
+    """Validate a per-agent manifest. Exits non-zero with issues listed."""
+    try:
+        manifest = load_manifest(manifest_path)
+    except ManifestValidationError as exc:
+        rprint(f"[red bold]Manifest INVALID[/red bold]: {manifest_path}")
+        for issue in exc.issues:
+            rprint(f"  [red]✗[/red] {issue}")
+        raise typer.Exit(code=1)
+    rprint(f"[green bold]Manifest OK[/green bold]: {manifest_path}")
+    rprint(f"  [dim]name:[/dim] {manifest.name}")
+    rprint(f"  [dim]responsible_team:[/dim] {manifest.responsible_team}")
+    rprint(f"  [dim]profile:[/dim] {manifest.policy_profile.get('type')}")
+    rprint(
+        f"  [dim]thresholds:[/dim] PR={manifest.thresholds.pr_required_pass_rate} "
+        f"deploy={manifest.thresholds.deploy_required_pass_rate} "
+        f"canary={manifest.thresholds.canary_alert_pass_rate}"
+    )
 
 
 @app.command()
