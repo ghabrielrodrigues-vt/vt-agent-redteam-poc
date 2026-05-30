@@ -1,0 +1,42 @@
+flowchart TB
+    classDef setup fill:#E8F4FD,stroke:#1E5A8E,stroke-width:2px,color:#0B2A4A
+    classDef live fill:#FFF2E0,stroke:#A8580C,stroke-width:2px,color:#3D2104
+    classDef score fill:#E8F7EE,stroke:#1E7A3D,stroke-width:2px,color:#0A2F18
+    classDef out fill:#F0E8FA,stroke:#5A2A9F,stroke-width:2px,color:#220C42
+
+    manifest["Manifest loader"]
+    selector["Scenario selector<br/>(tag + bucket filter)"]
+    render["Render metadata<br/>(Jinja templating)"]
+    room["Create LiveKit room"]
+    dispatch["Dispatch agent<br/>via AgentDispatchClient"]
+    join["Join as synthetic<br/>candidate"]
+
+    pub["Publish adversarial prompt<br/>(TTS → audio / direct LLM /<br/>HTTP body)"]
+    sub["Capture agent response<br/>(PCM → Whisper / HTTP / LLM)"]
+    captured["Captured response<br/>+ response_hash<br/>+ transcript_source"]
+
+    s1["refusal_detector"]
+    s2["prompt_leak_detector"]
+    s3["forbidden_topics_detector"]
+    s4["openai_moderation"]
+
+    agg["Conjunction aggregator<br/>(all advisory-non-only<br/>scorers must pass)"]
+    persist["Persist row in<br/>redteam.redteam_runs<br/>(PII-redacted)"]
+    teardown["Teardown room<br/>Update run_summary"]
+
+    manifest --> selector --> render --> room --> dispatch --> join
+    join --> pub
+    join --> sub
+    pub --> captured
+    sub --> captured
+    captured --> s1 & s2 & s3 & s4
+    s1 --> agg
+    s2 --> agg
+    s3 --> agg
+    s4 --> agg
+    agg --> persist --> teardown
+
+    class manifest,selector,render setup
+    class room,dispatch,join,pub,sub,captured live
+    class s1,s2,s3,s4,agg score
+    class persist,teardown out

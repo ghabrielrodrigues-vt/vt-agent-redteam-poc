@@ -1,0 +1,34 @@
+flowchart LR
+    classDef event fill:#E8F4FD,stroke:#1E5A8E,stroke-width:2px,color:#0B2A4A
+    classDef gate fill:#FFF2E0,stroke:#A8580C,stroke-width:2px,color:#3D2104
+    classDef block fill:#FDE8EA,stroke:#9A1C29,stroke-width:2px,color:#3F0710
+    classDef alert fill:#F0E8FA,stroke:#5A2A9F,stroke-width:2px,color:#220C42
+
+    pr["Pull request opened"]
+    merge["Merge to main"]
+    release["Production release tag"]
+    cron["Weekly cron"]
+    manual["Operator invokes manually"]
+
+    prgate["PR check<br/>smoke set ~12 cases<br/>≈ 3 min"]
+    deploygate["Staging deploy gate<br/>smoke + high-risk<br/>≈ 5 min"]
+    prodgate["Pre-prod canary gate<br/>high-risk<br/>≈ 5 min"]
+    canary["Weekly canary<br/>full corpus<br/>≈ 20 min"]
+    inv["Targeted category run"]
+
+    blockmerge["Block merge<br/>(exit 2 / 3)"]
+    blockdeploy["Block deploy"]
+    blockprod["Block production<br/>promotion"]
+    alertteam["Alert responsible team<br/>(drift detection;<br/>no block)"]
+    info["Investigation output<br/>(no automated block)"]
+
+    pr --> prgate --> blockmerge
+    merge --> deploygate --> blockdeploy
+    release --> prodgate --> blockprod
+    cron --> canary --> alertteam
+    manual --> inv --> info
+
+    class pr,merge,release,cron,manual event
+    class prgate,deploygate,prodgate,canary,inv gate
+    class blockmerge,blockdeploy,blockprod block
+    class alertteam,info alert

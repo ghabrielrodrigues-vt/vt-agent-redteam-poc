@@ -1,0 +1,33 @@
+flowchart TB
+    classDef start fill:#E8F4FD,stroke:#1E5A8E,stroke-width:2px,color:#0B2A4A
+    classDef decision fill:#FFF2E0,stroke:#A8580C,stroke-width:2px,color:#3D2104
+    classDef block fill:#FDE8EA,stroke:#9A1C29,stroke-width:2px,color:#3F0710
+    classDef pass fill:#E8F7EE,stroke:#1E7A3D,stroke-width:2px,color:#0A2F18
+
+    start([Run finished<br/>rows persisted])
+
+    stub{{"Any row<br/>is_stub_response = true?"}}
+    p0{{"Any P0 failure?"}}
+    p1{{"Any P1 failure?"}}
+    thr{{"pass_rate ≥ threshold?"}}
+
+    stubblock["threshold_passed = NULL<br/>Exit code 3<br/>Gate blocked<br/>(stub-row guarantee)"]
+    p0block["Block deploy<br/>Exit code 2<br/>(P0 override)"]
+    p1block["Block deploy<br/>Exit code 2<br/>(P1 override)"]
+    aggblock["Block deploy<br/>Exit code 2<br/>(below threshold)"]
+    passok["PASS<br/>threshold_passed = true<br/>Exit code 0"]
+
+    start --> stub
+    stub -- yes --> stubblock
+    stub -- no --> p0
+    p0 -- yes --> p0block
+    p0 -- no --> p1
+    p1 -- yes --> p1block
+    p1 -- no --> thr
+    thr -- no --> aggblock
+    thr -- yes --> passok
+
+    class start start
+    class stub,p0,p1,thr decision
+    class stubblock,p0block,p1block,aggblock block
+    class passok pass

@@ -1,0 +1,47 @@
+flowchart TB
+    classDef agentRepo fill:#E8F4FD,stroke:#1E5A8E,stroke-width:2px,color:#0B2A4A
+    classDef ci fill:#FFF2E0,stroke:#A8580C,stroke-width:2px,color:#3D2104
+    classDef framework fill:#E8F7EE,stroke:#1E7A3D,stroke-width:2px,color:#0A2F18
+    classDef target fill:#FDE8EA,stroke:#9A1C29,stroke-width:2px,color:#3F0710
+    classDef storage fill:#F0E8FA,stroke:#5A2A9F,stroke-width:2px,color:#220C42
+
+    subgraph Repo["Agent repository<br/>(e.g. varsitytutors/conversation-club)"]
+        manifest[".redteam/manifest.yaml"]
+        workflow[".github/workflows/redteam.yml"]
+    end
+
+    subgraph CI["GitHub Actions runner"]
+        install["pip install vt-agent-redteam"]
+        runcmd["vt-redteam run --manifest ..."]
+    end
+
+    subgraph FW["vt-agent-redteam package"]
+        runner["Runner<br/>(LiveKit / HTTP / Direct-LLM)"]
+        scorers["4 Scorers<br/>(parallel)"]
+        writer["Postgres Writer"]
+        runner --> scorers --> writer
+    end
+
+    subgraph Target["Target surface"]
+        livekit["LiveKit Cloud<br/>(staging / canary)"]
+        httpapi["HTTP moderation<br/>endpoint"]
+        directllm["Direct LLM<br/>(OpenAI / Gemini)"]
+    end
+
+    subgraph DB["Postgres / Supabase"]
+        table["redteam.redteam_runs"]
+        views["3 views<br/>+ alert webhook"]
+        table --> views
+    end
+
+    Repo -- "on PR / deploy / cron" --> CI
+    CI --> FW
+    runner -- "dispatch / call" --> Target
+    Target -- "response" --> runner
+    writer --> DB
+
+    class Repo,manifest,workflow agentRepo
+    class CI,install,runcmd ci
+    class FW,runner,scorers,writer framework
+    class Target,livekit,httpapi,directllm target
+    class DB,table,views storage
