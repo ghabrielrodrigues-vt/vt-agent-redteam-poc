@@ -100,7 +100,7 @@ The contract between them is the manifest schema (§2.3) and the reusable workfl
          OpenAI Moderation)
     [3k] Severity assigned per §2.6 mapping table (policy_profile × scenario_category → severity)
     [3l] Row inserted into redteam.redteam_runs (PII redaction at write per
-         spec section 12.4; transcript_source = "agent_native_langfuse";
+         spec section 12.4; transcript_source = "agent_native_transcript";
          artifact_uri = Langfuse trace URL of the form
          "{LANGFUSE_BASE_URL}/trace/{trace_id}" so the un-redacted evidence
          remains accessible to authorized readers via Langfuse access control
@@ -141,7 +141,7 @@ runtime:
   language: python
   model_family: multi-llm     # per pyproject.toml: openai|groq|anthropic|xai
   avatar: lemonslice
-  transcript_source: agent_native_langfuse   # v0 primary path
+  transcript_source: agent_native_transcript   # v0 primary path
 
 policy_profile:
   type: k12_learner
@@ -305,7 +305,7 @@ CREATE TABLE redteam.redteam_runs (
   workflow_run_id text,
   usd_cost_estimate numeric(10,4),
   is_stub_response boolean NOT NULL DEFAULT false,
-  transcript_source text NOT NULL CHECK (transcript_source IN ('stub_canned','livekit_audio','direct_llm','http_moderation','agent_native_langfuse')),
+  transcript_source text NOT NULL CHECK (transcript_source IN ('stub_canned','livekit_audio','direct_llm','http_moderation','agent_native_transcript')),
   response_hash text,                -- SHA-256, computed pre-redaction
   artifact_uri text,
   timeout_flag boolean NOT NULL DEFAULT false,
@@ -470,7 +470,7 @@ Repo: `varsitytutors/student-onboarding-orchestration`. Branch convention: `redt
 Maps to spec section 17.7 (numbered identically) with v0 deviations marked `(*)`:
 
 1. **At least one production LiveKit agent produces a real, non-stub transcript captured by the framework.** ✓ via Langfuse-native runner against `language-tutor` (or `language-checkpoint` or `support-agent`) on SOO staging.
-2. **That transcript is scored and stored in `redteam.redteam_runs` with `is_stub_response = false`.** ✓ via Supabase migration in CC project. `transcript_source = "agent_native_langfuse"`.
+2. **That transcript is scored and stored in `redteam.redteam_runs` with `is_stub_response = false`.** ✓ via Supabase migration in CC project. `transcript_source = "agent_native_transcript"`.
 3. **At least one deploy workflow runs the harness automatically and blocks deploy when thresholds fail.** ✓ via C1 modification of `deploy-language-agent-shared.yml`.
 4. **Slack alerting has fired in a controlled drill.** ✓ via C3 deliberate-failure smoke test. Channel: `#student-experience-v3-launch`.
 5. **Dashboards display pass rate by agent, bucket, and week.** **Partial — views shipped, BI consumer wiring deferred:** the three Postgres views (`pass_rate_by_bucket`, `recent_failures`, `cost_by_run`) are created by the §2.5 migration and queryable from any Postgres client; the BI panel (Looker/Metabase/equivalent) that turns them into a dashboard is deferred D9 — see §1.2. Spec §17.7 acceptance #5's full intent ships in v0.2.

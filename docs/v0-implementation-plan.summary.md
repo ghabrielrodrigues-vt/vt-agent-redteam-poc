@@ -94,7 +94,7 @@ We declare v0 shipped when, on a real PR against a real branch:
 
 1. The deploy gate blocks a deliberately failing scenario;
 2. A Slack alert lands in `#student-experience-v3-launch` with the full payload;
-3. The corresponding row appears in `redteam.redteam_runs` with `is_stub_response = false` and `transcript_source = "agent_native_langfuse"`;
+3. The corresponding row appears in `redteam.redteam_runs` with `is_stub_response = false` and `transcript_source = "agent_native_transcript"`;
 4. The block can be cleared either by fixing the underlying issue or by a recorded override in `redteam.overrides` (with the override audit table showing who approved, when, and why);
 5. All three manifests exist and validate.
 
