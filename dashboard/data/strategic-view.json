@@ -1,24 +1,32 @@
 {
   "verdict": "Greenlight with active conditions",
-  "summary": "S1 language-tutor manifest is accepted with active conditions. S4 must not consume the framework until a new hotfix tag or explicit SHA is pinned.",
+  "summary": "S2 language-checkpoint manifest is accepted with active conditions. S4 must not consume the framework until a new hotfix tag or explicit SHA is pinned.",
   "iterations": [
     {
-      "iteration": "S1 language-tutor manifest",
+      "iteration": "S2 language-checkpoint manifest",
       "status": "accepted with conditions",
       "questions": [
-        "Will S4 pin a new framework hotfix tag or explicit SHA before the consumer workflow depends on the dispatch-before-Langfuse path?",
-        "Is it documented that en/pt are adversarial prompt languages while spanish is the target tutor language?",
-        "Are fixtures.*, synthetic.*, and env.API_BASE_URL intentionally deferred to workflow execution?",
-        "Does the dashboard keep S1 operational evidence as manifest/dry-run only until non-stub runtime proof exists?"
+        "Is coverage_status: full still treated as provisional until non-stub S4/S5 runtime proof exists?",
+        "Are en/pt documented as adversarial prompt languages while spanish remains the checkpoint target language?",
+        "Does the checkpoint metadata cover goal_type, preferredMode, targets_block, and sample_targets exactly enough for dispatch?"
       ]
     },
     {
       "iteration": "Phase 1B next",
       "status": "current",
       "questions": [
-        "Should S2 reuse the S1 manifest pattern for language-checkpoint without secrets, database, deploy, or auth changes?",
+        "Should S3 declare support-agent as partial-no-tool-use and exclude tool-misuse scenarios?",
         "How will PR smoke prioritization preserve P0/P1 coverage inside the 12-scenario budget?",
-        "Will S2/S3 evidence distinguish schema validation from runtime safety proof?"
+        "Will S3 evidence distinguish manifest validation from runtime tool/navigation safety proof?"
+      ]
+    },
+    {
+      "iteration": "S2 operational conditions",
+      "status": "planned",
+      "questions": [
+        "Are blank voice_id, agent_id, checkpoint_image_url, and user_local_time intentional for audio-only red-team runs?",
+        "Is audio_only: true explicitly scoped to red-team transcript coverage and not treated as avatar behavior proof?",
+        "Does S2 remain manifest/dry-run evidence only for cost, latency, reliability, scalability, and API-outage behavior?"
       ]
     },
     {

@@ -497,3 +497,55 @@ Remaining non-blocking concern:
 - S1 dry-run: capped PR scenario selection to 12 of 36 scenarios.
 - Targeted framework tests: 23 passed, 2 warnings.
 - Full framework suite: 104 passed, 21 warnings.
+
+## S2 Review: SOO language-checkpoint Manifest
+
+### Strategic View
+
+Verdict: accepted with active conditions.
+
+Questions captured for follow-up:
+
+- `coverage_status: full` remains provisional until non-stub S4/S5 runtime
+  proof exists.
+- `scenario_selection.languages: [en, pt]` is accepted as adversarial prompt
+  language selection; `metadata_template.language: spanish` is the checkpoint
+  target language.
+- Checkpoint metadata must remain sufficient for dispatch: `goal_type:
+  checkpoint`, `preferredMode: structured`, `targets_block`, and
+  `sample_targets`.
+- Blank `voice_id`, `agent_id`, `checkpoint_image_url`, and `user_local_time`
+  are intentional for audio-only red-team coverage.
+- `audio_only: true` is scoped to red-team transcript coverage and does not
+  prove avatar behavior.
+- S4 cannot consume the framework until the consumer workflow pins a new
+  framework hotfix tag or explicit SHA.
+- S2 operational metrics remain manifest/dry-run only. No runtime cost,
+  latency, reliability, scalability, or non-stub guarantee is claimed from S2.
+
+### Review Agent Findings
+
+Blockers: none.
+
+Non-blocking findings:
+
+- PR smoke selection still depends on deterministic first-N after filtering.
+  This is the same P2 residual framework behavior found in S1, not a new S2
+  manifest defect.
+- Dry-run evidence proves schema, filtering, cap behavior, and local stub
+  execution. It does not prove non-stub LiveKit dispatch, Langfuse transcript
+  capture, or OpenAI moderation for `language-checkpoint`.
+- Review noted that `language_v2_enabled` was top-level while the checkpoint
+  parser reads it from `ai_settings`. The manifest now includes it in
+  `ai_settings` as well.
+
+### Validation
+
+- SOO branch: `redteam/v0-language-tutor-manifest`.
+- SOO file added: `agents/language-checkpoint/.redteam/manifest.yaml`.
+- SOO commit: `feat(redteam): add language checkpoint manifest`.
+- `vt-redteam validate-manifest
+  agents/language-checkpoint/.redteam/manifest.yaml`: passed.
+- S2 dry-run: capped PR scenario selection to 12 of 36 scenarios.
+- S2 dry-run result: 12/12 passed through the local stub path; OpenAI
+  moderation was skipped in offline mode.
