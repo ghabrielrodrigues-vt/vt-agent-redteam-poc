@@ -1022,6 +1022,34 @@ h3 {
   margin-top: 6px;
 }
 
+.strategic-questions {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.strategic-questions li {
+  color: var(--gray-700);
+  font-size: 0.72rem;
+  font-weight: 750;
+  line-height: 1.35;
+  padding-left: 14px;
+  position: relative;
+}
+
+.strategic-questions li::before {
+  background: var(--purple-400);
+  border-radius: 50%;
+  content: "";
+  height: 5px;
+  left: 0;
+  position: absolute;
+  top: 0.48em;
+  width: 5px;
+}
+
 .focus-chart-panel {
   min-height: 100%;
 }

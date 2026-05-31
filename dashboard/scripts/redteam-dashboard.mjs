@@ -196,17 +196,26 @@ function strategicView(phases) {
     {
       iteration: "Current iteration",
       status: current.status,
-      result: `${current.id} is active with ${currentCriteria} criteria complete. Finish this before starting SOO integration work.`,
+      questions: [
+        `Is ${current.id} the right next control point with ${currentCriteria} criteria complete?`,
+        "Are Ask First boundaries still protected before secrets, database, or deploy work?",
+      ],
     },
     {
       iteration: "F1 delivery",
       status: "accepted",
-      result: "Langfuse native transcript runner delivered with ADR-001 and latest captured framework tests passing.",
+      questions: [
+        "Does the runner use agent-native transcript evidence instead of synthetic replay?",
+        "Is ADR-001 still the decision source for this path?",
+      ],
     },
     {
       iteration: "Plan readiness review",
       status: "greenlight",
-      result: "Plan v1.1 resolved strategic review conditions; execution path remains Phase 1A before SOO onboarding.",
+      questions: [
+        "Are plan constraints still intact before consumer-repo rollout?",
+        "Does any new deviation require an ADR before implementation?",
+      ],
     },
   ];
 

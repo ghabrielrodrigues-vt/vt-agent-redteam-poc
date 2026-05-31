@@ -60,16 +60,30 @@ function renderStrategicView(view) {
 
   const root = $("#strategicList");
   root.innerHTML = "";
-  for (const item of view.iterations.slice(0, 3)) {
+  const questionItems = view.iterations.filter((item) => Array.isArray(item.questions) && item.questions.length);
+  for (const item of questionItems.slice(0, 3)) {
     const card = document.createElement("div");
     card.className = className("strategic-item", item.status);
-    card.innerHTML = `
-      <div class="strategic-item-top">
-        <strong>${item.iteration}</strong>
-        <span>${item.status}</span>
-      </div>
-      <p>${item.result}</p>
-    `;
+
+    const top = document.createElement("div");
+    top.className = "strategic-item-top";
+
+    const title = document.createElement("strong");
+    title.textContent = item.iteration;
+
+    const status = document.createElement("span");
+    status.textContent = item.status;
+
+    const list = document.createElement("ul");
+    list.className = "strategic-questions";
+    for (const question of item.questions.slice(0, 3)) {
+      const li = document.createElement("li");
+      li.textContent = question;
+      list.appendChild(li);
+    }
+
+    top.append(title, status);
+    card.append(top, list);
     root.appendChild(card);
   }
 }
