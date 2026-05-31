@@ -600,7 +600,15 @@ function contentType(filePath) {
 function serve() {
   const server = createServer((request, response) => {
     const url = new URL(request.url, `http://127.0.0.1:${port}`);
-    let requestedPath = decodeURIComponent(url.pathname);
+    let requestedPath;
+    try {
+      requestedPath = decodeURIComponent(url.pathname);
+    } catch {
+      response.writeHead(400, { "content-type": "text/plain; charset=utf-8" });
+      response.end("Bad request");
+      return;
+    }
+
     if (requestedPath === "/") requestedPath = "/dashboard/";
     if (requestedPath === "/dashboard/") requestedPath = "/dashboard/index.html";
 
