@@ -604,6 +604,13 @@ function serve() {
     if (requestedPath === "/") requestedPath = "/dashboard/";
     if (requestedPath === "/dashboard/") requestedPath = "/dashboard/index.html";
 
+    if (requestedPath === "/dashboard/data/redteam-status.json") {
+      const status = buildStatus();
+      response.writeHead(200, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" });
+      response.end(`${JSON.stringify(status, null, 2)}\n`);
+      return;
+    }
+
     const absPath = resolveServedPath(requestedPath);
     if (!absPath || !existsSync(absPath) || statSync(absPath).isDirectory()) {
       response.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
@@ -641,10 +648,12 @@ function resolveServedPath(requestedPath) {
   return safeJoin(repoRoot, requestedPath.replace(/^\/+/, ""));
 }
 
-const status = writeStatus();
-console.log(`Wrote ${path.relative(repoRoot, outputPath)} at ${status.generatedAt}`);
+if (!args.has("--serve") || args.has("--watch")) {
+  const status = writeStatus();
+  console.log(`Wrote ${path.relative(repoRoot, outputPath)} at ${status.generatedAt}`);
+}
 
-if (args.has("--watch") || args.has("--serve")) {
+if (args.has("--watch")) {
   setInterval(writeStatus, 3000);
 }
 
