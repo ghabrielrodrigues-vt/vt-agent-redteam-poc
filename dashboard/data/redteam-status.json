@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-31T12:17:05.559Z",
+  "generatedAt": "2026-05-31T12:27:13.031Z",
   "git": {
     "branch": "main",
     "isDirty": false,
     "shortStatus": "clean working tree",
-    "aheadBehind": "ahead 0, behind 0",
-    "ahead": 0,
+    "aheadBehind": "ahead 1, behind 0",
+    "ahead": 1,
     "behind": 0,
     "remote": "git@github.com:ghabrielrodrigues-vt/vt-agent-redteam-poc.git"
   },
@@ -17,33 +17,33 @@
   },
   "strategicView": {
     "verdict": "Greenlight with active conditions",
-    "summary": "S3 support-agent manifest is accepted with active conditions. S4 must not consume the framework until a new hotfix tag or explicit SHA is pinned.",
+    "summary": "S4 SOO redteam workflow is approved with a tracked deviation: direct thin SOO jobs use an explicit framework SHA pin so environment-scoped redteam secrets can be enforced.",
     "iterations": [
       {
-        "iteration": "S3 support-agent manifest",
+        "iteration": "S4 SOO redteam workflow",
         "status": "accepted with conditions",
         "questions": [
-          "Will partial-no-tool-use and exclude_tags: [tool-misuse] remain visible so support_navigation is not presented as full coverage?",
-          "Does S3 evidence distinguish manifest/filter proof from runtime tool/navigation safety proof?",
-          "Is the resolved metadata fixture representative enough after aligning tutoringContext v1, compact subjectsRegistry, featureFlags, subjectExpertise, and salesCallHistory?"
+          "Is the reusable-workflow preference explicitly superseded by the stronger environment-scoped secret requirement?",
+          "Will one agent path change prove only the matching redteam job runs in GitHub Actions?",
+          "Do direct thin SOO jobs keep framework/package execution pinned to an explicit SHA?"
         ]
       },
       {
         "iteration": "Phase 1B next",
         "status": "current",
         "questions": [
-          "Can S4 add only the SOO redteam workflow without secrets, database, deploy, auth, or product workflow changes?",
-          "Will S4 pin the framework by reviewed tag or explicit SHA before live workflow use?",
-          "Will path-scoped workflow jobs keep the support-agent tool-use gap visible while validating all three manifests?"
+          "Can S5 prove the redteam environment contains staging-only LiveKit, Langfuse, OpenAI, DB, and Slack secrets without printing sensitive values?",
+          "Can S5 confirm support-agent-maya emits Langfuse correlation metadata despite using MAYA_LANGFUSE_* internally?",
+          "Does write-results plus enforce-threshold stay blocked from trusted live acceptance until S6/S7 DB readiness is proven?"
         ]
       },
       {
-        "iteration": "S3 operational conditions",
+        "iteration": "S4 operational conditions",
         "status": "planned",
         "questions": [
-          "Is avatar: lemonslice recorded as current SOO runtime truth, superseding the older avatar: none snippet?",
-          "Will S5 prove staging-only LiveKit, Langfuse, and DB secret wiring for support-agent-maya?",
-          "Do cost, latency, reliability, scalability, API-outage behavior, and bottlenecks remain dry-run only until non-stub workflow evidence exists?"
+          "Are no prod/canary triggers present before explicit later phase approval?",
+          "Do fork PRs skip secret-backed jobs as intended?",
+          "Do operational metrics remain pending until non-stub workflow evidence exists?"
         ]
       },
       {
@@ -114,7 +114,7 @@
         "iteration": "Current iteration",
         "status": "current",
         "questions": [
-          "Is S4 the right next control point with 0/3 criteria complete?",
+          "Is S5 the right next control point with 0/4 criteria complete?",
           "Are Ask First boundaries still protected before secrets, database, or deploy work?"
         ]
       },
@@ -137,7 +137,7 @@
     ]
   },
   "operationalReadiness": {
-    "updatedAt": "2026-05-31T12:14:09.000Z",
+    "updatedAt": "2026-05-31T12:25:52.000Z",
     "serviceGuarantee": "The service is kept healthy by phase-end fitness checks: deterministic tests, non-stub integration/E2E runs, cost guardrail proof, latency budgets, API-outage simulations, concurrency/load checks, and bottleneck triage. Until those checks are measured, the dashboard marks the phase as partial or pending.",
     "summaryCards": [
       {
@@ -210,42 +210,42 @@
         "phaseId": "phase-1b",
         "phase": "Phase 1B - SOO integration",
         "status": "partial",
-        "evidence": "S1, S2, and S3 manifests validate locally. PR dry-runs for language-tutor and language-checkpoint each cap selection to 12 of 36 smoke scenarios; support-agent caps selection to 12 of 20 after excluding tool-misuse. All three pass through the local stub path. Default Langfuse path dispatches LiveKit before polling. Non-stub runtime evidence still pending.",
+        "evidence": "S1, S2, and S3 manifests validate locally. S4 adds a SOO redteam workflow with path-scoped jobs for all three agents, redteam environment binding, explicit framework SHA pin, staging-only target environment, fork-PR skip guard, and no prod/canary trigger. Non-stub runtime evidence still pending.",
         "checks": [
           {
             "name": "Cost",
             "status": "partial",
-            "metric": "S1/S2/S3 manifest budgets remain max_cost_usd_per_run=5.00 and max_scenarios_per_pr=12; each dry-run selected 12 rows with no provider cost.",
-            "next": "Record actual run_summary cost per SOO agent in a non-stub run and prove budget_exhausted behavior."
+            "metric": "S1/S2/S3 manifest budgets remain max_cost_usd_per_run=5.00 and max_scenarios_per_pr=12; S4 workflow uploads per-agent run summaries, but no non-stub provider cost has been measured.",
+            "next": "Use S5/S7 live probe to record actual run_summary cost per SOO agent and prove budget_exhausted behavior."
           },
           {
             "name": "Latency",
             "status": "partial",
-            "metric": "S1/S2/S3 dry-runs each completed 12 scenarios locally; real LiveKit/Langfuse p50/p95 not measured.",
+            "metric": "S4 workflow has 15-minute per-agent job limits and summary artifacts. Real LiveKit/Langfuse p50/p95 is not measured.",
             "next": "Record p50/p95 per scenario and total workflow time from the first non-stub SOO workflow."
           },
           {
             "name": "Scalability",
             "status": "partial",
-            "metric": "Three of three SOO manifests exist; path-scoped workflow jobs still pending.",
-            "next": "Test simultaneous agent path changes and workflow fan-out."
+            "metric": "Three path-scoped SOO jobs exist. PR path filters should fan out only touched agents; workflow_call runs all three.",
+            "next": "Prove path scoping in Actions with one single-agent path change and one workflow-file change."
           },
           {
             "name": "Reliability",
             "status": "partial",
-            "metric": "language-tutor, language-checkpoint, and support-agent validate-manifest passed; framework full suite passed with 104 tests after S1 hotfix.",
-            "next": "Cut or pin a framework hotfix tag/SHA before S4, then capture SOO workflow evidence and non-stub integration run."
+            "metric": "All three manifests validate locally; S4 workflow YAML parses; framework package is pinned to an explicit SHA.",
+            "next": "Configure redteam environment secrets and capture first SOO Actions run evidence."
           },
           {
             "name": "API outage",
             "status": "planned",
-            "metric": "Langfuse/OpenAI/LiveKit/Postgres/Slack outage scenarios",
-            "next": "Run failure injection or mocked outage tests."
+            "metric": "Langfuse/OpenAI/LiveKit/Postgres/Slack outage scenarios. S4 wires the path but does not exercise outages.",
+            "next": "Run failure injection or mocked outage tests after S5/S7 readiness."
           },
           {
             "name": "Bottlenecks",
             "status": "partial",
-            "metric": "S1/S2/S3 manifests include top-level redteam_run_id/redteam_scenario_id metadata; runtime trace search latency and support-agent tool-use gap are not measured.",
+            "metric": "Known bottleneck candidates now include GitHub job fan-out, framework package install, LiveKit dispatch, Langfuse trace search, OpenAI scoring, and DB writes.",
             "next": "Record slowest stage from SOO run."
           }
         ]
@@ -417,37 +417,41 @@
     ]
   },
   "currentTask": {
-    "id": "S4",
-    "title": "SOO redteam workflow",
-    "detail": "Add SOO GitHub workflow that calls the framework.",
+    "id": "S5",
+    "title": "Secrets and environments",
+    "detail": "Wire Langfuse, OpenAI, Supabase, and Slack secrets in target environments.",
     "criteria": [
       {
-        "label": "SOO redteam workflow exists",
+        "label": "Langfuse secrets documented/configured",
         "done": false
       },
       {
-        "label": "Workflow calls framework redteam runner",
+        "label": "OpenAI secret documented/configured",
         "done": false
       },
       {
-        "label": "Workflow is path-scoped to agents/**",
+        "label": "Supabase secrets documented/configured",
+        "done": false
+      },
+      {
+        "label": "Slack webhook secret documented/configured",
         "done": false
       }
     ],
     "criteriaComplete": 0,
-    "criteriaTotal": 3,
+    "criteriaTotal": 4,
     "done": false,
     "status": "current",
     "phase": "Phase 1B - SOO integration"
   },
   "progress": {
-    "done": 10,
+    "done": 11,
     "total": 26,
-    "percent": 38
+    "percent": 42
   },
   "nextAction": {
-    "title": "S4 - SOO redteam workflow",
-    "detail": "Add SOO GitHub workflow that calls the framework."
+    "title": "S5 - Secrets and environments",
+    "detail": "Wire Langfuse, OpenAI, Supabase, and Slack secrets in target environments."
   },
   "metrics": [
     {
@@ -476,7 +480,7 @@
       "detail": "Last captured pytest suite size."
     },
     {
-      "value": "0",
+      "value": "1",
       "label": "Commits ahead",
       "detail": "Local framework branch versus origin/main."
     }
@@ -839,21 +843,21 @@
           "criteria": [
             {
               "label": "SOO redteam workflow exists",
-              "done": false
+              "done": true
             },
             {
               "label": "Workflow calls framework redteam runner",
-              "done": false
+              "done": true
             },
             {
               "label": "Workflow is path-scoped to agents/**",
-              "done": false
+              "done": true
             }
           ],
-          "criteriaComplete": 0,
+          "criteriaComplete": 3,
           "criteriaTotal": 3,
-          "done": false,
-          "status": "current"
+          "done": true,
+          "status": "done"
         },
         {
           "id": "S5",
@@ -880,7 +884,7 @@
           "criteriaComplete": 0,
           "criteriaTotal": 4,
           "done": false,
-          "status": "manual"
+          "status": "current"
         },
         {
           "id": "S6",
@@ -929,7 +933,7 @@
           "status": "manual"
         }
       ],
-      "done": 3,
+      "done": 4,
       "total": 7
     },
     {
@@ -1326,6 +1330,14 @@
   ],
   "commits": [
     {
+      "hash": "29e49e1",
+      "message": "docs(dashboard): record S4 workflow review"
+    },
+    {
+      "hash": "870e53b",
+      "message": "docs(dashboard): sync S3 status snapshot"
+    },
+    {
       "hash": "5ab2cc1",
       "message": "docs(dashboard): refresh S3 status snapshot"
     },
@@ -1336,14 +1348,6 @@
     {
       "hash": "99c24fe",
       "message": "docs(dashboard): refresh S2 status snapshot"
-    },
-    {
-      "hash": "cf40ba4",
-      "message": "docs(dashboard): record S2 checkpoint manifest review"
-    },
-    {
-      "hash": "066da81",
-      "message": "fix(dashboard): add following current-stage action"
     }
   ],
   "fileGroups": [
@@ -1436,8 +1440,8 @@
           "exists": true,
           "href": "/docs/operational-metrics/status.json",
           "lines": 281,
-          "size": 12347,
-          "updatedAt": "2026-05-31T12:14:36.889Z",
+          "size": 12434,
+          "updatedAt": "2026-05-31T12:26:24.381Z",
           "note": null
         },
         {
