@@ -126,24 +126,50 @@ function renderCharts(data) {
   }
 }
 
+function findTaskPhase(phases, taskId) {
+  return phases.find((phase) => phase.tasks.some((task) => task.id === taskId));
+}
+
+function phaseShortName(phase) {
+  return phase?.name?.replace(/\s+-\s+.*$/, "")?.replace("Phase ", "Phase ") ?? "Phase";
+}
+
+function renderQuickTaskLinks(data) {
+  const root = $("#quickTaskLinks");
+  if (!root) return;
+
+  const phase = findTaskPhase(data.phases, data.currentTask.id) ?? data.phases.find((item) => item.done < item.total);
+  root.innerHTML = "";
+
+  for (const task of phase?.tasks ?? []) {
+    const link = document.createElement("a");
+    link.href = `#task-${task.id.toLowerCase()}`;
+    link.className = className("quick-task-link", task.status);
+    link.textContent = `#${task.id}`;
+    link.title = task.title;
+    root.appendChild(link);
+  }
+}
+
 function renderCriticalPath(data) {
   const tasks = data.phases.flatMap((phase) => phase.tasks);
   const current = data.currentTask;
-  const phaseOne = data.phases[0];
+  const currentPhase = findTaskPhase(data.phases, current.id) ?? data.phases.find((phase) => phase.done < phase.total) ?? data.phases[0];
   const currentTask = tasks.find((task) => task.id === current.id) ?? current;
-  const nextTask = tasks.find((task) => !task.done && task.id !== current.id && task.status !== "manual");
-  const phaseOneTasks = phaseOne.tasks.map((task) => task.id);
+  const phaseTasks = currentPhase?.tasks ?? [];
+  const currentIndex = tasks.findIndex((task) => task.id === current.id);
+  const nextTask = tasks.slice(Math.max(currentIndex + 1, 0)).find((task) => !task.done && task.status !== "manual");
 
   setText("#criticalNow", `${current.id}: ${current.title}`);
 
   const rail = $("#criticalRail");
   rail.innerHTML = "";
-  for (const id of phaseOneTasks) {
-    const task = tasks.find((item) => item.id === id);
+  for (const task of phaseTasks) {
     const node = document.createElement("a");
-    node.href = `#task-${id.toLowerCase()}`;
+    node.href = `#task-${task.id.toLowerCase()}`;
     node.className = className("path-node", task?.status);
-    node.textContent = id;
+    node.textContent = task.id;
+    node.title = task.title;
     rail.appendChild(node);
   }
 
@@ -152,7 +178,7 @@ function renderCriticalPath(data) {
   const items = [
     `Current criteria: ${currentTask.criteriaComplete ?? 0}/${currentTask.criteriaTotal ?? 0}`,
     `Next gate: ${nextTask ? nextTask.id : "none"}`,
-    `Phase 1A: ${phaseOne.done}/${phaseOne.total}`,
+    `${phaseShortName(currentPhase)}: ${currentPhase.done}/${currentPhase.total}`,
   ];
   for (const item of items) {
     const badge = document.createElement("span");
@@ -439,6 +465,7 @@ function renderStatus(data) {
   renderStrategicView(data.strategicView);
   renderMetricGrid(data.metrics);
   renderCharts(data);
+  renderQuickTaskLinks(data);
   renderCriticalPath(data);
   renderPhaseLanes(data.phases);
   renderOperationalReadiness(data.operationalReadiness);

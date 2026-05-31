@@ -199,11 +199,35 @@ h3 {
   border-color: var(--purple-300);
 }
 
+.quick-task-links {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
 .quick-nav a:first-child,
 .quick-nav a:nth-child(2) {
   background: var(--success-100);
   border-color: rgba(43, 182, 115, 0.28);
   color: #0b6b40;
+}
+
+.quick-task-link.done {
+  background: var(--success-100);
+  border-color: rgba(43, 182, 115, 0.28);
+  color: #0b6b40;
+}
+
+.quick-task-link.current {
+  background: var(--purple-700);
+  border-color: var(--purple-700);
+  color: var(--white);
+}
+
+.quick-task-link.manual {
+  background: var(--warning-100);
+  border-color: rgba(240, 160, 32, 0.32);
+  color: #6e4406;
 }
 
 .pill,
@@ -1320,7 +1344,7 @@ h3 {
   align-items: center;
   display: grid;
   gap: 6px;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(34px, 1fr));
 }
 
 .path-node {
