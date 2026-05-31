@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-31T12:44:31.184Z",
+  "generatedAt": "2026-05-31T12:47:24.441Z",
   "git": {
     "branch": "main",
     "isDirty": true,
@@ -419,20 +419,20 @@
   "tokenUsage": {
     "source": "Codex local session logs",
     "scope": "Red Team MVP project sessions since 2026-05-30",
-    "updatedAt": "2026-05-31T12:44:31.062Z",
+    "updatedAt": "2026-05-31T12:47:24.195Z",
     "sessionCount": 4,
-    "inputTokens": 194229797,
-    "cachedInputTokens": 185490560,
-    "outputTokens": 525587,
-    "reasoningOutputTokens": 157108,
-    "totalTokens": 194755384,
-    "effectiveInputTokens": 8739237,
+    "inputTokens": 198256940,
+    "cachedInputTokens": 189419904,
+    "outputTokens": 532564,
+    "reasoningOutputTokens": 159774,
+    "totalTokens": 198789504,
+    "effectiveInputTokens": 8837036,
     "sessions": [
       {
         "id": "019e7b19-79cc-7b71-ba5e-0519571acd0e",
         "label": "Ler contexto vt4s e redteam",
-        "totalTokens": 166295381,
-        "updatedAt": "2026-05-31T12:44:31.062Z",
+        "totalTokens": 170329501,
+        "updatedAt": "2026-05-31T12:47:24.195Z",
         "contextWindow": 258400
       },
       {
@@ -1372,6 +1372,10 @@
   ],
   "commits": [
     {
+      "hash": "7c5b9e9",
+      "message": "feat(dashboard): add floating token usage counter"
+    },
+    {
       "hash": "380f338",
       "message": "feat(dashboard): make phase map collapsible"
     },
@@ -1386,10 +1390,6 @@
     {
       "hash": "f27cdd7",
       "message": "docs(dashboard): refresh S4 status snapshot"
-    },
-    {
-      "hash": "29e49e1",
-      "message": "docs(dashboard): record S4 workflow review"
     }
   ],
   "fileGroups": [

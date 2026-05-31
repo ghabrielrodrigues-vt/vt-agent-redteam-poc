@@ -70,6 +70,8 @@ const STATIC_COPY = {
     "tokens.reasoning": "Reasoning",
     "tokens.sessions": "sessions",
     "tokens.updated": "updated",
+    "tokens.hideLabel": "Hide token usage counter",
+    "tokens.hideTitle": "Click to hide token usage counter",
   },
   pt: {
     "hero.eyebrow": "LiveKit Agents Red Team MVP",
@@ -129,6 +131,8 @@ const STATIC_COPY = {
     "tokens.reasoning": "Reasoning",
     "tokens.sessions": "sessoes",
     "tokens.updated": "atualizado",
+    "tokens.hideLabel": "Ocultar contador de tokens",
+    "tokens.hideTitle": "Clique para ocultar o contador de tokens",
   },
 };
 
@@ -360,6 +364,12 @@ function applyStaticCopy() {
   document.title = t("hero.title");
   for (const element of document.querySelectorAll("[data-i18n]")) {
     element.textContent = t(element.dataset.i18n);
+  }
+  for (const element of document.querySelectorAll("[data-i18n-aria-label]")) {
+    element.setAttribute("aria-label", t(element.dataset.i18nAriaLabel));
+  }
+  for (const element of document.querySelectorAll("[data-i18n-title]")) {
+    element.setAttribute("title", t(element.dataset.i18nTitle));
   }
   for (const button of document.querySelectorAll("[data-lang-button]")) {
     const active = button.dataset.langButton === state.language;
@@ -859,6 +869,10 @@ function renderTokenCounter(usage) {
   setText("#tokenReasoningValue", formatCompactNumber(usage.reasoningOutputTokens));
 }
 
+function hideTokenCounter() {
+  $("#tokenCounter")?.setAttribute("hidden", "");
+}
+
 function renderStatus(data) {
   state.lastData = data;
   applyStaticCopy();
@@ -948,6 +962,14 @@ function setLanguage(language) {
 for (const button of document.querySelectorAll("[data-lang-button]")) {
   button.addEventListener("click", () => setLanguage(button.dataset.langButton));
 }
+
+const tokenCounter = $("#tokenCounter");
+tokenCounter?.addEventListener("click", hideTokenCounter);
+tokenCounter?.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter" && event.key !== " ") return;
+  event.preventDefault();
+  hideTokenCounter();
+});
 
 $("#refreshButton").addEventListener("click", loadStatus);
 window.addEventListener("hashchange", revealHashTarget);

@@ -272,17 +272,35 @@ function sessionMeta(filePath) {
 }
 
 function latestTokenCount(filePath) {
-  let latest = null;
-  for (const entry of readJsonl(filePath)) {
-    if (entry.type === "event_msg" && entry.payload?.type === "token_count") {
-      latest = {
+  const stat = statSync(filePath);
+  const bytesToRead = Math.min(stat.size, 2 * 1024 * 1024);
+  const fd = openSync(filePath, "r");
+  let content = "";
+  try {
+    const buffer = Buffer.alloc(bytesToRead);
+    readSync(fd, buffer, 0, bytesToRead, stat.size - bytesToRead);
+    content = buffer.toString("utf8");
+  } finally {
+    closeSync(fd);
+  }
+
+  const lines = content.split("\n");
+  for (let index = lines.length - 1; index >= 0; index -= 1) {
+    const line = lines[index];
+    if (!line.includes('"token_count"')) continue;
+    try {
+      const entry = JSON.parse(line);
+      if (entry.type !== "event_msg" || entry.payload?.type !== "token_count") continue;
+      return {
         timestamp: entry.timestamp,
         usage: entry.payload.info?.total_token_usage ?? {},
         contextWindow: entry.payload.info?.model_context_window ?? null,
       };
+    } catch {
+      continue;
     }
   }
-  return latest;
+  return null;
 }
 
 function addUsage(a, b) {

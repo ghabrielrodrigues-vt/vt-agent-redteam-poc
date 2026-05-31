@@ -226,6 +226,7 @@ h3 {
   bottom: 18px;
   box-shadow: var(--shadow-md);
   color: var(--purple-950);
+  cursor: pointer;
   display: grid;
   gap: 8px;
   left: 18px;
@@ -233,6 +234,17 @@ h3 {
   padding: 12px;
   position: fixed;
   z-index: 50;
+}
+
+.token-counter[hidden] {
+  display: none;
+}
+
+.token-counter:hover,
+.token-counter:focus-visible {
+  border-color: var(--purple-500);
+  box-shadow: 0 0 0 3px rgba(139, 61, 235, 0.12), var(--shadow-md);
+  outline: 0;
 }
 
 .token-counter-top {
