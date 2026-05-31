@@ -958,6 +958,8 @@ h3 {
 .strategic-panel {
   display: grid;
   gap: 10px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .strategic-summary {
@@ -970,6 +972,7 @@ h3 {
 .strategic-list {
   display: grid;
   gap: 8px;
+  min-width: 0;
 }
 
 .strategic-item {
@@ -977,6 +980,7 @@ h3 {
   border: 1px solid var(--gray-200);
   border-left: 4px solid var(--purple-300);
   border-radius: 8px;
+  min-width: 0;
   padding: 10px;
 }
 
@@ -996,10 +1000,12 @@ h3 {
   display: flex;
   gap: 8px;
   justify-content: space-between;
+  min-width: 0;
 }
 
 .strategic-item-top strong {
   color: var(--purple-900);
+  min-width: 0;
   font-size: 0.8rem;
   line-height: 1.25;
 }
@@ -1009,9 +1015,11 @@ h3 {
   border: 1px solid var(--purple-100);
   border-radius: 999px;
   color: var(--purple-800);
+  flex: 0 0 auto;
   font-size: 0.64rem;
   font-weight: 900;
   padding: 4px 7px;
+  white-space: nowrap;
 }
 
 .strategic-item p {
@@ -1469,7 +1477,11 @@ h3 {
 
   .side-stack {
     grid-column: 1 / -1;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: 1fr;
+  }
+
+  .strategic-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .compact-metrics .metric-grid {
@@ -1490,6 +1502,7 @@ h3 {
   .priority-grid,
   .chart-layout,
   .side-stack,
+  .strategic-list,
   .compact-metrics .metric-grid,
   .signal-list,
   .ops-layout,

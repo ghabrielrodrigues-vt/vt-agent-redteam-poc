@@ -46,6 +46,12 @@ function opsTone(status) {
   return "neutral";
 }
 
+function strategicStatusLabel(status) {
+  const normalized = String(status ?? "").toLowerCase();
+  if (normalized === "accepted with conditions") return "accepted";
+  return status ?? "";
+}
+
 function renderMetricGrid(metrics) {
   const grid = $("#metricGrid");
   grid.innerHTML = "";
@@ -80,7 +86,8 @@ function renderStrategicView(view) {
     title.textContent = item.iteration;
 
     const status = document.createElement("span");
-    status.textContent = item.status;
+    status.textContent = strategicStatusLabel(item.status);
+    status.title = item.status ?? "";
 
     const list = document.createElement("ul");
     list.className = "strategic-questions";
