@@ -51,7 +51,7 @@ def load_manifest(path: Path) -> AgentManifest:
         issues.append("livekit.agent_name is required (per-env mapping)")
     if not manifest.runtime.get("language"):
         issues.append("runtime.language is required (python | typescript)")
-    profile_type = manifest.policy_profile.get("type")
+    profile_type = manifest.policy_profile.type
     valid_profiles = {
         "k12_learner", "support_navigation", "commerce_checkout",
         "interview_assessment", "b2b_course", "demo_poc",
@@ -61,7 +61,7 @@ def load_manifest(path: Path) -> AgentManifest:
             f"policy_profile.type must be one of {sorted(valid_profiles)}, "
             f"got {profile_type!r}"
         )
-    if not manifest.scenario_selection.get("buckets"):
+    if not manifest.scenario_selection.buckets:
         issues.append("scenario_selection.buckets must list at least one bucket")
     if manifest.thresholds.pr_required_pass_rate < 0 or manifest.thresholds.pr_required_pass_rate > 1:
         issues.append("thresholds.pr_required_pass_rate must be in [0, 1]")

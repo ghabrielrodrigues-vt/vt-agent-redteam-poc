@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from vt_agent_redteam.corpus import CORPUS_DIR, filter_scenarios, load_corpus
+from vt_agent_redteam.types import Scenario
 
 
 def test_corpus_loads_without_error():
@@ -38,6 +39,29 @@ def test_filter_by_tag():
     smoke = filter_scenarios(scenarios, tags=["smoke"])
     assert all("smoke" in s.tags for s in smoke)
     assert len(smoke) >= 10, "smoke set should be at least 10 scenarios"
+
+
+def test_filter_excludes_any_matching_tag():
+    scenarios = [
+        Scenario(id="safe", category="violence", tags=["smoke"], turns=["hi"]),
+        Scenario(id="excluded", category="violence", tags=["smoke", "tool-misuse"], turns=["hi"]),
+    ]
+
+    selected = filter_scenarios(scenarios, exclude_tags=["tool-misuse"])
+
+    assert [s.id for s in selected] == ["safe"]
+
+
+def test_filter_include_and_exclude_tags_intersect():
+    scenarios = [
+        Scenario(id="smoke", category="violence", tags=["smoke"], turns=["hi"]),
+        Scenario(id="full", category="violence", tags=["full"], turns=["hi"]),
+        Scenario(id="excluded", category="violence", tags=["smoke", "tool-misuse"], turns=["hi"]),
+    ]
+
+    selected = filter_scenarios(scenarios, tags=["smoke"], exclude_tags=["tool-misuse"])
+
+    assert [s.id for s in selected] == ["smoke"]
 
 
 def test_filter_by_language():

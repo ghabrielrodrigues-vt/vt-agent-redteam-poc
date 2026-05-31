@@ -1,0 +1,51 @@
+{
+  "verdict": "Greenlight with active conditions",
+  "summary": "Phase 1A is now 5/7; F3-F5 are accepted and the next strategic control point is F6 reusable workflow packaging.",
+  "iterations": [
+    {
+      "iteration": "F6 implementation",
+      "status": "in-review",
+      "result": "Reusable workflow YAML and fixture manifest are implemented. Local fixture dry-run writes run_summary.json and workflow contract tests pass. Pending condition: actual green GitHub Actions run evidence before F6 can be accepted as done."
+    },
+    {
+      "iteration": "F5 review hardening",
+      "status": "accepted",
+      "result": "Reviewer blocker cleared: trigger modes now default to agent-native-transcript/Langfuse, dry-run remains a local stub, and tests prove non-dry-run trigger mode fails fast without Langfuse credentials instead of silently using stub."
+    },
+    {
+      "iteration": "F5 delivery",
+      "status": "accepted",
+      "result": "CLI now supports manifest-driven PR/deploy/canary trigger modes while preserving legacy runner modes via --runner-mode. Langfuse/agent-native-transcript is the default trigger-mode runner, known_system_prompt_source feeds prompt-leak scoring, dry-run uses a local stub runner, and run_summary.json smoke is covered; full suite is green at 98 tests."
+    },
+    {
+      "iteration": "F4 review hardening",
+      "status": "accepted",
+      "result": "Reviewer blocker cleared: expected_behavior.must_include now flows into ScenarioResult.redaction_allowlist and both Postgres/Supabase writers pass it to redact_text. F5 watch item: do not reintroduce raw prompt/response text through alerts or summaries."
+    },
+    {
+      "iteration": "F4 delivery",
+      "status": "accepted",
+      "result": "Storage-time redaction now protects prompts and responses before Postgres/Supabase writes while preserving pre-redaction response_hash. test_redaction.py covers email, SSN, phone, credit card, learner_id, named entities, allowlist through writer payloads, and both Postgres/Supabase behavior; full suite is green at 94 tests."
+    },
+    {
+      "iteration": "F3 review hardening",
+      "status": "accepted",
+      "result": "Post-review blockers cleared: override lookup is decoupled from writes, stable run_id supports approved reruns, and transient failures now classify as P3 before category severity. F5/F6 must provide REDTEAM_RUN_ID for operational overrides."
+    },
+    {
+      "iteration": "F3 delivery",
+      "status": "accepted",
+      "result": "Severity assignment, P0/P1 precedence, stub exit 3, active override lookup, stable run_id override reruns, and non-P0 override bypass are implemented with 17 focused gate tests; full framework suite is green at 87 tests."
+    },
+    {
+      "iteration": "F2 delivery",
+      "status": "accepted",
+      "result": "Manifest schema now declares coverage_status and exclude_tags with manifest-loader tests and ADR-002; framework suite is green at 70 tests. This closes coverage-truthfulness ambiguity and does not change gate logic."
+    },
+    {
+      "iteration": "Dashboard iteration",
+      "status": "accepted",
+      "result": "Control room now prioritizes current stage, phase map, critical path, and task-level criteria."
+    }
+  ]
+}

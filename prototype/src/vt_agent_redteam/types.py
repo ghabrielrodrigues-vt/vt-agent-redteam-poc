@@ -35,10 +35,24 @@ ScenarioCategory = Literal[
     "medical_legal_advice",
     "impersonation",
     "emotional_manipulation",
+    "tool_misuse",
+    "ferpa_violation",
+    "coppa_violation",
+    "fairness",
+    "assessment_integrity",
+    "protected_class_handling",
+    "payment_boundaries",
+    "refund_manipulation",
+    "competitor_disclosure",
+    "tenant_boundaries",
+    "course_authorization",
+    "hallucination",
 ]
 
 
 ModerationVerdict = Literal["block", "mask", "pass"]
+CoverageStatus = Literal["full", "partial-no-tool-use", "partial-other"]
+Severity = Literal["P0", "P1", "P2", "P3"]
 
 
 class ExpectedBehavior(BaseModel):
@@ -94,6 +108,7 @@ class ScenarioResult(BaseModel):
     agent_responses: list[str]
     scorer_results: list[ScoreResult]
     passed: bool
+    severity: Severity = "P2"
     failure_reason: str | None = None
     duration_seconds: float = 0.0
     run_at: datetime = Field(default_factory=datetime.utcnow)
@@ -105,6 +120,7 @@ class ScenarioResult(BaseModel):
     timeout_flag: bool = False
     retry_count: int = 0
     usd_cost_estimate: float | None = None
+    redaction_allowlist: list[str] = Field(default_factory=list)
 
 
 class OverridePolicy(BaseModel):
@@ -127,6 +143,7 @@ class AgentConfig(BaseModel):
     room_name_prefix: str
     metadata_template: dict[str, Any]
     known_system_prompt: str | None = None
+    policy_profile: str = "interview_assessment"
     # Threshold-failure override + flake tolerance (Q3 of boss review).
     override_policy: OverridePolicy = Field(default_factory=OverridePolicy)
 
@@ -143,6 +160,23 @@ class ManifestBudgets(BaseModel):
     max_cost_usd_per_run: float = 5.00
 
 
+class PolicyProfile(BaseModel):
+    """Policy coverage declaration for one target agent."""
+
+    type: str
+    coverage_status: CoverageStatus = "full"
+    scenario_packs: list[str] = Field(default_factory=list)
+
+
+class ScenarioSelection(BaseModel):
+    """Corpus selection rules for one manifest trigger family."""
+
+    buckets: list[str]
+    languages: list[str] = Field(default_factory=list)
+    tags: dict[str, list[str]] = Field(default_factory=dict)
+    exclude_tags: list[str] = Field(default_factory=list)
+
+
 class AgentManifest(BaseModel):
     """Full `.redteam/manifest.yaml` schema for an agent repo."""
 
@@ -151,9 +185,10 @@ class AgentManifest(BaseModel):
     responsible_team: str
     livekit: dict[str, Any]
     runtime: dict[str, Any]
-    policy_profile: dict[str, Any]
+    policy_profile: PolicyProfile
     metadata_template: dict[str, Any]
-    scenario_selection: dict[str, Any]
+    scenario_selection: ScenarioSelection
     budgets: ManifestBudgets = Field(default_factory=ManifestBudgets)
     thresholds: ManifestThresholds = Field(default_factory=ManifestThresholds)
     override_policy: OverridePolicy = Field(default_factory=OverridePolicy)
+    known_system_prompt_source: str | None = None

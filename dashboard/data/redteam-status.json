@@ -1,0 +1,1353 @@
+{
+  "generatedAt": "2026-05-31T03:10:42.291Z",
+  "git": {
+    "branch": "main",
+    "isDirty": true,
+    "shortStatus": "uncommitted changes present",
+    "aheadBehind": "ahead 5, behind 0",
+    "ahead": 5,
+    "behind": 0,
+    "remote": "git@github.com:ghabrielrodrigues-vt/vt-agent-redteam-poc.git"
+  },
+  "testStatus": {
+    "status": "passing",
+    "summary": "101 passed in 9.74s",
+    "command": "cd prototype && .venv/bin/python -m pytest",
+    "verifiedAt": "2026-05-31T01:50:27.000Z"
+  },
+  "strategicView": {
+    "verdict": "Greenlight with active conditions",
+    "summary": "Phase 1A is now 5/7; F3-F5 are accepted and the next strategic control point is F6 reusable workflow packaging.",
+    "iterations": [
+      {
+        "iteration": "F6 implementation",
+        "status": "in-review",
+        "result": "Reusable workflow YAML and fixture manifest are implemented. Local fixture dry-run writes run_summary.json and workflow contract tests pass. Pending condition: actual green GitHub Actions run evidence before F6 can be accepted as done."
+      },
+      {
+        "iteration": "F5 review hardening",
+        "status": "accepted",
+        "result": "Reviewer blocker cleared: trigger modes now default to agent-native-transcript/Langfuse, dry-run remains a local stub, and tests prove non-dry-run trigger mode fails fast without Langfuse credentials instead of silently using stub."
+      },
+      {
+        "iteration": "F5 delivery",
+        "status": "accepted",
+        "result": "CLI now supports manifest-driven PR/deploy/canary trigger modes while preserving legacy runner modes via --runner-mode. Langfuse/agent-native-transcript is the default trigger-mode runner, known_system_prompt_source feeds prompt-leak scoring, dry-run uses a local stub runner, and run_summary.json smoke is covered; full suite is green at 98 tests."
+      },
+      {
+        "iteration": "F4 review hardening",
+        "status": "accepted",
+        "result": "Reviewer blocker cleared: expected_behavior.must_include now flows into ScenarioResult.redaction_allowlist and both Postgres/Supabase writers pass it to redact_text. F5 watch item: do not reintroduce raw prompt/response text through alerts or summaries."
+      },
+      {
+        "iteration": "F4 delivery",
+        "status": "accepted",
+        "result": "Storage-time redaction now protects prompts and responses before Postgres/Supabase writes while preserving pre-redaction response_hash. test_redaction.py covers email, SSN, phone, credit card, learner_id, named entities, allowlist through writer payloads, and both Postgres/Supabase behavior; full suite is green at 94 tests."
+      },
+      {
+        "iteration": "F3 review hardening",
+        "status": "accepted",
+        "result": "Post-review blockers cleared: override lookup is decoupled from writes, stable run_id supports approved reruns, and transient failures now classify as P3 before category severity. F5/F6 must provide REDTEAM_RUN_ID for operational overrides."
+      },
+      {
+        "iteration": "F3 delivery",
+        "status": "accepted",
+        "result": "Severity assignment, P0/P1 precedence, stub exit 3, active override lookup, stable run_id override reruns, and non-P0 override bypass are implemented with 17 focused gate tests; full framework suite is green at 87 tests."
+      },
+      {
+        "iteration": "F2 delivery",
+        "status": "accepted",
+        "result": "Manifest schema now declares coverage_status and exclude_tags with manifest-loader tests and ADR-002; framework suite is green at 70 tests. This closes coverage-truthfulness ambiguity and does not change gate logic."
+      },
+      {
+        "iteration": "Dashboard iteration",
+        "status": "accepted",
+        "result": "Control room now prioritizes current stage, phase map, critical path, and task-level criteria."
+      },
+      {
+        "iteration": "Current iteration",
+        "status": "current",
+        "result": "F6 is active with 3/4 criteria complete. Finish this before starting SOO integration work."
+      },
+      {
+        "iteration": "F1 delivery",
+        "status": "accepted",
+        "result": "Langfuse native transcript runner delivered with ADR-001 and latest captured framework tests passing."
+      },
+      {
+        "iteration": "Plan readiness review",
+        "status": "greenlight",
+        "result": "Plan v1.1 resolved strategic review conditions; execution path remains Phase 1A before SOO onboarding."
+      }
+    ]
+  },
+  "currentTask": {
+    "id": "F6",
+    "title": "Reusable workflow",
+    "detail": "Package framework workflow for repo consumers and CI reuse.",
+    "criteria": [
+      {
+        "label": "Framework reusable workflow exists",
+        "done": true
+      },
+      {
+        "label": "Workflow exposes inputs and secrets",
+        "done": true
+      },
+      {
+        "label": "Workflow supports fixture manifest run",
+        "done": true
+      },
+      {
+        "label": "Green Actions run recorded",
+        "done": false
+      }
+    ],
+    "criteriaComplete": 3,
+    "criteriaTotal": 4,
+    "done": false,
+    "status": "current",
+    "phase": "Phase 1A - Framework hardening"
+  },
+  "progress": {
+    "done": 5,
+    "total": 17,
+    "percent": 29
+  },
+  "nextAction": {
+    "title": "F6 - Reusable workflow",
+    "detail": "Package framework workflow for repo consumers and CI reuse."
+  },
+  "metrics": [
+    {
+      "value": "195",
+      "label": "Scenario target",
+      "detail": "Target corpus size from spec v2.1."
+    },
+    {
+      "value": "24",
+      "label": "Corpus files",
+      "detail": "YAML category files currently in the framework."
+    },
+    {
+      "value": "3",
+      "label": "v0 target agents",
+      "detail": "language-tutor, language-checkpoint, support-agent."
+    },
+    {
+      "value": "4",
+      "label": "Feedback channels",
+      "detail": "GitHub Check, Slack, dashboard views, run_summary.json."
+    },
+    {
+      "value": "101",
+      "label": "Framework tests",
+      "detail": "Last captured pytest suite size."
+    },
+    {
+      "value": "5",
+      "label": "Commits ahead",
+      "detail": "Local framework branch versus origin/main."
+    }
+  ],
+  "phases": [
+    {
+      "id": "phase-1a",
+      "name": "Phase 1A - Framework hardening",
+      "tasks": [
+        {
+          "id": "F1",
+          "title": "Langfuse native transcript runner",
+          "detail": "Use Langfuse agent-native transcripts instead of replaying synthetic responses.",
+          "criteria": [
+            {
+              "label": "LangfuseTraceRunner file exists",
+              "done": true
+            },
+            {
+              "label": "Runner exported from runners package",
+              "done": true
+            },
+            {
+              "label": "Native transcript / generation span extraction implemented",
+              "done": true
+            },
+            {
+              "label": "Unit tests cover success, timeout, not-found, malformed span",
+              "done": true
+            },
+            {
+              "label": "ADR-001 recorded",
+              "done": true
+            },
+            {
+              "label": "Last captured framework suite passing",
+              "done": true
+            }
+          ],
+          "criteriaComplete": 6,
+          "criteriaTotal": 6,
+          "done": true,
+          "status": "done"
+        },
+        {
+          "id": "F2",
+          "title": "Manifest schema extensions",
+          "detail": "Add policy_profile.coverage_status and scenario_selection.exclude_tags with tests and ADR-002.",
+          "criteria": [
+            {
+              "label": "coverage_status enum added",
+              "done": true
+            },
+            {
+              "label": "coverage_status accepts full / partial-no-tool-use / partial-other",
+              "done": true
+            },
+            {
+              "label": "scenario_selection.exclude_tags added",
+              "done": true
+            },
+            {
+              "label": "Manifest validation/tests cover new fields",
+              "done": true
+            },
+            {
+              "label": "Fixture with partial-no-tool-use + tool-misuse validates",
+              "done": true
+            },
+            {
+              "label": "ADR-002 recorded",
+              "done": true
+            }
+          ],
+          "criteriaComplete": 6,
+          "criteriaTotal": 6,
+          "done": true,
+          "status": "done"
+        },
+        {
+          "id": "F3",
+          "title": "Severity gate and overrides",
+          "detail": "Make gate precedence explicit and read approved overrides from storage.",
+          "criteria": [
+            {
+              "label": "Severity assignment lookup implemented",
+              "done": true
+            },
+            {
+              "label": "Precedence gate table implemented top-to-bottom",
+              "done": true
+            },
+            {
+              "label": "Override read path queries redteam.overrides",
+              "done": true
+            },
+            {
+              "label": "P0 cannot be cleared by override",
+              "done": true
+            },
+            {
+              "label": "Gate tests cover at least eight plan cases",
+              "done": true
+            },
+            {
+              "label": "ADR-003 recorded",
+              "done": true
+            }
+          ],
+          "criteriaComplete": 6,
+          "criteriaTotal": 6,
+          "done": true,
+          "status": "done"
+        },
+        {
+          "id": "F4",
+          "title": "PII redaction at write",
+          "detail": "Redact sensitive fields before persistence and downstream reporting.",
+          "criteria": [
+            {
+              "label": "storage/redaction.py added",
+              "done": true
+            },
+            {
+              "label": "Regex covers SSN, phone, email, credit card, synthetic learner_id",
+              "done": true
+            },
+            {
+              "label": "Postgres writer invokes redaction before INSERT",
+              "done": true
+            },
+            {
+              "label": "response_hash computed pre-redaction",
+              "done": true
+            },
+            {
+              "label": "Redaction tests cover PII and allowlist",
+              "done": true
+            },
+            {
+              "label": "ADR-005 recorded",
+              "done": true
+            }
+          ],
+          "criteriaComplete": 6,
+          "criteriaTotal": 6,
+          "done": true,
+          "status": "done"
+        },
+        {
+          "id": "F5",
+          "title": "CLI modes from manifest",
+          "detail": "Expose pr, deploy, canary, environment, threshold, and manifest-driven execution.",
+          "criteria": [
+            {
+              "label": "--mode flag added",
+              "done": true
+            },
+            {
+              "label": "--environment flag added",
+              "done": true
+            },
+            {
+              "label": "--enforce-threshold flag added",
+              "done": true
+            },
+            {
+              "label": "--manifest remains supported",
+              "done": true
+            },
+            {
+              "label": "dry-run emits run_summary.json",
+              "done": true
+            }
+          ],
+          "criteriaComplete": 5,
+          "criteriaTotal": 5,
+          "done": true,
+          "status": "done"
+        },
+        {
+          "id": "F6",
+          "title": "Reusable workflow",
+          "detail": "Package framework workflow for repo consumers and CI reuse.",
+          "criteria": [
+            {
+              "label": "Framework reusable workflow exists",
+              "done": true
+            },
+            {
+              "label": "Workflow exposes inputs and secrets",
+              "done": true
+            },
+            {
+              "label": "Workflow supports fixture manifest run",
+              "done": true
+            },
+            {
+              "label": "Green Actions run recorded",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 3,
+          "criteriaTotal": 4,
+          "done": false,
+          "status": "current"
+        },
+        {
+          "id": "F7",
+          "title": "v0.1.0 release tag",
+          "detail": "Tag framework once F1-F6 are stable and documented.",
+          "criteria": [
+            {
+              "label": "pyproject version bumped to 0.1.0",
+              "done": false
+            },
+            {
+              "label": "git tag v0.1.0 exists locally",
+              "done": false
+            },
+            {
+              "label": "Install target resolves from tag",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "pending"
+        }
+      ],
+      "done": 5,
+      "total": 7
+    },
+    {
+      "id": "phase-1b",
+      "name": "Phase 1B - SOO integration",
+      "tasks": [
+        {
+          "id": "S1",
+          "title": "language-tutor manifest",
+          "detail": "Create the first SOO manifest for the tutor agent.",
+          "criteria": [
+            {
+              "label": "language-tutor manifest exists",
+              "done": false
+            },
+            {
+              "label": "agent_name declared",
+              "done": false
+            },
+            {
+              "label": "policy profile declared",
+              "done": false
+            },
+            {
+              "label": "Expected profile references language_tutor",
+              "done": false
+            },
+            {
+              "label": "LiveKit staging/production config exists",
+              "done": true
+            },
+            {
+              "label": "validate-manifest evidence captured",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 1,
+          "criteriaTotal": 6,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "S2",
+          "title": "language-checkpoint manifest",
+          "detail": "Create the checkpoint agent manifest and trace binding.",
+          "criteria": [
+            {
+              "label": "language-checkpoint manifest exists",
+              "done": false
+            },
+            {
+              "label": "agent_name declared",
+              "done": false
+            },
+            {
+              "label": "policy profile declared",
+              "done": false
+            },
+            {
+              "label": "Expected profile references language_checkpoint",
+              "done": false
+            },
+            {
+              "label": "LiveKit staging/production config exists",
+              "done": true
+            },
+            {
+              "label": "validate-manifest evidence captured",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 1,
+          "criteriaTotal": 6,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "S3",
+          "title": "support-agent manifest",
+          "detail": "Create Maya/support-agent manifest with partial tool-use coverage noted.",
+          "criteria": [
+            {
+              "label": "support-agent manifest exists",
+              "done": false
+            },
+            {
+              "label": "agent_name declared",
+              "done": false
+            },
+            {
+              "label": "policy profile declared",
+              "done": false
+            },
+            {
+              "label": "Expected profile references support_navigation",
+              "done": false
+            },
+            {
+              "label": "LiveKit staging/production config exists",
+              "done": true
+            },
+            {
+              "label": "validate-manifest evidence captured",
+              "done": false
+            },
+            {
+              "label": "support-agent declares partial-no-tool-use",
+              "done": false
+            },
+            {
+              "label": "support-agent excludes tool-misuse",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 1,
+          "criteriaTotal": 8,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "S4",
+          "title": "SOO redteam workflow",
+          "detail": "Add SOO GitHub workflow that calls the framework.",
+          "criteria": [
+            {
+              "label": "SOO redteam workflow exists",
+              "done": false
+            },
+            {
+              "label": "Workflow calls framework redteam runner",
+              "done": false
+            },
+            {
+              "label": "Workflow is path-scoped to agents/**",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "S5",
+          "title": "Secrets and environments",
+          "detail": "Wire Langfuse, OpenAI, Supabase, and Slack secrets in target environments.",
+          "criteria": [
+            {
+              "label": "Langfuse secrets documented/configured",
+              "done": false
+            },
+            {
+              "label": "OpenAI secret documented/configured",
+              "done": false
+            },
+            {
+              "label": "Supabase secrets documented/configured",
+              "done": false
+            },
+            {
+              "label": "Slack webhook secret documented/configured",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 4,
+          "done": false,
+          "status": "manual"
+        },
+        {
+          "id": "S6",
+          "title": "Conversation Club schema",
+          "detail": "Apply redteam result schema to the CC Supabase project.",
+          "criteria": [
+            {
+              "label": "Conversation Club redteam migration exists",
+              "done": false
+            },
+            {
+              "label": "redteam result tables/views included",
+              "done": false
+            },
+            {
+              "label": "Migration respects Supabase AGENTS constraints",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "S7",
+          "title": "CI DB URL and JWT",
+          "detail": "Finalize CI database connection and service-token plumbing.",
+          "criteria": [
+            {
+              "label": "CI DB URL available to workflow",
+              "done": false
+            },
+            {
+              "label": "Service JWT/token available to workflow",
+              "done": false
+            },
+            {
+              "label": "CI connection verified by workflow",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "manual"
+        }
+      ],
+      "done": 0,
+      "total": 7
+    },
+    {
+      "id": "phase-1c",
+      "name": "Phase 1C - Rollout controls",
+      "tasks": [
+        {
+          "id": "C1",
+          "title": "Deploy hook gate",
+          "detail": "Gate deploys on severity threshold and override rules.",
+          "criteria": [
+            {
+              "label": "deploy-language-agent-shared.yml calls redteam workflow",
+              "done": false
+            },
+            {
+              "label": "Deploy blocks on exit 2 or 3",
+              "done": false
+            },
+            {
+              "label": "Deliberately failing scenario proves deploy blocked",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "C2",
+          "title": "Slack alert",
+          "detail": "Send concise failure summaries to the configured team channel.",
+          "criteria": [
+            {
+              "label": "Slack alert code exists",
+              "done": false
+            },
+            {
+              "label": "Alert includes agent, run, severity, artifact link",
+              "done": false
+            },
+            {
+              "label": "Slack secret wired in workflow",
+              "done": true
+            }
+          ],
+          "criteriaComplete": 1,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "C3",
+          "title": "Controlled drill",
+          "detail": "Run a known scenario drill and preserve evidence.",
+          "criteria": [
+            {
+              "label": "Controlled drill scenario selected",
+              "done": false
+            },
+            {
+              "label": "Known failure triggers red-team gate",
+              "done": false
+            },
+            {
+              "label": "Evidence captured for drill",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "pending"
+        }
+      ],
+      "done": 0,
+      "total": 3
+    }
+  ],
+  "architecture": {
+    "flow": [
+      {
+        "title": "Manifest",
+        "detail": "Agent profile, policy coverage, scenario selection, thresholds."
+      },
+      {
+        "title": "Scenarios",
+        "detail": "Curated corpus buckets plus exclude tags for partial coverage."
+      },
+      {
+        "title": "Runner",
+        "detail": "LiveKit/Langfuse trace path for agent-native transcript evidence."
+      },
+      {
+        "title": "Scorers",
+        "detail": "Moderation, refusal, prompt leak, expected verdict, category checks."
+      },
+      {
+        "title": "Storage",
+        "detail": "Redacted results persisted to Postgres/Supabase."
+      },
+      {
+        "title": "Gate",
+        "detail": "Severity precedence, overrides, deploy decision, alerts."
+      }
+    ],
+    "feedbackChannels": [
+      {
+        "title": "GitHub Check",
+        "detail": "PR and deploy context with pass/fail and artifact links."
+      },
+      {
+        "title": "Slack",
+        "detail": "Concise alert for high-severity failures and blocked deploys."
+      },
+      {
+        "title": "Dashboard Views",
+        "detail": "Operational surface for current phase, files, risks, and outcomes."
+      },
+      {
+        "title": "run_summary.json",
+        "detail": "Machine-readable artifact for downstream automation and audits."
+      }
+    ]
+  },
+  "overview": [
+    {
+      "title": "Framework boundary",
+      "detail": "This repo owns the reusable red-team runner, manifest schema, corpus, scoring, storage, and release workflow."
+    },
+    {
+      "title": "SOO boundary",
+      "detail": "student-onboarding-orchestration consumes the framework for the three LiveKit agents selected for v0."
+    },
+    {
+      "title": "Production moderation",
+      "detail": "Existing app-level input moderation is not replaced; the MVP validates agent output behavior and deploy safety."
+    },
+    {
+      "title": "Decision posture",
+      "detail": "Hard constraints, ADRs, Ask First rules, and bilingual-doc conventions remain binding for every new step."
+    }
+  ],
+  "risks": [
+    {
+      "level": "high",
+      "title": "Langfuse correlation metadata",
+      "detail": "Plan assumes redteam_run_id and redteam_scenario_id metadata. SOO tracing may need explicit metadata wiring before runner search works reliably."
+    },
+    {
+      "level": "high",
+      "title": "SOO Ask First boundaries",
+      "detail": "DB, auth, deploy, infrastructure, and destructive operations require explicit confirmation inside the consumer repo."
+    },
+    {
+      "level": "medium",
+      "title": "Maya tool-use coverage gap",
+      "detail": "support-agent must declare partial-no-tool-use until scenario/tool traces are proven."
+    },
+    {
+      "level": "medium",
+      "title": "Supabase deploy-killer rules",
+      "detail": "Conversation Club schema work must follow local migration rules and avoid direct remote mutations."
+    },
+    {
+      "level": "low",
+      "title": "Deferred audio and BI scope",
+      "detail": "WAV collector D1 and BI dashboard D9 remain post-v0 unless priorities change through a new ADR."
+    }
+  ],
+  "commits": [
+    {
+      "hash": "7bbaffd",
+      "message": "docs: AGENTS.md + codex-transfer bundle for cross-tool portability"
+    },
+    {
+      "hash": "ad551b8",
+      "message": "feat(framework): F1 LangfuseTraceRunner — agent_native_transcript path"
+    },
+    {
+      "hash": "ba08f21",
+      "message": "docs: v0 plan v1.1 — resolve boss-review conditions"
+    },
+    {
+      "hash": "9b2ace1",
+      "message": "docs: v2.1 spec hardening — Mermaid diagrams, condensed brief, executive summary"
+    },
+    {
+      "hash": "535d304",
+      "message": "docs: add v0 implementation plan, summary, handoff, and boss review"
+    }
+  ],
+  "fileGroups": [
+    {
+      "title": "Start Here",
+      "files": [
+        {
+          "label": "Repository instructions",
+          "path": "AGENTS.md",
+          "exists": true,
+          "href": "/AGENTS.md",
+          "lines": 57,
+          "size": 3128,
+          "updatedAt": "2026-05-30T22:18:29.646Z",
+          "note": null
+        },
+        {
+          "label": "Codex transfer bundle",
+          "path": "docs/v0-implementation-plan.codex-transfer.md",
+          "exists": true,
+          "href": "/docs/v0-implementation-plan.codex-transfer.md",
+          "lines": 169,
+          "size": 11588,
+          "updatedAt": "2026-05-30T22:18:09.854Z",
+          "note": null
+        },
+        {
+          "label": "Technical plan v1.1",
+          "path": "docs/v0-implementation-plan.md",
+          "exists": true,
+          "href": "/docs/v0-implementation-plan.md",
+          "lines": 568,
+          "size": 46878,
+          "updatedAt": "2026-05-30T19:58:28.712Z",
+          "note": null
+        },
+        {
+          "label": "Non-technical summary",
+          "path": "docs/v0-implementation-plan.summary.md",
+          "exists": true,
+          "href": "/docs/v0-implementation-plan.summary.md",
+          "lines": 102,
+          "size": 9698,
+          "updatedAt": "2026-05-30T19:58:39.949Z",
+          "note": null
+        },
+        {
+          "label": "Decision trail handoff",
+          "path": "docs/v0-implementation-plan.handoff.md",
+          "exists": true,
+          "href": "/docs/v0-implementation-plan.handoff.md",
+          "lines": 163,
+          "size": 16060,
+          "updatedAt": "2026-05-30T18:00:59.341Z",
+          "note": null
+        },
+        {
+          "label": "Boss-review verdict",
+          "path": "docs/v0-implementation-plan.review.md",
+          "exists": true,
+          "href": "/docs/v0-implementation-plan.review.md",
+          "lines": 86,
+          "size": 11564,
+          "updatedAt": "2026-05-30T18:36:12.038Z",
+          "note": null
+        },
+        {
+          "label": "Current repo status",
+          "path": "STATUS.md",
+          "exists": true,
+          "href": "/STATUS.md",
+          "lines": 198,
+          "size": 9797,
+          "updatedAt": "2026-05-28T00:12:41.349Z",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "Canonical Specs",
+      "files": [
+        {
+          "label": "Spec v2.1 authority",
+          "path": "docs/exports/livekit-agent-red-team-hardening.md",
+          "exists": true,
+          "href": "/docs/exports/livekit-agent-red-team-hardening.md",
+          "lines": 1610,
+          "size": 142411,
+          "updatedAt": "2026-05-28T14:00:19.993Z",
+          "note": null
+        },
+        {
+          "label": "Condensed brief",
+          "path": "docs/exports/livekit-redteam-condensed.md",
+          "exists": true,
+          "href": "/docs/exports/livekit-redteam-condensed.md",
+          "lines": 162,
+          "size": 13641,
+          "updatedAt": "2026-05-28T14:29:02.863Z",
+          "note": null
+        },
+        {
+          "label": "Executive summary",
+          "path": "docs/EXECUTIVE_SUMMARY.md",
+          "exists": true,
+          "href": "/docs/EXECUTIVE_SUMMARY.md",
+          "lines": 89,
+          "size": 5327,
+          "updatedAt": "2026-05-28T13:05:33.117Z",
+          "note": null
+        },
+        {
+          "label": "Hardening solution",
+          "path": "docs/12-livekit-redteam-hardening-solution.md",
+          "exists": true,
+          "href": "/docs/12-livekit-redteam-hardening-solution.md",
+          "lines": 649,
+          "size": 34978,
+          "updatedAt": "2026-05-27T20:18:57.314Z",
+          "note": null
+        },
+        {
+          "label": "Coverage matrix",
+          "path": "docs/11-agent-coverage-matrix.md",
+          "exists": true,
+          "href": "/docs/11-agent-coverage-matrix.md",
+          "lines": 238,
+          "size": 11448,
+          "updatedAt": "2026-05-27T18:56:38.715Z",
+          "note": null
+        },
+        {
+          "label": "Tooling dossier",
+          "path": "docs/08-tooling-dossier.md",
+          "exists": true,
+          "href": "/docs/08-tooling-dossier.md",
+          "lines": 479,
+          "size": 35551,
+          "updatedAt": "2026-05-27T18:29:07.079Z",
+          "note": null
+        },
+        {
+          "label": "Policy coverage",
+          "path": "docs/07-corpus-policy-coverage.md",
+          "exists": true,
+          "href": "/docs/07-corpus-policy-coverage.md",
+          "lines": 198,
+          "size": 11252,
+          "updatedAt": "2026-05-27T18:28:59.497Z",
+          "note": null
+        },
+        {
+          "label": "Real-agent proof",
+          "path": "docs/10-livekit-real-agent-proof.md",
+          "exists": true,
+          "href": "/docs/10-livekit-real-agent-proof.md",
+          "lines": 201,
+          "size": 7599,
+          "updatedAt": "2026-05-27T18:24:11.250Z",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "Framework Code",
+      "files": [
+        {
+          "label": "Types and manifest models",
+          "path": "prototype/src/vt_agent_redteam/types.py",
+          "exists": true,
+          "href": "/prototype/src/vt_agent_redteam/types.py",
+          "lines": 195,
+          "size": 6433,
+          "updatedAt": "2026-05-31T00:59:20.347Z",
+          "note": null
+        },
+        {
+          "label": "Manifest loader",
+          "path": "prototype/src/vt_agent_redteam/manifest_loader.py",
+          "exists": true,
+          "href": "/prototype/src/vt_agent_redteam/manifest_loader.py",
+          "lines": 82,
+          "size": 2784,
+          "updatedAt": "2026-05-31T00:06:44.377Z",
+          "note": null
+        },
+        {
+          "label": "Harness orchestration",
+          "path": "prototype/src/vt_agent_redteam/harness.py",
+          "exists": true,
+          "href": "/prototype/src/vt_agent_redteam/harness.py",
+          "lines": 537,
+          "size": 17986,
+          "updatedAt": "2026-05-31T00:59:26.323Z",
+          "note": null
+        },
+        {
+          "label": "CLI entrypoint",
+          "path": "prototype/src/vt_agent_redteam/cli.py",
+          "exists": true,
+          "href": "/prototype/src/vt_agent_redteam/cli.py",
+          "lines": 546,
+          "size": 19783,
+          "updatedAt": "2026-05-31T01:01:56.681Z",
+          "note": null
+        },
+        {
+          "label": "Langfuse trace runner",
+          "path": "prototype/src/vt_agent_redteam/runners/langfuse_trace_runner.py",
+          "exists": true,
+          "href": "/prototype/src/vt_agent_redteam/runners/langfuse_trace_runner.py",
+          "lines": 524,
+          "size": 19962,
+          "updatedAt": "2026-05-30T20:01:02.271Z",
+          "note": null
+        },
+        {
+          "label": "Runner exports",
+          "path": "prototype/src/vt_agent_redteam/runners/__init__.py",
+          "exists": true,
+          "href": "/prototype/src/vt_agent_redteam/runners/__init__.py",
+          "lines": 27,
+          "size": 859,
+          "updatedAt": "2026-05-30T20:01:14.099Z",
+          "note": null
+        },
+        {
+          "label": "Postgres writer",
+          "path": "prototype/src/vt_agent_redteam/storage/postgres_writer.py",
+          "exists": true,
+          "href": "/prototype/src/vt_agent_redteam/storage/postgres_writer.py",
+          "lines": 194,
+          "size": 7055,
+          "updatedAt": "2026-05-31T00:51:04.690Z",
+          "note": null
+        },
+        {
+          "label": "Storage schema",
+          "path": "prototype/src/vt_agent_redteam/storage/schema.sql",
+          "exists": true,
+          "href": "/prototype/src/vt_agent_redteam/storage/schema.sql",
+          "lines": 150,
+          "size": 5591,
+          "updatedAt": "2026-05-31T00:37:53.424Z",
+          "note": null
+        },
+        {
+          "label": "Package config",
+          "path": "prototype/pyproject.toml",
+          "exists": true,
+          "href": "/prototype/pyproject.toml",
+          "lines": 56,
+          "size": 1061,
+          "updatedAt": "2026-05-23T17:00:50.000Z",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "Tests and ADRs",
+      "files": [
+        {
+          "label": "Langfuse runner tests",
+          "path": "prototype/tests/test_langfuse_runner.py",
+          "exists": true,
+          "href": "/prototype/tests/test_langfuse_runner.py",
+          "lines": 378,
+          "size": 13135,
+          "updatedAt": "2026-05-30T21:36:54.182Z",
+          "note": null
+        },
+        {
+          "label": "Manifest/type tests",
+          "path": "prototype/tests/test_types.py",
+          "exists": true,
+          "href": "/prototype/tests/test_types.py",
+          "lines": 103,
+          "size": 3280,
+          "updatedAt": "2026-05-31T00:07:11.423Z",
+          "note": null
+        },
+        {
+          "label": "Corpus loader tests",
+          "path": "prototype/tests/test_corpus_loader.py",
+          "exists": true,
+          "href": "/prototype/tests/test_corpus_loader.py",
+          "lines": 139,
+          "size": 5385,
+          "updatedAt": "2026-05-31T00:07:11.462Z",
+          "note": null
+        },
+        {
+          "label": "Scorer tests",
+          "path": "prototype/tests/test_scorers.py",
+          "exists": true,
+          "href": "/prototype/tests/test_scorers.py",
+          "lines": 164,
+          "size": 6814,
+          "updatedAt": "2026-05-25T21:42:40.000Z",
+          "note": null
+        },
+        {
+          "label": "ADR-001 native transcript",
+          "path": "docs/adr/0001-langfuse-native-transcript.md",
+          "exists": true,
+          "href": "/docs/adr/0001-langfuse-native-transcript.md",
+          "lines": 59,
+          "size": 5596,
+          "updatedAt": "2026-05-30T22:07:12.335Z",
+          "note": null
+        },
+        {
+          "label": "ADR-002 manifest profile",
+          "path": "docs/adr/0002-colocated-manifest-layout-and-coverage-status.md",
+          "exists": true,
+          "href": "/docs/adr/0002-colocated-manifest-layout-and-coverage-status.md",
+          "lines": 49,
+          "size": 2322,
+          "updatedAt": "2026-05-31T00:07:39.258Z",
+          "note": null
+        },
+        {
+          "label": "ADR-003 severity gate",
+          "path": "docs/adr/0003-severity-gate-overrides.md",
+          "exists": true,
+          "href": "/docs/adr/0003-severity-gate-overrides.md",
+          "lines": 48,
+          "size": 1530,
+          "updatedAt": "2026-05-31T00:39:22.827Z",
+          "note": null
+        },
+        {
+          "label": "ADR-005 redaction",
+          "path": "docs/adr/0005-redaction-at-write.md",
+          "exists": true,
+          "href": "/docs/adr/0005-redaction-at-write.md",
+          "lines": 37,
+          "size": 1470,
+          "updatedAt": "2026-05-31T00:48:48.439Z",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "SOO Consumer",
+      "files": [
+        {
+          "label": "SOO instructions",
+          "path": "/Users/gupy/apps/nerdy/student-onboarding-orchestration/AGENTS.md",
+          "exists": true,
+          "href": "/external/soo/AGENTS.md",
+          "lines": 101,
+          "size": 5939,
+          "updatedAt": "2026-05-31T03:01:12.678Z",
+          "note": null
+        },
+        {
+          "label": "Supabase instructions",
+          "path": "/Users/gupy/apps/nerdy/student-onboarding-orchestration/supabase/AGENTS.md",
+          "exists": true,
+          "href": "/external/soo/supabase/AGENTS.md",
+          "lines": 151,
+          "size": 14287,
+          "updatedAt": "2026-05-20T18:26:48.993Z",
+          "note": null
+        },
+        {
+          "label": "Cinematic judge workflow",
+          "path": "/Users/gupy/apps/nerdy/student-onboarding-orchestration/.github/workflows/cinematic-judge.yml",
+          "exists": true,
+          "href": "/external/soo/.github/workflows/cinematic-judge.yml",
+          "lines": 134,
+          "size": 5461,
+          "updatedAt": "2026-05-15T21:18:24.295Z",
+          "note": null
+        },
+        {
+          "label": "Language deploy shared workflow",
+          "path": "/Users/gupy/apps/nerdy/student-onboarding-orchestration/.github/workflows/deploy-language-agent-shared.yml",
+          "exists": true,
+          "href": "/external/soo/.github/workflows/deploy-language-agent-shared.yml",
+          "lines": 127,
+          "size": 5103,
+          "updatedAt": "2026-05-15T21:18:24.296Z",
+          "note": null
+        },
+        {
+          "label": "language-tutor agent",
+          "path": "/Users/gupy/apps/nerdy/student-onboarding-orchestration/agents/language-tutor/agent.py",
+          "exists": true,
+          "href": "/external/soo/agents/language-tutor/agent.py",
+          "lines": 9118,
+          "size": 475194,
+          "updatedAt": "2026-05-27T03:33:59.513Z",
+          "note": null
+        },
+        {
+          "label": "language-tutor Langfuse",
+          "path": "/Users/gupy/apps/nerdy/student-onboarding-orchestration/agents/language-tutor/langfuse_tracing.py",
+          "exists": true,
+          "href": "/external/soo/agents/language-tutor/langfuse_tracing.py",
+          "lines": 141,
+          "size": 5613,
+          "updatedAt": "2026-05-20T18:26:48.372Z",
+          "note": null
+        },
+        {
+          "label": "language-checkpoint agent",
+          "path": "/Users/gupy/apps/nerdy/student-onboarding-orchestration/agents/language-checkpoint/agent.py",
+          "exists": true,
+          "href": "/external/soo/agents/language-checkpoint/agent.py",
+          "lines": 2394,
+          "size": 111304,
+          "updatedAt": "2026-05-27T03:33:59.509Z",
+          "note": null
+        },
+        {
+          "label": "language-checkpoint Langfuse",
+          "path": "/Users/gupy/apps/nerdy/student-onboarding-orchestration/agents/language-checkpoint/langfuse_tracing.py",
+          "exists": true,
+          "href": "/external/soo/agents/language-checkpoint/langfuse_tracing.py",
+          "lines": 132,
+          "size": 5148,
+          "updatedAt": "2026-05-20T18:26:48.358Z",
+          "note": null
+        },
+        {
+          "label": "support-agent agent",
+          "path": "/Users/gupy/apps/nerdy/student-onboarding-orchestration/agents/support-agent/agent.py",
+          "exists": true,
+          "href": "/external/soo/agents/support-agent/agent.py",
+          "lines": 1942,
+          "size": 90032,
+          "updatedAt": "2026-05-28T19:10:10.359Z",
+          "note": null
+        },
+        {
+          "label": "support-agent Langfuse",
+          "path": "/Users/gupy/apps/nerdy/student-onboarding-orchestration/agents/support-agent/langfuse_tracing.py",
+          "exists": true,
+          "href": "/external/soo/agents/support-agent/langfuse_tracing.py",
+          "lines": 431,
+          "size": 17564,
+          "updatedAt": "2026-05-20T18:26:48.422Z",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "External Knowledge",
+      "files": [
+        {
+          "label": "VT4S overview",
+          "path": "/Users/gupy/apps/nerdy/vt4s-team-scope/00-overview.md",
+          "exists": true,
+          "href": "/external/vt4s/00-overview.md",
+          "lines": 131,
+          "size": 11476,
+          "updatedAt": "2026-05-26T00:04:43.105Z",
+          "note": null
+        },
+        {
+          "label": "VT4S repos ranked",
+          "path": "/Users/gupy/apps/nerdy/vt4s-team-scope/01-repos-ranked.md",
+          "exists": true,
+          "href": "/external/vt4s/01-repos-ranked.md",
+          "lines": 89,
+          "size": 6299,
+          "updatedAt": "2026-05-23T17:26:14.926Z",
+          "note": null
+        },
+        {
+          "label": "Accessibility notes",
+          "path": "/Users/gupy/apps/nerdy/vt4s-team-scope/accessibility-matt.md",
+          "exists": true,
+          "href": "/external/vt4s/accessibility-matt.md",
+          "lines": 183,
+          "size": 11731,
+          "updatedAt": "2026-05-26T00:04:33.781Z",
+          "note": null
+        },
+        {
+          "label": "LLM_WIKI index",
+          "path": "/Users/gupy/LLM_WIKI/index.md",
+          "exists": true,
+          "href": "/external/wiki/index.md",
+          "lines": 127,
+          "size": 9711,
+          "updatedAt": "2026-05-04T17:12:13.526Z",
+          "note": null
+        },
+        {
+          "label": "Architecture fundamentals ch03",
+          "path": "/Users/gupy/LLM_WIKI/wiki/books/fundamentals-of-software-architecture/ch03-modularity.md",
+          "exists": true,
+          "href": "/external/wiki/wiki/books/fundamentals-of-software-architecture/ch03-modularity.md",
+          "lines": 97,
+          "size": 4530,
+          "updatedAt": "2026-05-03T01:25:44.241Z",
+          "note": null
+        },
+        {
+          "label": "Architecture fundamentals ch06",
+          "path": "/Users/gupy/LLM_WIKI/wiki/books/fundamentals-of-software-architecture/ch06-measuring-governing.md",
+          "exists": true,
+          "href": "/external/wiki/wiki/books/fundamentals-of-software-architecture/ch06-measuring-governing.md",
+          "lines": 101,
+          "size": 4732,
+          "updatedAt": "2026-05-03T01:27:15.207Z",
+          "note": null
+        },
+        {
+          "label": "Architecture fundamentals ch07",
+          "path": "/Users/gupy/LLM_WIKI/wiki/books/fundamentals-of-software-architecture/ch07-scope.md",
+          "exists": true,
+          "href": "/external/wiki/wiki/books/fundamentals-of-software-architecture/ch07-scope.md",
+          "lines": 93,
+          "size": 4577,
+          "updatedAt": "2026-05-03T01:27:42.538Z",
+          "note": null
+        },
+        {
+          "label": "Architecture decisions",
+          "path": "/Users/gupy/LLM_WIKI/wiki/books/fundamentals-of-software-architecture/techniques/architecture-decisions.md",
+          "exists": true,
+          "href": "/external/wiki/wiki/books/fundamentals-of-software-architecture/techniques/architecture-decisions.md",
+          "lines": 159,
+          "size": 6479,
+          "updatedAt": "2026-05-03T01:32:56.558Z",
+          "note": null
+        },
+        {
+          "label": "DDD ch03",
+          "path": "/Users/gupy/LLM_WIKI/wiki/books/learning-domain-driven-design/ch03-managing-domain-complexity.md",
+          "exists": true,
+          "href": "/external/wiki/wiki/books/learning-domain-driven-design/ch03-managing-domain-complexity.md",
+          "lines": 92,
+          "size": 4076,
+          "updatedAt": "2026-05-04T00:26:13.633Z",
+          "note": null
+        },
+        {
+          "label": "DDD ch10",
+          "path": "/Users/gupy/LLM_WIKI/wiki/books/learning-domain-driven-design/ch10-design-heuristics.md",
+          "exists": true,
+          "href": "/external/wiki/wiki/books/learning-domain-driven-design/ch10-design-heuristics.md",
+          "lines": 120,
+          "size": 4959,
+          "updatedAt": "2026-05-04T00:32:47.015Z",
+          "note": null
+        },
+        {
+          "label": "Documentation process",
+          "path": "/Users/gupy/LLM_WIKI/wiki/processes/documentation.md",
+          "exists": true,
+          "href": "/external/wiki/wiki/processes/documentation.md",
+          "lines": 101,
+          "size": 3946,
+          "updatedAt": "2026-05-01T23:54:11.834Z",
+          "note": null
+        }
+      ]
+    }
+  ]
+}

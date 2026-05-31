@@ -16,6 +16,7 @@ from typing import Any
 
 from rich import print as rprint
 
+from vt_agent_redteam.storage.redaction import redact_text, sha256_text
 from vt_agent_redteam.types import ScenarioResult
 
 
@@ -64,26 +65,51 @@ class SupabaseWriter:
         pr_number: int | None,
         workflow_run_id: str | None,
         results: list[ScenarioResult],
+        threshold_passed: bool | None = None,
+        run_summary: dict[str, Any] | None = None,
     ) -> int:
-        rows = [
-            {
+        rows: list[dict[str, Any]] = []
+        for idx, r in enumerate(results):
+            adversarial_prompt = "\n---\n".join(r.adversarial_prompts)
+            agent_response = "\n---\n".join(r.agent_responses)
+            response_hash = r.response_hash or sha256_text(agent_response)
+            row_summary = (
+                run_summary
+                if run_summary is not None and idx == len(results) - 1
+                else None
+            )
+            rows.append({
                 "run_id": str(run_id),
                 "agent_name": agent_name,
                 "agent_commit_sha": agent_commit_sha,
                 "agent_environment": agent_environment,
                 "scenario_category": r.category,
                 "scenario_id": r.scenario_id,
-                "adversarial_prompt": "\n---\n".join(r.adversarial_prompts),
-                "agent_response": "\n---\n".join(r.agent_responses),
+                "adversarial_prompt": redact_text(
+                    adversarial_prompt,
+                    allowlist=r.redaction_allowlist,
+                ),
+                "agent_response": redact_text(
+                    agent_response,
+                    allowlist=r.redaction_allowlist,
+                ),
                 "scorer_results": [sr.model_dump() for sr in r.scorer_results],
                 "passed": r.passed,
+                "severity": r.severity,
                 "failure_reason": r.failure_reason,
                 "triggered_by": triggered_by,
                 "pr_number": pr_number,
                 "workflow_run_id": workflow_run_id,
-            }
-            for r in results
-        ]
+                "usd_cost_estimate": r.usd_cost_estimate,
+                "is_stub_response": r.is_stub_response,
+                "transcript_source": r.transcript_source,
+                "response_hash": response_hash,
+                "artifact_uri": r.artifact_uri,
+                "timeout_flag": r.timeout_flag,
+                "retry_count": r.retry_count,
+                "threshold_passed": None if r.is_stub_response else threshold_passed,
+                "run_summary": row_summary,
+            })
 
         if self.dry_run:
             rprint(f"[yellow]DRY-RUN[/yellow] Would write {len(rows)} row(s) to redteam.redteam_runs:")

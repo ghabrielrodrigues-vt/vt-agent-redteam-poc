@@ -1,0 +1,195 @@
+name: redteam reusable
+
+on:
+  workflow_call:
+    inputs:
+      agent_manifest:
+        required: true
+        type: string
+      mode:
+        required: true
+        type: string
+      environment:
+        required: false
+        type: string
+        default: staging
+      runner_mode:
+        required: false
+        type: string
+        default: agent-native-transcript
+      enforce_threshold:
+        required: false
+        type: boolean
+        default: true
+      write_results:
+        required: false
+        type: boolean
+        default: true
+      dry_run:
+        required: false
+        type: boolean
+        default: false
+      framework_package:
+        required: false
+        type: string
+        default: git+https://github.com/varsitytutors/vt-agent-redteam@v0.1.0#subdirectory=prototype
+    secrets:
+      LIVEKIT_URL:
+        required: true
+      LIVEKIT_API_KEY:
+        required: true
+      LIVEKIT_API_SECRET:
+        required: true
+      OPENAI_API_KEY:
+        required: true
+      LANGFUSE_PUBLIC_KEY:
+        required: true
+      LANGFUSE_SECRET_KEY:
+        required: true
+      LANGFUSE_BASE_URL:
+        required: false
+      REDTEAM_DB_URL:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: false
+
+  workflow_dispatch:
+    inputs:
+      agent_manifest:
+        required: true
+        type: string
+        default: .github/fixtures/redteam/manifest.yaml
+      mode:
+        required: true
+        type: choice
+        options: [pr, deploy, canary, manual]
+        default: pr
+      environment:
+        required: true
+        type: choice
+        options: [local, staging, production-canary]
+        default: local
+      runner_mode:
+        required: true
+        type: choice
+        options: [agent-native-transcript, direct-llm, http-moderation, livekit-audio]
+        default: agent-native-transcript
+      enforce_threshold:
+        required: true
+        type: boolean
+        default: false
+      write_results:
+        required: true
+        type: boolean
+        default: false
+      dry_run:
+        required: true
+        type: boolean
+        default: true
+      framework_package:
+        required: true
+        type: string
+        default: local
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    name: red-team gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      AGENT_MANIFEST: ${{ inputs.agent_manifest }}
+      REDTEAM_MODE: ${{ inputs.mode }}
+      REDTEAM_ENVIRONMENT: ${{ inputs.environment }}
+      REDTEAM_RUNNER_MODE: ${{ inputs.runner_mode }}
+      REDTEAM_ENFORCE_THRESHOLD: ${{ inputs.enforce_threshold }}
+      REDTEAM_WRITE_RESULTS: ${{ inputs.write_results }}
+      REDTEAM_DRY_RUN: ${{ inputs.dry_run }}
+      REDTEAM_FRAMEWORK_PACKAGE: ${{ inputs.framework_package }}
+      LIVEKIT_URL: ${{ secrets.LIVEKIT_URL }}
+      LIVEKIT_API_KEY: ${{ secrets.LIVEKIT_API_KEY }}
+      LIVEKIT_API_SECRET: ${{ secrets.LIVEKIT_API_SECRET }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+      LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+      LANGFUSE_BASE_URL: ${{ secrets.LANGFUSE_BASE_URL }}
+      REDTEAM_DB_URL: ${{ secrets.REDTEAM_DB_URL }}
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    steps:
+      - name: Checkout target repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Install red-team framework
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          if [[ "$REDTEAM_FRAMEWORK_PACKAGE" == "local" ]]; then
+            python -m pip install -e ./prototype
+          else
+            python -m pip install "$REDTEAM_FRAMEWORK_PACKAGE"
+          fi
+
+      - name: Validate manifest
+        run: vt-redteam validate-manifest "$AGENT_MANIFEST"
+
+      - name: Prepare stable run id
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_ENV"
+          import os
+          import uuid
+
+          seed = ":".join([
+              os.environ["GITHUB_SERVER_URL"],
+              os.environ["GITHUB_REPOSITORY"],
+              os.environ["GITHUB_RUN_ID"],
+              os.environ["AGENT_MANIFEST"],
+              os.environ["REDTEAM_MODE"],
+              os.environ["REDTEAM_ENVIRONMENT"],
+          ])
+          print(f"REDTEAM_RUN_ID={uuid.uuid5(uuid.NAMESPACE_URL, seed)}")
+          PY
+
+      - name: Run red-team gate
+        shell: bash
+        run: |
+          summary_path="redteam-run-summary.json"
+          cmd=(
+            vt-redteam run
+            --manifest "$AGENT_MANIFEST"
+            --mode "$REDTEAM_MODE"
+            --environment "$REDTEAM_ENVIRONMENT"
+            --write-summary "$summary_path"
+          )
+
+          if [[ "$REDTEAM_DRY_RUN" == "true" ]]; then
+            cmd+=(--dry-run)
+          else
+            cmd+=(--runner-mode "$REDTEAM_RUNNER_MODE")
+          fi
+
+          if [[ "$REDTEAM_ENFORCE_THRESHOLD" == "true" ]]; then
+            cmd+=(--enforce-threshold)
+          fi
+
+          if [[ "$REDTEAM_WRITE_RESULTS" == "true" ]]; then
+            cmd+=(--write-results)
+          fi
+
+          "${cmd[@]}"
+
+      - name: Upload run summary
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: redteam-run-summary
+          path: redteam-run-summary.json
+          if-no-files-found: ignore

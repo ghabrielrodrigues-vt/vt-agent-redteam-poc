@@ -25,6 +25,7 @@ from typing import Any
 import psycopg
 from rich import print as rprint
 
+from vt_agent_redteam.storage.redaction import redact_text, sha256_text
 from vt_agent_redteam.types import ScenarioResult
 
 
@@ -63,7 +64,7 @@ _INSERT_SQL = """
 insert into redteam.redteam_runs (
   run_id, agent_name, agent_commit_sha, agent_environment,
   scenario_category, scenario_id, adversarial_prompt, agent_response,
-  scorer_results, passed, failure_reason,
+  scorer_results, passed, severity, failure_reason,
   triggered_by, pr_number, workflow_run_id,
   usd_cost_estimate,
   is_stub_response, transcript_source, response_hash, artifact_uri,
@@ -71,12 +72,21 @@ insert into redteam.redteam_runs (
 ) values (
   %(run_id)s, %(agent_name)s, %(agent_commit_sha)s, %(agent_environment)s,
   %(scenario_category)s, %(scenario_id)s, %(adversarial_prompt)s, %(agent_response)s,
-  %(scorer_results)s, %(passed)s, %(failure_reason)s,
+  %(scorer_results)s, %(passed)s, %(severity)s, %(failure_reason)s,
   %(triggered_by)s, %(pr_number)s, %(workflow_run_id)s,
   %(usd_cost_estimate)s,
   %(is_stub_response)s, %(transcript_source)s, %(response_hash)s, %(artifact_uri)s,
   %(timeout_flag)s, %(retry_count)s, %(threshold_passed)s, %(run_summary)s
 )
+"""
+
+_ACTIVE_OVERRIDE_SQL = """
+select 1
+from redteam.overrides
+where run_id = %s
+  and agent_name = %s
+  and expires_at > now()
+limit 1
 """
 
 
@@ -101,6 +111,9 @@ class PostgresWriter:
     ) -> int:
         rows: list[dict[str, Any]] = []
         for idx, r in enumerate(results):
+            adversarial_prompt = "\n---\n".join(r.adversarial_prompts)
+            agent_response = "\n---\n".join(r.agent_responses)
+            response_hash = r.response_hash or sha256_text(agent_response)
             # Per spec: run_summary is attached only to the LAST row of the
             # run so joined queries can fetch it without de-duplication.
             row_summary = (
@@ -115,10 +128,17 @@ class PostgresWriter:
                 "agent_environment": agent_environment,
                 "scenario_category": r.category,
                 "scenario_id": r.scenario_id,
-                "adversarial_prompt": "\n---\n".join(r.adversarial_prompts),
-                "agent_response": "\n---\n".join(r.agent_responses),
+                "adversarial_prompt": redact_text(
+                    adversarial_prompt,
+                    allowlist=r.redaction_allowlist,
+                ),
+                "agent_response": redact_text(
+                    agent_response,
+                    allowlist=r.redaction_allowlist,
+                ),
                 "scorer_results": json.dumps([sr.model_dump() for sr in r.scorer_results]),
                 "passed": r.passed,
+                "severity": r.severity,
                 "failure_reason": r.failure_reason,
                 "triggered_by": triggered_by,
                 "pr_number": pr_number,
@@ -126,7 +146,7 @@ class PostgresWriter:
                 "usd_cost_estimate": r.usd_cost_estimate,
                 "is_stub_response": r.is_stub_response,
                 "transcript_source": r.transcript_source,
-                "response_hash": r.response_hash,
+                "response_hash": response_hash,
                 "artifact_uri": r.artifact_uri,
                 "timeout_flag": r.timeout_flag,
                 "retry_count": r.retry_count,
@@ -144,7 +164,10 @@ class PostgresWriter:
                 "redteam.redteam_runs."
             )
             for row in rows[:3]:
-                preview = {k: row[k] for k in ("scenario_id", "passed", "failure_reason")}
+                preview = {
+                    k: row[k]
+                    for k in ("scenario_id", "passed", "severity", "failure_reason")
+                }
                 rprint(json.dumps(preview, default=str, indent=2))
             if len(rows) > 3:
                 rprint(f"... and {len(rows) - 3} more.")
@@ -159,3 +182,12 @@ class PostgresWriter:
             f"(run_id={run_id})"
         )
         return len(rows)
+
+    def active_override_exists(self, *, run_id: uuid.UUID, agent_name: str) -> bool:
+        if self.dry_run:
+            return False
+
+        with psycopg.connect(self.config.conninfo()) as conn:
+            with conn.cursor() as cur:
+                cur.execute(_ACTIVE_OVERRIDE_SQL, (str(run_id), agent_name))
+                return cur.fetchone() is not None

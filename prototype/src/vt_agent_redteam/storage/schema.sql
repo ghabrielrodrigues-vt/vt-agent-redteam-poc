@@ -16,6 +16,7 @@ create table if not exists redteam.redteam_runs (
   agent_response      text not null,
   scorer_results      jsonb not null default '{}'::jsonb,
   passed              boolean not null,
+  severity            text not null check (severity in ('P0','P1','P2','P3')),
   failure_reason      text,
   created_at          timestamptz not null default now(),
   triggered_by        text not null check (triggered_by in
@@ -48,6 +49,22 @@ create table if not exists redteam.redteam_runs (
         then 'privacy_integrity'
     else 'other'
   end) stored
+);
+
+alter table redteam.redteam_runs
+  add column if not exists severity text not null default 'P2'
+  check (severity in ('P0','P1','P2','P3'));
+
+create table if not exists redteam.overrides (
+  id                uuid primary key default gen_random_uuid(),
+  run_id            uuid not null,
+  agent_name        text not null,
+  pr_number         int,
+  approver_handle   text not null,
+  approver_team     text,
+  reason_text       text not null,
+  expires_at        timestamptz not null,
+  created_at        timestamptz not null default now()
 );
 
 -- Aggregated views for dashboards.
@@ -84,6 +101,7 @@ select
   agent_name,
   scenario_category,
   scenario_id,
+  severity,
   failure_reason,
   agent_response,
   created_at,
@@ -116,6 +134,16 @@ create index if not exists idx_redteam_runs_failures
   on redteam.redteam_runs (passed, agent_name, created_at desc)
   where passed = false;
 
+create index if not exists idx_redteam_runs_severity
+  on redteam.redteam_runs (run_id, severity)
+  where passed = false;
+
+create index if not exists idx_overrides_active
+  on redteam.overrides (run_id, agent_name, expires_at);
+
 comment on table redteam.redteam_runs is
   'One row per scenario execution. A "run" (run_id) groups all scenarios from one '
   'invocation of the harness (a PR check, a deploy gate, a weekly canary, etc.).';
+
+comment on table redteam.overrides is
+  'Audit trail for approved non-P0 gate bypasses. expires_at is enforced by the harness.';

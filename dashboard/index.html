@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Red Team MVP Control Room</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="./dashboard.js"></script>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero-panel compact-hero">
+        <div class="hero-copy">
+          <div class="eyebrow">LiveKit Agents Red Team MVP</div>
+          <h1>Red Team MVP Control Room</h1>
+          <p>Task-first operating view for framework delivery, SOO integration, deploy gates, canonical docs, and implementation risks.</p>
+        </div>
+        <div class="hero-status" aria-label="Current project status">
+          <span class="pill pill-live" id="syncState">Loading</span>
+          <span class="pill" id="branchPill">Branch</span>
+          <span class="pill" id="worktreePill">Worktree</span>
+          <button class="ghost-button" id="refreshButton" type="button">Refresh</button>
+        </div>
+      </header>
+
+      <nav class="quick-nav" aria-label="Quick navigation">
+        <a href="#current-stage">Current</a>
+        <a id="currentTaskNav" href="#task-f2">#F2</a>
+        <a href="#phase-map">Phase Map</a>
+        <a href="#task-f1">#F1</a>
+        <a href="#task-f2">#F2</a>
+        <a href="#task-f3">#F3</a>
+        <a href="#task-f4">#F4</a>
+        <a href="#task-f5">#F5</a>
+        <a href="#task-f6">#F6</a>
+        <a href="#task-f7">#F7</a>
+        <a href="#phase-1b">SOO</a>
+        <a href="#watch-items">Risks</a>
+        <a href="#source-map">Files</a>
+      </nav>
+
+      <section class="priority-grid" aria-label="Project command center">
+        <article class="panel stage-panel" id="current-stage">
+          <div class="panel-header">
+            <div>
+              <div class="label">Current Stage</div>
+              <h2 id="currentStageTitle">Loading stage</h2>
+            </div>
+            <span class="status-dot" id="stageDot" aria-hidden="true"></span>
+          </div>
+          <p id="currentStageBody" class="muted">Reading repo state and transfer docs.</p>
+          <div class="progress-shell" aria-label="Overall MVP progress">
+            <div class="progress-meta">
+              <span id="progressLabel">0% complete</span>
+              <span id="taskCountLabel">0/0 tasks</span>
+            </div>
+            <div class="progress-track"><span id="progressFill"></span></div>
+          </div>
+          <div class="next-action">
+            <span class="label">Next Action</span>
+            <strong id="nextActionTitle">Loading</strong>
+            <p id="nextActionBody">The next implementation step will appear here.</p>
+          </div>
+        </article>
+
+        <article class="panel focus-chart-panel">
+          <div class="panel-header compact">
+            <div>
+              <div class="label">Delivery Focus</div>
+              <h2>Progress and targets</h2>
+            </div>
+          </div>
+          <div class="chart-layout">
+            <div class="ring-chart" id="progressRing" aria-label="Overall completion">
+              <span id="ringValue">0%</span>
+              <small>complete</small>
+            </div>
+            <div class="bar-chart" id="phaseChart"></div>
+          </div>
+          <div class="critical-path" aria-label="Critical path">
+            <div class="critical-header">
+              <span class="label">Critical Path</span>
+              <strong id="criticalNow">Loading</strong>
+            </div>
+            <div class="path-rail" id="criticalRail"></div>
+            <div class="critical-badges" id="criticalBadges"></div>
+          </div>
+        </article>
+
+        <div class="side-stack">
+          <article class="panel strategic-panel">
+            <div class="panel-header compact">
+              <div>
+                <div class="label">Strategic View</div>
+                <h2 id="strategicVerdict">Loading</h2>
+              </div>
+            </div>
+            <p id="strategicSummary" class="strategic-summary">Loading strategic delivery notes.</p>
+            <div class="strategic-list" id="strategicList"></div>
+          </article>
+
+          <article class="panel metrics-panel compact-metrics">
+            <div class="panel-header compact">
+              <div>
+                <div class="label">Essential Metrics</div>
+                <h2>At a glance</h2>
+              </div>
+            </div>
+            <div class="metric-grid" id="metricGrid"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="phase-board panel" id="phase-map" aria-label="Development roadmap">
+        <div class="panel-header">
+          <div>
+            <div class="label">Execution Roadmap</div>
+            <h2>Phase map</h2>
+          </div>
+          <p class="panel-note">F = framework, S = SOO integration, C = rollout controls.</p>
+        </div>
+        <div class="lane-grid" id="phaseLanes"></div>
+      </section>
+
+      <section class="details-stack" aria-label="Supporting details">
+        <details class="panel detail-panel" id="runtime-signals" open>
+          <summary>
+            <span>
+              <span class="label">Health</span>
+              <strong>Runtime signals</strong>
+            </span>
+            <span class="summary-meta">Git, tests, sync</span>
+          </summary>
+          <dl class="signal-list">
+            <div>
+              <dt>Git</dt>
+              <dd id="gitSignal">Loading</dd>
+            </div>
+            <div>
+              <dt>Tests</dt>
+              <dd id="testSignal">Loading</dd>
+            </div>
+            <div>
+              <dt>Last Sync</dt>
+              <dd id="syncSignal">Loading</dd>
+            </div>
+          </dl>
+        </details>
+
+        <details class="panel detail-panel" id="architecture">
+          <summary>
+            <span>
+              <span class="label">Architecture</span>
+              <strong>Red-team data path</strong>
+            </span>
+            <span class="summary-meta">Flow + feedback channels</span>
+          </summary>
+          <div class="flow" id="architectureFlow"></div>
+          <div class="feedback-grid" id="feedbackChannels"></div>
+        </details>
+
+        <details class="panel detail-panel" id="project-overview">
+          <summary>
+            <span>
+              <span class="label">Project Overview</span>
+              <strong>What this MVP proves</strong>
+            </span>
+            <span class="summary-meta">Boundaries and posture</span>
+          </summary>
+          <div id="overviewBlocks" class="overview-blocks"></div>
+        </details>
+
+        <details class="panel detail-panel" id="watch-items">
+          <summary>
+            <span>
+              <span class="label">Watch Items</span>
+              <strong>Open risks</strong>
+            </span>
+            <span class="summary-meta">Needs attention</span>
+          </summary>
+          <div id="riskList" class="risk-list"></div>
+        </details>
+
+        <details class="panel detail-panel" id="source-map">
+          <summary>
+            <span>
+              <span class="label">Source Map</span>
+              <strong>Canonical files and working surfaces</strong>
+            </span>
+            <span class="summary-meta" id="fileCountLabel">Loading files</span>
+          </summary>
+          <div class="file-map" id="fileMap"></div>
+        </details>
+
+        <details class="panel detail-panel" id="recent-activity">
+          <summary>
+            <span>
+              <span class="label">Recent Activity</span>
+              <strong>Local commits</strong>
+            </span>
+            <span class="summary-meta">Latest 5</span>
+          </summary>
+          <ol id="commitList" class="commit-list"></ol>
+        </details>
+      </section>
+    </main>
+  </body>
+</html>
