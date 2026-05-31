@@ -430,3 +430,70 @@ Fix applied after review:
 - `git diff --check`: passed.
 - Dashboard snapshot shows S1 as current and operational readiness loaded from
   `docs/operational-metrics/status.json`.
+
+## S1 Review: SOO language-tutor Manifest
+
+### Strategic View
+
+Verdict: accepted with active conditions.
+
+Questions captured for follow-up:
+
+- S4 cannot consume the framework until the consumer workflow pins a new
+  framework hotfix tag or explicit SHA. Preferred next tag: `v0.1.1`.
+- `scenario_selection.languages: [en, pt]` is accepted as adversarial prompt
+  language selection; `metadata_template.language: spanish` is the target tutor
+  language.
+- `coverage_status: full` is acceptable for S1 profile selection, but runtime
+  coverage is not proven until a non-stub S4/S5 run validates the real
+  language-tutor path.
+- `fixtures.*`, `synthetic.*`, and `env.API_BASE_URL` placeholders are deferred
+  to workflow execution.
+- S1 operational metrics remain manifest/dry-run only. No runtime cost,
+  latency, reliability, scalability, or non-stub guarantee is claimed from S1.
+
+### Review Agent Findings
+
+Initial blockers:
+
+- The S1 manifest originally declared nested `redteam.run_id` /
+  `redteam.scenario_id`, while the Langfuse runner searches top-level
+  `redteam_run_id` / `redteam_scenario_id`.
+- PR mode originally selected 36 smoke scenarios while the manifest budget
+  declared `max_scenarios_per_pr: 12`.
+- After the first fix, the default `agent-native-transcript` path still only
+  polled Langfuse. It did not create a LiveKit room or dispatch the agent with
+  correlation metadata.
+
+Fixes applied:
+
+- Updated the SOO manifest to declare top-level `redteam_run_id` and
+  `redteam_scenario_id` in `metadata_template`.
+- Added framework PR selection capping from
+  `budgets.max_scenarios_per_pr`.
+- Added `build_room_metadata()` so LiveKit room metadata includes
+  `redteam_run_id`, `redteam_scenario_id`, and nested red-team context.
+- Added `LiveKitLangfuseRunner` as the default manifest trigger path:
+  create LiveKit room, create agent dispatch with metadata, then poll
+  Langfuse through `LangfuseTraceRunner`.
+- Added tests proving the PR cap and dispatch-before-polling metadata path.
+
+Final Review Agent verdict: P1 blockers cleared.
+
+Remaining non-blocking concern:
+
+- PR cap currently keeps the first 12 scenarios after filtering, which is
+  deterministic but corpus-order dependent. The selected S1 PR set can omit P0
+  categories such as `personal_information` and `prompt_leakage`. Before using
+  PR smoke as representative safety coverage, curate smoke tags or add
+  priority ordering.
+
+### Validation
+
+- SOO branch: `redteam/v0-language-tutor-manifest`.
+- SOO file added: `agents/language-tutor/.redteam/manifest.yaml`.
+- `vt-redteam validate-manifest agents/language-tutor/.redteam/manifest.yaml`:
+  passed.
+- S1 dry-run: capped PR scenario selection to 12 of 36 scenarios.
+- Targeted framework tests: 23 passed, 2 warnings.
+- Full framework suite: 104 passed, 21 warnings.

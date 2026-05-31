@@ -1,14 +1,24 @@
 {
   "verdict": "Greenlight with active conditions",
-  "summary": "Phase 1A is closed. Strategic View now watches whether Phase 1B starts with the language-tutor manifest while keeping secrets, database, and deploy work behind Ask First.",
+  "summary": "S1 language-tutor manifest is accepted with active conditions. S4 must not consume the framework until a new hotfix tag or explicit SHA is pinned.",
   "iterations": [
     {
-      "iteration": "Phase 1B entry",
+      "iteration": "S1 language-tutor manifest",
+      "status": "accepted with conditions",
+      "questions": [
+        "Will S4 pin a new framework hotfix tag or explicit SHA before the consumer workflow depends on the dispatch-before-Langfuse path?",
+        "Is it documented that en/pt are adversarial prompt languages while spanish is the target tutor language?",
+        "Are fixtures.*, synthetic.*, and env.API_BASE_URL intentionally deferred to workflow execution?",
+        "Does the dashboard keep S1 operational evidence as manifest/dry-run only until non-stub runtime proof exists?"
+      ]
+    },
+    {
+      "iteration": "Phase 1B next",
       "status": "current",
       "questions": [
-        "Can S1 start with only the language-tutor manifest, without secrets, database, or deploy mutations?",
-        "Will the consumer workflow and install path pin the framework release at v0.1.0?",
-        "Does the language-tutor policy profile declare honest coverage before validation?"
+        "Should S2 reuse the S1 manifest pattern for language-checkpoint without secrets, database, deploy, or auth changes?",
+        "How will PR smoke prioritization preserve P0/P1 coverage inside the 12-scenario budget?",
+        "Will S2/S3 evidence distinguish schema validation from runtime safety proof?"
       ]
     },
     {

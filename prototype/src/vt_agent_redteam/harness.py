@@ -15,6 +15,7 @@ from typing import Any
 
 from vt_agent_redteam.runners import (
     HttpModerationRunner,
+    LiveKitLangfuseRunner,
     LiveKitRoomRunner,
     SyntheticCandidateRunner,
 )
@@ -367,7 +368,12 @@ class RedTeamHarness:
 
     def __init__(
         self,
-        runner: LiveKitRoomRunner | SyntheticCandidateRunner | HttpModerationRunner,
+        runner: (
+            LiveKitLangfuseRunner
+            | LiveKitRoomRunner
+            | SyntheticCandidateRunner
+            | HttpModerationRunner
+        ),
         scorers: list[Scorer],
         writer: SupabaseWriter | None = None,
         override_reader: Any | None = None,

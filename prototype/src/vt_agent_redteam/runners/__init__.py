@@ -6,6 +6,7 @@ from vt_agent_redteam.runners.langfuse_trace_runner import (
     LangfuseClientProtocol,
     LangfuseHttpClient,
     LangfuseTraceRunner,
+    LiveKitLangfuseRunner,
     TranscriptFetch,
     build_default_client,
 )
@@ -18,6 +19,7 @@ __all__ = [
     "LangfuseClientProtocol",
     "LangfuseHttpClient",
     "LangfuseTraceRunner",
+    "LiveKitLangfuseRunner",
     "LiveKitRoomRunner",
     "RoomDispatchResult",
     "SyntheticCandidateRunner",

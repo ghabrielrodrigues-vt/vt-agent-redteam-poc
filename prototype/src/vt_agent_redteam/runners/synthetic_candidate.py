@@ -35,7 +35,7 @@ from vt_agent_redteam.audio import (
     publish_wav,
     synthesize_to_wav,
 )
-from vt_agent_redteam.runners.livekit_room import RoomDispatchResult
+from vt_agent_redteam.runners.livekit_room import RoomDispatchResult, build_room_metadata
 from vt_agent_redteam.types import AgentConfig, Scenario
 
 
@@ -92,17 +92,17 @@ class SyntheticCandidateRunner:
         self,
         scenario: Scenario,
         agent: AgentConfig,
+        run_id: str | None = None,
     ) -> RoomDispatchResult:
         notes: list[str] = []
         room_name = f"{agent.room_name_prefix}-redteam-{uuid.uuid4().hex[:8]}"
 
-        metadata: dict[str, Any] = dict(agent.metadata_template)
-        metadata["redteam"] = {
-            "scenario_id": scenario.id,
-            "category": scenario.category,
-            "language": scenario.language,
-            "harness_version": "0.0.2",
-        }
+        metadata = build_room_metadata(
+            agent,
+            scenario,
+            run_id=run_id,
+            harness_version="0.0.2",
+        )
 
         lk_api = api.LiveKitAPI(_http_url(self.url), self.api_key, self.api_secret)
         room_sid: str | None = None

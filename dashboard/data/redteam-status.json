@@ -1,31 +1,41 @@
 {
-  "generatedAt": "2026-05-31T03:53:50.292Z",
+  "generatedAt": "2026-05-31T11:45:43.352Z",
   "git": {
     "branch": "main",
-    "isDirty": false,
-    "shortStatus": "clean working tree",
-    "aheadBehind": "ahead 1, behind 0",
-    "ahead": 1,
+    "isDirty": true,
+    "shortStatus": "uncommitted changes present",
+    "aheadBehind": "ahead 0, behind 0",
+    "ahead": 0,
     "behind": 0,
     "remote": "git@github.com:ghabrielrodrigues-vt/vt-agent-redteam-poc.git"
   },
   "testStatus": {
     "status": "passing",
-    "summary": "101 passed in 9.74s",
+    "summary": "104 passed in 9.63s",
     "command": "cd prototype && .venv/bin/python -m pytest",
-    "verifiedAt": "2026-05-31T01:50:27.000Z"
+    "verifiedAt": "2026-05-31T11:45:00.000Z"
   },
   "strategicView": {
     "verdict": "Greenlight with active conditions",
-    "summary": "Phase 1A is closed. Strategic View now watches whether Phase 1B starts with the language-tutor manifest while keeping secrets, database, and deploy work behind Ask First.",
+    "summary": "S1 language-tutor manifest is accepted with active conditions. S4 must not consume the framework until a new hotfix tag or explicit SHA is pinned.",
     "iterations": [
       {
-        "iteration": "Phase 1B entry",
+        "iteration": "S1 language-tutor manifest",
+        "status": "accepted with conditions",
+        "questions": [
+          "Will S4 pin a new framework hotfix tag or explicit SHA before the consumer workflow depends on the dispatch-before-Langfuse path?",
+          "Is it documented that en/pt are adversarial prompt languages while spanish is the target tutor language?",
+          "Are fixtures.*, synthetic.*, and env.API_BASE_URL intentionally deferred to workflow execution?",
+          "Does the dashboard keep S1 operational evidence as manifest/dry-run only until non-stub runtime proof exists?"
+        ]
+      },
+      {
+        "iteration": "Phase 1B next",
         "status": "current",
         "questions": [
-          "Can S1 start with only the language-tutor manifest, without secrets, database, or deploy mutations?",
-          "Will the consumer workflow and install path pin the framework release at v0.1.0?",
-          "Does the language-tutor policy profile declare honest coverage before validation?"
+          "Should S2 reuse the S1 manifest pattern for language-checkpoint without secrets, database, deploy, or auth changes?",
+          "How will PR smoke prioritization preserve P0/P1 coverage inside the 12-scenario budget?",
+          "Will S2/S3 evidence distinguish schema validation from runtime safety proof?"
         ]
       },
       {
@@ -96,7 +106,7 @@
         "iteration": "Current iteration",
         "status": "current",
         "questions": [
-          "Is S1 the right next control point with 1/6 criteria complete?",
+          "Is S2 the right next control point with 1/6 criteria complete?",
           "Are Ask First boundaries still protected before secrets, database, or deploy work?"
         ]
       },
@@ -119,7 +129,7 @@
     ]
   },
   "operationalReadiness": {
-    "updatedAt": "2026-05-31T00:00:00.000Z",
+    "updatedAt": "2026-05-31T11:40:15.000Z",
     "serviceGuarantee": "The service is kept healthy by phase-end fitness checks: deterministic tests, non-stub integration/E2E runs, cost guardrail proof, latency budgets, API-outage simulations, concurrency/load checks, and bottleneck triage. Until those checks are measured, the dashboard marks the phase as partial or pending.",
     "summaryCards": [
       {
@@ -148,7 +158,7 @@
         "phaseId": "phase-1a",
         "phase": "Phase 1A - Framework hardening",
         "status": "partial",
-        "evidence": "101 pytest tests, green reusable workflow fixture, v0.1.0 tag install proof.",
+        "evidence": "104 pytest tests, green reusable workflow fixture, v0.1.0 tag install proof.",
         "checks": [
           {
             "name": "Cost",
@@ -171,7 +181,7 @@
           {
             "name": "Reliability",
             "status": "measured",
-            "metric": "101 tests passed; fixture GitHub Action passed",
+            "metric": "104 tests passed; fixture GitHub Action passed",
             "next": "Extend to non-stub SOO integration evidence."
           },
           {
@@ -191,20 +201,20 @@
       {
         "phaseId": "phase-1b",
         "phase": "Phase 1B - SOO integration",
-        "status": "planned",
-        "evidence": "Must be captured after S1-S7 work.",
+        "status": "partial",
+        "evidence": "S1 manifest validates locally; PR dry-run now caps language-tutor selection to 12 of 36 smoke scenarios; default Langfuse path now dispatches LiveKit before polling. Non-stub runtime evidence still pending.",
         "checks": [
           {
             "name": "Cost",
-            "status": "planned",
-            "metric": "PR smoke expected near $0.01; deploy expected near $0.025",
-            "next": "Record actual run_summary cost per SOO agent."
+            "status": "partial",
+            "metric": "Manifest budget remains max_cost_usd_per_run=5.00 and max_scenarios_per_pr=12; dry-run selected 12 rows with no provider cost.",
+            "next": "Record actual run_summary cost per SOO agent in a non-stub run and prove budget_exhausted behavior."
           },
           {
             "name": "Latency",
-            "status": "planned",
-            "metric": "scenario_timeout_seconds target from manifest",
-            "next": "Record p50/p95 per scenario and total workflow time."
+            "status": "partial",
+            "metric": "Dry-run completed 12 scenarios locally; real LiveKit/Langfuse p50/p95 not measured.",
+            "next": "Record p50/p95 per scenario and total workflow time from the first non-stub SOO workflow."
           },
           {
             "name": "Scalability",
@@ -214,9 +224,9 @@
           },
           {
             "name": "Reliability",
-            "status": "planned",
-            "metric": "validate-manifest + non-stub integration run",
-            "next": "Capture SOO workflow evidence."
+            "status": "partial",
+            "metric": "language-tutor validate-manifest passed; framework full suite passed with 104 tests after S1 hotfix.",
+            "next": "Cut or pin a framework hotfix tag/SHA before S4, then capture SOO workflow evidence and non-stub integration run."
           },
           {
             "name": "API outage",
@@ -226,8 +236,8 @@
           },
           {
             "name": "Bottlenecks",
-            "status": "planned",
-            "metric": "Trace correlation, room dispatch, storage writes",
+            "status": "partial",
+            "metric": "Trace correlation hotfix adds top-level redteam_run_id/redteam_scenario_id metadata and dispatches LiveKit before Langfuse polling; runtime trace search latency not measured.",
             "next": "Record slowest stage from SOO run."
           }
         ]
@@ -399,12 +409,12 @@
     ]
   },
   "currentTask": {
-    "id": "S1",
-    "title": "language-tutor manifest",
-    "detail": "Create the first SOO manifest for the tutor agent.",
+    "id": "S2",
+    "title": "language-checkpoint manifest",
+    "detail": "Create the checkpoint agent manifest and trace binding.",
     "criteria": [
       {
-        "label": "language-tutor manifest exists",
+        "label": "language-checkpoint manifest exists",
         "done": false
       },
       {
@@ -416,7 +426,7 @@
         "done": false
       },
       {
-        "label": "Expected profile references language_tutor",
+        "label": "Expected profile references k12_learner",
         "done": false
       },
       {
@@ -435,13 +445,13 @@
     "phase": "Phase 1B - SOO integration"
   },
   "progress": {
-    "done": 7,
+    "done": 8,
     "total": 26,
-    "percent": 27
+    "percent": 31
   },
   "nextAction": {
-    "title": "S1 - language-tutor manifest",
-    "detail": "Create the first SOO manifest for the tutor agent."
+    "title": "S2 - language-checkpoint manifest",
+    "detail": "Create the checkpoint agent manifest and trace binding."
   },
   "metrics": [
     {
@@ -465,12 +475,12 @@
       "detail": "GitHub Check, Slack, dashboard views, run_summary.json."
     },
     {
-      "value": "101",
+      "value": "104",
       "label": "Framework tests",
       "detail": "Last captured pytest suite size."
     },
     {
-      "value": "1",
+      "value": "0",
       "label": "Commits ahead",
       "detail": "Local framework branch versus origin/main."
     }
@@ -720,19 +730,19 @@
           "criteria": [
             {
               "label": "language-tutor manifest exists",
-              "done": false
+              "done": true
             },
             {
               "label": "agent_name declared",
-              "done": false
+              "done": true
             },
             {
               "label": "policy profile declared",
-              "done": false
+              "done": true
             },
             {
-              "label": "Expected profile references language_tutor",
-              "done": false
+              "label": "Expected profile references k12_learner",
+              "done": true
             },
             {
               "label": "LiveKit staging/production config exists",
@@ -740,13 +750,13 @@
             },
             {
               "label": "validate-manifest evidence captured",
-              "done": false
+              "done": true
             }
           ],
-          "criteriaComplete": 1,
+          "criteriaComplete": 6,
           "criteriaTotal": 6,
-          "done": false,
-          "status": "current"
+          "done": true,
+          "status": "done"
         },
         {
           "id": "S2",
@@ -766,7 +776,7 @@
               "done": false
             },
             {
-              "label": "Expected profile references language_checkpoint",
+              "label": "Expected profile references k12_learner",
               "done": false
             },
             {
@@ -781,7 +791,7 @@
           "criteriaComplete": 1,
           "criteriaTotal": 6,
           "done": false,
-          "status": "pending"
+          "status": "current"
         },
         {
           "id": "S3",
@@ -923,7 +933,7 @@
           "status": "manual"
         }
       ],
-      "done": 0,
+      "done": 1,
       "total": 7
     },
     {
@@ -1320,6 +1330,10 @@
   ],
   "commits": [
     {
+      "hash": "82516fd",
+      "message": "docs(dashboard): refresh operational readiness snapshot"
+    },
+    {
       "hash": "10628fe",
       "message": "docs(dashboard): add operational readiness metrics"
     },
@@ -1334,10 +1348,6 @@
     {
       "hash": "8be3829",
       "message": "fix(dashboard): focus strategic view on questions"
-    },
-    {
-      "hash": "1f86d9b",
-      "message": "docs(framework): record F7 release acceptance"
     }
   ],
   "fileGroups": [
@@ -1430,8 +1440,8 @@
           "exists": true,
           "href": "/docs/operational-metrics/status.json",
           "lines": 281,
-          "size": 11482,
-          "updatedAt": "2026-05-31T03:52:47.804Z",
+          "size": 12117,
+          "updatedAt": "2026-05-31T11:45:40.197Z",
           "note": null
         },
         {
@@ -1704,9 +1714,9 @@
           "path": "prototype/src/vt_agent_redteam/harness.py",
           "exists": true,
           "href": "/prototype/src/vt_agent_redteam/harness.py",
-          "lines": 537,
-          "size": 17986,
-          "updatedAt": "2026-05-31T00:59:26.323Z",
+          "lines": 543,
+          "size": 18097,
+          "updatedAt": "2026-05-31T11:42:43.270Z",
           "note": null
         },
         {
@@ -1714,9 +1724,9 @@
           "path": "prototype/src/vt_agent_redteam/cli.py",
           "exists": true,
           "href": "/prototype/src/vt_agent_redteam/cli.py",
-          "lines": 546,
-          "size": 19783,
-          "updatedAt": "2026-05-31T01:01:56.681Z",
+          "lines": 564,
+          "size": 20470,
+          "updatedAt": "2026-05-31T11:42:32.346Z",
           "note": null
         },
         {
@@ -1724,9 +1734,9 @@
           "path": "prototype/src/vt_agent_redteam/runners/langfuse_trace_runner.py",
           "exists": true,
           "href": "/prototype/src/vt_agent_redteam/runners/langfuse_trace_runner.py",
-          "lines": 524,
-          "size": 19962,
-          "updatedAt": "2026-05-30T20:01:02.271Z",
+          "lines": 640,
+          "size": 23891,
+          "updatedAt": "2026-05-31T11:45:12.888Z",
           "note": null
         },
         {
@@ -1734,9 +1744,9 @@
           "path": "prototype/src/vt_agent_redteam/runners/__init__.py",
           "exists": true,
           "href": "/prototype/src/vt_agent_redteam/runners/__init__.py",
-          "lines": 27,
-          "size": 859,
-          "updatedAt": "2026-05-30T20:01:14.099Z",
+          "lines": 29,
+          "size": 915,
+          "updatedAt": "2026-05-31T11:42:26.569Z",
           "note": null
         },
         {
@@ -1779,9 +1789,9 @@
           "path": "prototype/tests/test_langfuse_runner.py",
           "exists": true,
           "href": "/prototype/tests/test_langfuse_runner.py",
-          "lines": 378,
-          "size": 13135,
-          "updatedAt": "2026-05-30T21:36:54.182Z",
+          "lines": 455,
+          "size": 15854,
+          "updatedAt": "2026-05-31T11:43:00.681Z",
           "note": null
         },
         {
@@ -1864,9 +1874,9 @@
           "path": "/Users/gupy/apps/nerdy/student-onboarding-orchestration/AGENTS.md",
           "exists": true,
           "href": "/external/soo/AGENTS.md",
-          "lines": 101,
-          "size": 5939,
-          "updatedAt": "2026-05-31T03:01:12.678Z",
+          "lines": 116,
+          "size": 6730,
+          "updatedAt": "2026-05-31T11:32:28.128Z",
           "note": null
         },
         {
@@ -1874,9 +1884,9 @@
           "path": "/Users/gupy/apps/nerdy/student-onboarding-orchestration/supabase/AGENTS.md",
           "exists": true,
           "href": "/external/soo/supabase/AGENTS.md",
-          "lines": 151,
-          "size": 14287,
-          "updatedAt": "2026-05-20T18:26:48.993Z",
+          "lines": 157,
+          "size": 15134,
+          "updatedAt": "2026-05-31T11:32:29.568Z",
           "note": null
         },
         {
@@ -1906,7 +1916,7 @@
           "href": "/external/soo/agents/language-tutor/agent.py",
           "lines": 9118,
           "size": 475194,
-          "updatedAt": "2026-05-27T03:33:59.513Z",
+          "updatedAt": "2026-05-31T11:32:28.135Z",
           "note": null
         },
         {
@@ -1926,7 +1936,7 @@
           "href": "/external/soo/agents/language-checkpoint/agent.py",
           "lines": 2394,
           "size": 111304,
-          "updatedAt": "2026-05-27T03:33:59.509Z",
+          "updatedAt": "2026-05-31T11:32:28.130Z",
           "note": null
         },
         {
@@ -1944,9 +1954,9 @@
           "path": "/Users/gupy/apps/nerdy/student-onboarding-orchestration/agents/support-agent/agent.py",
           "exists": true,
           "href": "/external/soo/agents/support-agent/agent.py",
-          "lines": 1942,
-          "size": 90032,
-          "updatedAt": "2026-05-28T19:10:10.359Z",
+          "lines": 2135,
+          "size": 97172,
+          "updatedAt": "2026-05-31T11:32:28.140Z",
           "note": null
         },
         {

@@ -13,6 +13,7 @@ fake's call counter, not real time.
 from __future__ import annotations
 
 import asyncio
+import json
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -21,6 +22,7 @@ import pytest
 from vt_agent_redteam.runners.langfuse_trace_runner import (
     LangfuseClientProtocol,
     LangfuseTraceRunner,
+    LiveKitLangfuseRunner,
     TranscriptFetch,
     _coerce_output_to_text,
 )
@@ -68,6 +70,45 @@ class FakeLangfuseClient:
 
     def trace_url(self, trace_id: str) -> str:
         return f"{self.base_url}/trace/{trace_id}"
+
+
+class _FakeRoomService:
+    def __init__(self) -> None:
+        self.created: list[Any] = []
+        self.deleted: list[Any] = []
+
+    async def create_room(self, req: Any) -> Any:
+        self.created.append(req)
+        return type("RoomInfo", (), {"sid": "RM_fake"})()
+
+    async def delete_room(self, req: Any) -> Any:
+        self.deleted.append(req)
+        return None
+
+
+class _FakeDispatchService:
+    def __init__(self) -> None:
+        self.created: list[Any] = []
+
+    async def create_dispatch(self, req: Any) -> Any:
+        self.created.append(req)
+        return type("Dispatch", (), {"id": "AD_fake"})()
+
+
+class _FakeLiveKitAPI:
+    instances: list["_FakeLiveKitAPI"] = []
+
+    def __init__(self, url: str, api_key: str, api_secret: str) -> None:
+        self.url = url
+        self.api_key = api_key
+        self.api_secret = api_secret
+        self.room = _FakeRoomService()
+        self.agent_dispatch = _FakeDispatchService()
+        self.closed = False
+        self.instances.append(self)
+
+    async def aclose(self) -> None:
+        self.closed = True
 
 
 def _make_runner(client: LangfuseClientProtocol) -> LangfuseTraceRunner:
@@ -340,6 +381,42 @@ async def test_run_scenario_sets_room_metadata_from_inputs():
     assert result.room_name == "explicit-room-name"
     assert result.room_sid == "RM_explicit"
     assert result.metadata_sent == {"override_key": "override_value"}
+
+
+@pytest.mark.asyncio
+async def test_livekit_langfuse_runner_dispatches_room_before_polling():
+    _FakeLiveKitAPI.instances.clear()
+    client = FakeLangfuseClient(
+        search_responses=[[{"id": "tr-livekit"}]],
+        trace_responses={"tr-livekit": [_trace_with_generation("tr-livekit")]},
+    )
+    trace_runner = _make_runner(client)
+    runner = LiveKitLangfuseRunner(
+        trace_runner=trace_runner,
+        livekit_url="ws://livekit.test",
+        api_key="key",
+        api_secret="secret",
+        livekit_api_factory=_FakeLiveKitAPI,
+    )
+
+    result = await runner.run_scenario(_scenario(), _agent(), run_id="run-livekit")
+
+    fake_api = _FakeLiveKitAPI.instances[0]
+    assert fake_api.url == "http://livekit.test"
+    assert fake_api.closed is True
+    assert len(fake_api.room.created) == 1
+    assert len(fake_api.agent_dispatch.created) == 1
+    room_metadata = json.loads(fake_api.room.created[0].metadata)
+    dispatch_metadata = json.loads(fake_api.agent_dispatch.created[0].metadata)
+    assert room_metadata["redteam_run_id"] == "run-livekit"
+    assert room_metadata["redteam_scenario_id"] == _scenario().id
+    assert dispatch_metadata == room_metadata
+    assert fake_api.agent_dispatch.created[0].agent_name == _agent().livekit_agent_name
+    assert result.is_stub_response is False  # type: ignore[attr-defined]
+    assert result.metadata_sent["redteam_run_id"] == "run-livekit"
+    assert result.notes[0] == "Created room sid=RM_fake"
+    assert result.notes[1] == "Dispatched agent name=test-agent id=AD_fake"
+    assert result.notes[-1].startswith("Deleted room")
 
 
 # ---------------------------------------------------------------------------

@@ -79,18 +79,18 @@ class LiveKitRoomRunner:
         self,
         scenario: Scenario,
         agent: AgentConfig,
+        run_id: str | None = None,
     ) -> RoomDispatchResult:
         """Execute one scenario. v0.0.1: creates room, returns stub response."""
         notes: list[str] = []
         room_name = f"{agent.room_name_prefix}-redteam-{uuid.uuid4().hex[:8]}"
 
-        # Build metadata: agent template + red-team tracer fields.
-        metadata = dict(agent.metadata_template)
-        metadata["redteam"] = {
-            "scenario_id": scenario.id,
-            "category": scenario.category,
-            "harness_version": "0.0.1",
-        }
+        metadata = build_room_metadata(
+            agent,
+            scenario,
+            run_id=run_id,
+            harness_version="0.0.1",
+        )
 
         lk_api = api.LiveKitAPI(
             self._http_url(),
@@ -145,3 +145,34 @@ class LiveKitRoomRunner:
             agent_response_transcript=response,
             notes=notes,
         )
+
+
+def build_room_metadata(
+    agent: AgentConfig,
+    scenario: Scenario,
+    *,
+    run_id: str | None,
+    harness_version: str,
+) -> dict[str, Any]:
+    """Build LiveKit room metadata with Langfuse correlation fields.
+
+    The Langfuse native transcript runner searches top-level trace metadata
+    keys, so the room metadata must include these exact keys before the agent
+    exports its OpenTelemetry spans.
+    """
+    metadata = dict(agent.metadata_template)
+    existing_redteam = metadata.get("redteam")
+    redteam = dict(existing_redteam) if isinstance(existing_redteam, dict) else {}
+    redteam.update(
+        {
+            "scenario_id": scenario.id,
+            "category": scenario.category,
+            "language": scenario.language,
+            "harness_version": harness_version,
+        }
+    )
+    metadata["redteam"] = redteam
+    if run_id:
+        metadata["redteam_run_id"] = run_id
+    metadata["redteam_scenario_id"] = scenario.id
+    return metadata

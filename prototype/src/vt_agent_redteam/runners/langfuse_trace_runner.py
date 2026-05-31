@@ -61,8 +61,9 @@ from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 import httpx
+from livekit import api
 
-from vt_agent_redteam.runners.livekit_room import RoomDispatchResult
+from vt_agent_redteam.runners.livekit_room import RoomDispatchResult, build_room_metadata
 from vt_agent_redteam.types import AgentConfig, Scenario
 
 
@@ -242,7 +243,7 @@ class LangfuseTraceRunner:
             trace = await self._client.get_trace(trace_id)
             if trace is not None:
                 last_trace = trace
-                transcript = self._extract_generation_outputs(trace)
+                transcript = _extract_generation_outputs(trace)
                 if transcript.transcript_text:
                     transcript.found = True
                     transcript.trace_id = trace_id
@@ -268,7 +269,7 @@ class LangfuseTraceRunner:
 
         # Timeout. If we ever saw the trace, surface partial state for forensics.
         partial = (
-            self._extract_generation_outputs(last_trace)
+            _extract_generation_outputs(last_trace)
             if last_trace is not None
             else TranscriptFetch(
                 transcript_text="",
@@ -365,9 +366,10 @@ class LangfuseTraceRunner:
         in the room metadata. This method polls Langfuse for the agent's
         response and assembles the result.
 
-        v0 does not include the LiveKit dispatch here because that logic lives
-        in `synthetic_candidate.py` and `livekit_room.py`. F3 (harness) wires
-        them together. Tests can call this directly with a mocked client.
+        This lower-level runner does not create the LiveKit dispatch itself.
+        The CLI's default manifest path wraps it with LiveKitLangfuseRunner,
+        which injects room metadata and dispatches the agent before polling.
+        Tests can still call this class directly with a mocked client.
         """
         notes: list[str] = []
         effective_room_name = room_name or (
@@ -428,43 +430,157 @@ class LangfuseTraceRunner:
             retry_count=0,
         )  # type: ignore[return-value]
 
-    @staticmethod
-    def _extract_generation_outputs(trace: dict[str, Any]) -> TranscriptFetch:
-        """Pull all GENERATION span outputs from a Langfuse trace.
 
-        Concatenates in start_time order with `\\n---\\n` separators so the
-        scorers see a coherent agent_response. Token counts aggregate across
-        all GENERATION spans.
-        """
-        observations = trace.get("observations") or []
-        generations = [
-            obs for obs in observations if obs.get("type") == "GENERATION"
-        ]
-        generations.sort(key=lambda o: o.get("startTime") or "")
+def _livekit_http_url(url: str) -> str:
+    if url.startswith("ws://"):
+        return "http://" + url[len("ws://") :]
+    if url.startswith("wss://"):
+        return "https://" + url[len("wss://") :]
+    return url
 
-        outputs: list[str] = []
-        in_tokens = 0
-        out_tokens = 0
-        for gen in generations:
-            output = gen.get("output")
-            text = _coerce_output_to_text(output)
-            if text:
-                outputs.append(text)
-            usage = gen.get("usage") or {}
-            in_tokens += int(usage.get("input") or usage.get("promptTokens") or 0)
-            out_tokens += int(
-                usage.get("output") or usage.get("completionTokens") or 0
+
+class LiveKitLangfuseRunner:
+    """Dispatch a LiveKit agent, then read its response from Langfuse.
+
+    This is the default non-dry-run path for manifest trigger modes. It closes
+    the loop between room metadata injection and the Langfuse trace lookup so
+    `agent-native-transcript` runs do not poll for traces that were never
+    dispatched by the harness.
+    """
+
+    def __init__(
+        self,
+        *,
+        trace_runner: LangfuseTraceRunner,
+        livekit_url: str,
+        api_key: str,
+        api_secret: str,
+        livekit_api_factory: Any = api.LiveKitAPI,
+    ) -> None:
+        self._trace_runner = trace_runner
+        self.livekit_url = livekit_url
+        self.api_key = api_key
+        self.api_secret = api_secret
+        self._livekit_api_factory = livekit_api_factory
+
+    async def run_scenario(
+        self,
+        scenario: Scenario,
+        agent: AgentConfig,
+        *,
+        run_id: str,
+    ) -> RoomDispatchResult:
+        room_name = f"{agent.room_name_prefix}-langfuse-{uuid.uuid4().hex[:8]}"
+        metadata = build_room_metadata(
+            agent,
+            scenario,
+            run_id=run_id,
+            harness_version="0.1.0",
+        )
+        notes: list[str] = []
+        room_sid: str | None = None
+        result: RoomDispatchResult | None = None
+
+        lk_api = self._livekit_api_factory(
+            _livekit_http_url(self.livekit_url),
+            self.api_key,
+            self.api_secret,
+        )
+        try:
+            room_info = await lk_api.room.create_room(
+                api.CreateRoomRequest(
+                    name=room_name,
+                    metadata=json.dumps(metadata),
+                    empty_timeout=120,
+                    max_participants=4,
+                )
+            )
+            room_sid = getattr(room_info, "sid", None)
+            notes.append(f"Created room sid={room_sid or '-'}")
+
+            dispatch = await lk_api.agent_dispatch.create_dispatch(
+                api.CreateAgentDispatchRequest(
+                    agent_name=agent.livekit_agent_name,
+                    room=room_name,
+                    metadata=json.dumps(metadata),
+                )
+            )
+            notes.append(
+                "Dispatched agent "
+                f"name={agent.livekit_agent_name} "
+                f"id={getattr(dispatch, 'id', '-') or '-'}"
             )
 
-        transcript_text = "\n---\n".join(outputs)
-        return TranscriptFetch(
-            transcript_text=transcript_text,
-            trace_id=trace.get("id"),
-            artifact_uri=None,  # caller fills via client.trace_url()
-            input_tokens=in_tokens,
-            output_tokens=out_tokens,
-            generations_count=len(generations),
+            result = await self._trace_runner.run_scenario(
+                scenario,
+                agent,
+                run_id=run_id,
+                room_name=room_name,
+                room_sid=room_sid,
+                metadata_sent=metadata,
+            )
+            result.notes = notes + result.notes
+        except Exception as exc:  # noqa: BLE001
+            result = _LangfuseTraceResult(
+                room_name=room_name,
+                room_sid=room_sid,
+                metadata_sent=metadata,
+                agent_response_transcript=(
+                    "<langfuse runner: LiveKit dispatch failed before trace polling>"
+                ),
+                notes=notes + [f"FALLBACK to stub: LiveKit dispatch failed: {exc}"],
+                is_stub_response=True,
+                transcript_source="stub_canned",
+                timeout_flag=True,
+            )  # type: ignore[assignment]
+        finally:
+            try:
+                await lk_api.room.delete_room(api.DeleteRoomRequest(room=room_name))
+                if result is not None:
+                    result.notes.append(f"Deleted room {room_name}")
+            except Exception as exc:  # noqa: BLE001
+                if result is not None:
+                    result.notes.append(f"Room cleanup failed (non-fatal): {exc}")
+            await lk_api.aclose()
+
+        return result
+
+def _extract_generation_outputs(trace: dict[str, Any]) -> TranscriptFetch:
+    """Pull all GENERATION span outputs from a Langfuse trace.
+
+    Concatenates in start_time order with `\\n---\\n` separators so the
+    scorers see a coherent agent_response. Token counts aggregate across
+    all GENERATION spans.
+    """
+    observations = trace.get("observations") or []
+    generations = [
+        obs for obs in observations if obs.get("type") == "GENERATION"
+    ]
+    generations.sort(key=lambda o: o.get("startTime") or "")
+
+    outputs: list[str] = []
+    in_tokens = 0
+    out_tokens = 0
+    for gen in generations:
+        output = gen.get("output")
+        text = _coerce_output_to_text(output)
+        if text:
+            outputs.append(text)
+        usage = gen.get("usage") or {}
+        in_tokens += int(usage.get("input") or usage.get("promptTokens") or 0)
+        out_tokens += int(
+            usage.get("output") or usage.get("completionTokens") or 0
         )
+
+    transcript_text = "\n---\n".join(outputs)
+    return TranscriptFetch(
+        transcript_text=transcript_text,
+        trace_id=trace.get("id"),
+        artifact_uri=None,  # caller fills via client.trace_url()
+        input_tokens=in_tokens,
+        output_tokens=out_tokens,
+        generations_count=len(generations),
+    )
 
 
 def _coerce_output_to_text(output: Any) -> str:

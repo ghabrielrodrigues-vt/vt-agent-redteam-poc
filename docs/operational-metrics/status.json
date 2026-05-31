@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-31T00:00:00.000Z",
+  "updatedAt": "2026-05-31T11:40:15.000Z",
   "serviceGuarantee": "The service is kept healthy by phase-end fitness checks: deterministic tests, non-stub integration/E2E runs, cost guardrail proof, latency budgets, API-outage simulations, concurrency/load checks, and bottleneck triage. Until those checks are measured, the dashboard marks the phase as partial or pending.",
   "summaryCards": [
     {
@@ -28,7 +28,7 @@
       "phaseId": "phase-1a",
       "phase": "Phase 1A - Framework hardening",
       "status": "partial",
-      "evidence": "101 pytest tests, green reusable workflow fixture, v0.1.0 tag install proof.",
+      "evidence": "104 pytest tests, green reusable workflow fixture, v0.1.0 tag install proof.",
       "checks": [
         {
           "name": "Cost",
@@ -51,7 +51,7 @@
         {
           "name": "Reliability",
           "status": "measured",
-          "metric": "101 tests passed; fixture GitHub Action passed",
+          "metric": "104 tests passed; fixture GitHub Action passed",
           "next": "Extend to non-stub SOO integration evidence."
         },
         {
@@ -71,20 +71,20 @@
     {
       "phaseId": "phase-1b",
       "phase": "Phase 1B - SOO integration",
-      "status": "planned",
-      "evidence": "Must be captured after S1-S7 work.",
+      "status": "partial",
+      "evidence": "S1 manifest validates locally; PR dry-run now caps language-tutor selection to 12 of 36 smoke scenarios; default Langfuse path now dispatches LiveKit before polling. Non-stub runtime evidence still pending.",
       "checks": [
         {
           "name": "Cost",
-          "status": "planned",
-          "metric": "PR smoke expected near $0.01; deploy expected near $0.025",
-          "next": "Record actual run_summary cost per SOO agent."
+          "status": "partial",
+          "metric": "Manifest budget remains max_cost_usd_per_run=5.00 and max_scenarios_per_pr=12; dry-run selected 12 rows with no provider cost.",
+          "next": "Record actual run_summary cost per SOO agent in a non-stub run and prove budget_exhausted behavior."
         },
         {
           "name": "Latency",
-          "status": "planned",
-          "metric": "scenario_timeout_seconds target from manifest",
-          "next": "Record p50/p95 per scenario and total workflow time."
+          "status": "partial",
+          "metric": "Dry-run completed 12 scenarios locally; real LiveKit/Langfuse p50/p95 not measured.",
+          "next": "Record p50/p95 per scenario and total workflow time from the first non-stub SOO workflow."
         },
         {
           "name": "Scalability",
@@ -94,9 +94,9 @@
         },
         {
           "name": "Reliability",
-          "status": "planned",
-          "metric": "validate-manifest + non-stub integration run",
-          "next": "Capture SOO workflow evidence."
+          "status": "partial",
+          "metric": "language-tutor validate-manifest passed; framework full suite passed with 104 tests after S1 hotfix.",
+          "next": "Cut or pin a framework hotfix tag/SHA before S4, then capture SOO workflow evidence and non-stub integration run."
         },
         {
           "name": "API outage",
@@ -106,8 +106,8 @@
         },
         {
           "name": "Bottlenecks",
-          "status": "planned",
-          "metric": "Trace correlation, room dispatch, storage writes",
+          "status": "partial",
+          "metric": "Trace correlation hotfix adds top-level redteam_run_id/redteam_scenario_id metadata and dispatches LiveKit before Langfuse polling; runtime trace search latency not measured.",
           "next": "Record slowest stage from SOO run."
         }
       ]

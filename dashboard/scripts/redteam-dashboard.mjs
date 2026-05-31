@@ -343,8 +343,8 @@ function buildTasks() {
     criterion("Install target resolves from tag", f7Evidence.installResolved),
   ];
 
-  const s1Criteria = manifestCriteria("language-tutor", "language_tutor");
-  const s2Criteria = manifestCriteria("language-checkpoint", "language_checkpoint");
+  const s1Criteria = manifestCriteria("language-tutor", "k12_learner");
+  const s2Criteria = manifestCriteria("language-checkpoint", "k12_learner");
   const s3Criteria = [
     ...manifestCriteria("support-agent", "support_navigation"),
     criterion("support-agent declares partial-no-tool-use", hasAbs(path.join(sooRoot, "agents/support-agent/.redteam/manifest.yaml"), /partial-no-tool-use/)),

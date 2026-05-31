@@ -23,6 +23,7 @@ from vt_agent_redteam.runners import (
     DirectLLMRunner,
     HttpModerationRunner,
     LangfuseTraceRunner,
+    LiveKitLangfuseRunner,
     LiveKitRoomRunner,
     SyntheticCandidateRunner,
     build_default_client,
@@ -356,6 +357,18 @@ def run(
         exclude_tags=exclude_tags,
         languages=effective_languages,
     )
+    if (
+        manifest is not None
+        and _normalise_trigger_mode(triggered_by) == "pr"
+        and len(scenarios) > manifest.budgets.max_scenarios_per_pr
+    ):
+        original_count = len(scenarios)
+        scenarios = scenarios[: manifest.budgets.max_scenarios_per_pr]
+        rprint(
+            "[yellow]Capped PR scenario selection to "
+            f"{len(scenarios)} of {original_count} scenario(s) per "
+            "budgets.max_scenarios_per_pr.[/yellow]"
+        )
     if not scenarios:
         rprint("[red]No scenarios matched the filters.[/red]")
         raise typer.Exit(code=2)
@@ -431,7 +444,12 @@ def run(
                 "LANGFUSE_SECRET_KEY.[/red]"
             )
             raise typer.Exit(code=2)
-        runner = LangfuseTraceRunner(client=client)
+        runner = LiveKitLangfuseRunner(
+            trace_runner=LangfuseTraceRunner(client=client),
+            livekit_url=livekit_url,
+            api_key=livekit_api_key,
+            api_secret=livekit_api_secret,
+        )
         scorers = default_scorers()
         rprint("[cyan]Mode:[/cyan] agent-native-transcript  [cyan]Source:[/cyan] Langfuse")
     else:
