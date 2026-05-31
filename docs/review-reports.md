@@ -329,3 +329,54 @@ Residual non-blocking notes:
 - Dashboard release criteria are evidence-document driven rather than live
   network checks.
 - Tag is unsigned; no current release policy requires signed tags.
+
+## Plan Update Review: Phase 1D Final Release Governance
+
+### Strategic View
+
+Verdict: accepted.
+
+Rationale:
+
+- Phase 1D should be a release-readiness gate, not a blocker for starting
+  Phase 1B.
+- S1 remains current and limited to the `language-tutor` manifest.
+- Phase 1D correctly runs after Phase 1C and before final team-facing release
+  communication.
+- Final team communication remains blocked until R1-R8 close and Strategic
+  View clears unresolved reviewer blockers.
+
+Required strategic conditions now captured:
+
+- PostHog feature-flag release gate with rollback evidence.
+- Non-stub E2E evidence for the red-team tool.
+- Cost guardrail proof for `max_cost_usd_per_run` / `budget_exhausted`.
+- Strict LLM_WIKI NITPICK review.
+- LLM attack-defense review.
+- Strategic triage into fix-now work and post-v0 backlog.
+- `vt-agent-redteam` repository/package cutover.
+- Dense DOCX security traceability audit.
+- Security pentest and exploitation review.
+- Final technical and non-technical daily report only after governance closure.
+
+### Review Agent Findings
+
+Initial blocker:
+
+- `docs/v0-implementation-plan.codex-transfer.md` still had a stale header that
+  claimed the transfer reflected `git HEAD = ad551b8` from 2026-05-30.
+
+Fix applied:
+
+- Updated the transfer-bundle purpose statement to reflect Phase 1A/F7 closure
+  and the new Phase 1D final release-governance gate.
+
+Final Review Agent verdict: cleared.
+
+### Validation
+
+- `node --check dashboard/scripts/redteam-dashboard.mjs`: passed.
+- `git diff --check`: passed.
+- Dashboard snapshot shows S1 as current.
+- Dashboard snapshot shows Phase 1D after Phase 1C, with R1-R9 pending and
+  0/9 tasks done.

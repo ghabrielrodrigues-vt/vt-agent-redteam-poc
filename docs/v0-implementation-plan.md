@@ -465,9 +465,42 @@ Repo: `varsitytutors/student-onboarding-orchestration`. Branch convention: `redt
 
 ---
 
+## 5.1 Phase 1D — Final release governance
+
+This is a new final stage. It runs after Phase 1C and before any final
+team-facing release report says v0 is ready.
+
+Canonical gate document:
+
+- `docs/final-release-governance.md`
+- `docs/final-release-governance.summary.md`
+
+Evidence directory:
+
+- `docs/release-governance/`
+
+| Task | Evidence | Acceptance |
+|------|----------|------------|
+| **R1. PostHog feature-flag release gate** | `posthog-feature-flag.md` | Release path is guarded by a PostHog feature flag; flag key, owner, rollout audience, and rollback/off procedure are recorded. |
+| **R2. Integration and E2E tests** | `integration-e2e-evidence.md` | Integration and E2E runs exercise the red-team tool through a non-stub intended workflow path; cost guardrail behavior is verified; run links/artifacts are captured. |
+| **R3. LLM_WIKI NITPICK code review** | `nitpick-llm-wiki-review.md` | A strict senior review applies LLM_WIKI engineering standards; every finding is resolved or dispositioned. |
+| **R4. LLM attack-defense review** | `llm-attack-defense-review.md` | Each hardening artifact is reviewed against relevant LLM attack classes; uncovered defenses become fix-now work or post-v0 backlog. |
+| **R5. Strategic triage** | `strategic-triage.md` | Strategic View consumes the reviewer reports, prioritizes immediate fixes versus post-v0 backlog, and explicitly classifies cost guardrail status. |
+| **R6. `vt-agent-redteam` cutover** | `repo-package-cutover.md` | Final repository/package/workflow/install naming uses `vt-agent-redteam`; `vt-agent-redteam-poc` references are removed or explicitly dispositioned. |
+| **R7. DOCX security traceability audit** | `docx-security-traceability.md` | A security documentation analyst re-reads the dense DOCX/source exports and maps requirements point by point to implementation, deviation, or backlog. |
+| **R8. Security pentest and exploitation review** | `security-pentest.md` | Pentest process, exploit attempts, metrics, and unresolved exploitable gaps are recorded and triaged. |
+| **R9. Final team report** | `final-daily-report.md` | Technical and non-technical daily messages are drafted only after R1-R8 close and Strategic View clears unresolved reviewer blockers. |
+
+**Estimated effort:** 3–5 days depending on review findings and cutover
+complexity.
+
+---
+
 ## 6. Acceptance criteria — v0 ship gate
 
-Maps to spec section 17.7 (numbered identically) with v0 deviations marked `(*)`:
+Maps to spec section 17.7 (numbered identically) with v0 deviations marked `(*)`.
+The new Phase 1D governance gate is an additional release-readiness layer on top
+of these spec criteria:
 
 1. **At least one production LiveKit agent produces a real, non-stub transcript captured by the framework.** ✓ via Langfuse-native runner against `language-tutor` (or `language-checkpoint` or `support-agent`) on SOO staging.
 2. **That transcript is scored and stored in `redteam.redteam_runs` with `is_stub_response = false`.** ✓ via Supabase migration in CC project. `transcript_source = "agent_native_transcript"`.
@@ -547,6 +580,18 @@ Run this in order. Each step has an explicit "done means" so there's no ambiguit
 - [ ] **C1 done means:** Push to a branch with a deliberately failing scenario triggers `deploy-language-agent-shared.yml` calling the local `redteam.yml`; deploy is blocked at red-team step; LiveKit deploy action does not run.
 - [ ] **C2 done means:** A Slack message appears in `#student-experience-v3-launch` with the full payload schema (agent, environment, commit, workflow link, pass rate, threshold, severity, scorer reasons, link to dashboard).
 - [ ] **C3 done means:** One screenshot/link in the PR description of v0-ship showing the block + alert + override-pathway in action.
+
+### Final release governance
+
+- [ ] **R1 done means:** `docs/release-governance/posthog-feature-flag.md` records the PostHog flag key, owner, rollout audience, rollback/off path, and evidence that release is guarded by the flag.
+- [ ] **R2 done means:** `docs/release-governance/integration-e2e-evidence.md` links at least one integration run and one non-stub E2E/tool run through the intended workflow path, plus cost guardrail evidence for `max_cost_usd_per_run` / `budget_exhausted`.
+- [ ] **R3 done means:** `docs/release-governance/nitpick-llm-wiki-review.md` records a strict LLM_WIKI NITPICK review and every finding is resolved or dispositioned.
+- [ ] **R4 done means:** `docs/release-governance/llm-attack-defense-review.md` reviews each hardening artifact against LLM attack classes and maps gaps to fix-now or backlog.
+- [ ] **R5 done means:** `docs/release-governance/strategic-triage.md` consumes all reviewer reports, prioritizes immediate fixes versus post-v0 backlog, and classifies cost guardrail status.
+- [ ] **R6 done means:** `docs/release-governance/repo-package-cutover.md` proves final repository/package/workflow/install naming uses `vt-agent-redteam`.
+- [ ] **R7 done means:** `docs/release-governance/docx-security-traceability.md` maps dense DOCX/source requirements point by point to implementation evidence, accepted deviation, or backlog.
+- [ ] **R8 done means:** `docs/release-governance/security-pentest.md` records pentest methodology, exploit attempts, metrics, and unresolved exploitable gaps with triage.
+- [ ] **R9 done means:** `docs/release-governance/final-daily-report.md` contains technical and non-technical daily messages, and neither claims final readiness before R1-R8 are complete and Strategic View clears unresolved reviewer blockers.
 
 ---
 

@@ -113,6 +113,10 @@ function has(relativePath, pattern) {
   return pattern.test(read(relativePath));
 }
 
+function evidenceDoc(relativePath, pattern) {
+  return existsSync(path.join(repoRoot, relativePath)) && has(relativePath, pattern);
+}
+
 function hasGreenActionsEvidence() {
   const reviewReport = read("docs/review-reports.md");
   const hasLegacyTransferEvidence = has("docs/v0-implementation-plan.codex-transfer.md", /green Actions run|Actions run/i);
@@ -374,6 +378,62 @@ function buildTasks() {
     criterion("Evidence captured for drill", false),
   ];
 
+  const r1Criteria = [
+    criterion("PostHog release flag policy documented", has("docs/final-release-governance.md", /PostHog feature flag/i)),
+    criterion("Feature flag key, owner, rollout plan, and rollback recorded", evidenceDoc("docs/release-governance/posthog-feature-flag.md", /flag_key|owner|rollback|rollout/i)),
+    criterion("Release path proven guarded by PostHog flag", evidenceDoc("docs/release-governance/posthog-feature-flag.md", /guarded|kill switch|feature flag/i)),
+  ];
+
+  const r2Criteria = [
+    criterion("Integration test plan recorded", evidenceDoc("docs/release-governance/integration-e2e-evidence.md", /integration/i)),
+    criterion("Non-stub E2E test with the red-team tool executed", evidenceDoc("docs/release-governance/integration-e2e-evidence.md", /non-stub|is_stub_response\s*=\s*false|agent_native_transcript/i)),
+    criterion("Cost guardrail integration evidence captured", evidenceDoc("docs/release-governance/integration-e2e-evidence.md", /cost guardrail|budget_exhausted|max_cost_usd_per_run/i)),
+    criterion("CI or local run evidence linked", evidenceDoc("docs/release-governance/integration-e2e-evidence.md", /run|artifact|workflow|trace/i)),
+  ];
+
+  const r3Criteria = [
+    criterion("LLM_WIKI NITPICK review report exists", evidenceDoc("docs/release-governance/nitpick-llm-wiki-review.md", /LLM_WIKI|nitpick/i)),
+    criterion("Language/tool-specific senior review applied", evidenceDoc("docs/release-governance/nitpick-llm-wiki-review.md", /language|tool|senior|expert/i)),
+    criterion("All nitpick findings resolved or dispositioned", evidenceDoc("docs/release-governance/nitpick-llm-wiki-review.md", /resolved|dispositioned|backlog/i)),
+  ];
+
+  const r4Criteria = [
+    criterion("LLM attack-defense review report exists", evidenceDoc("docs/release-governance/llm-attack-defense-review.md", /attack|defense|LLM/i)),
+    criterion("Each red-team hardening artifact reviewed", evidenceDoc("docs/release-governance/llm-attack-defense-review.md", /scenario|hardening|artifact/i)),
+    criterion("Uncovered attack classes mapped to fixes or backlog", evidenceDoc("docs/release-governance/llm-attack-defense-review.md", /uncovered|gap|backlog|fix/i)),
+  ];
+
+  const r5Criteria = [
+    criterion("Strategic View consumed reviewer reports", evidenceDoc("docs/release-governance/strategic-triage.md", /Strategic View|reviewer reports/i)),
+    criterion("Immediate fixes prioritized", evidenceDoc("docs/release-governance/strategic-triage.md", /immediate|P0|P1|must fix/i)),
+    criterion("Cost guardrail status triaged", evidenceDoc("docs/release-governance/strategic-triage.md", /cost guardrail|budget_exhausted|max_cost_usd_per_run/i)),
+    criterion("Post-v0 backlog created for deferrable work", evidenceDoc("docs/release-governance/strategic-triage.md", /post-v0|backlog|defer/i)),
+  ];
+
+  const r6Criteria = [
+    criterion("Final repo/package naming plan exists", evidenceDoc("docs/release-governance/repo-package-cutover.md", /vt-agent-redteam/i)),
+    criterion("Repository final name is vt-agent-redteam", evidenceDoc("docs/release-governance/repo-package-cutover.md", /repository.*vt-agent-redteam|repo.*vt-agent-redteam/i)),
+    criterion("Package/install/workflow references final name", evidenceDoc("docs/release-governance/repo-package-cutover.md", /package|install|workflow/i)),
+  ];
+
+  const r7Criteria = [
+    criterion("Dense DOCX security documentation audit exists", evidenceDoc("docs/release-governance/docx-security-traceability.md", /DOCX|security documentation|traceability/i)),
+    criterion("Point-by-point implementation traceability recorded", evidenceDoc("docs/release-governance/docx-security-traceability.md", /point-by-point|traceability|requirement/i)),
+    criterion("All deviations classified as fix-now or backlog", evidenceDoc("docs/release-governance/docx-security-traceability.md", /deviation|fix-now|backlog/i)),
+  ];
+
+  const r8Criteria = [
+    criterion("Security pentest report exists", evidenceDoc("docs/release-governance/security-pentest.md", /pentest|exploitation/i)),
+    criterion("Exploit attempts and metrics recorded", evidenceDoc("docs/release-governance/security-pentest.md", /exploit|metric|attempt/i)),
+    criterion("Unresolved exploitable gaps triaged", evidenceDoc("docs/release-governance/security-pentest.md", /unresolved|exploitable|triaged/i)),
+  ];
+
+  const r9Criteria = [
+    criterion("Final technical daily message drafted", evidenceDoc("docs/release-governance/final-daily-report.md", /technical daily|technical update/i)),
+    criterion("Final non-technical daily message drafted", evidenceDoc("docs/release-governance/final-daily-report.md", /non-technical daily|nontechnical/i)),
+    criterion("Final team-ready state report included", evidenceDoc("docs/release-governance/final-daily-report.md", /current state|team report|release state/i)),
+  ];
+
   return [
     {
       id: "phase-1a",
@@ -410,6 +470,21 @@ function buildTasks() {
         task("C3", "Controlled drill", "Run a known scenario drill and preserve evidence.", c3Criteria),
       ],
     },
+    {
+      id: "phase-1d",
+      name: "Phase 1D - Final release governance",
+      tasks: [
+        task("R1", "PostHog feature-flag release gate", "Release only behind an explicit PostHog feature flag with rollback evidence.", r1Criteria),
+        task("R2", "Integration and E2E tests", "Prove the red-team tool works through integration and end-to-end runs.", r2Criteria),
+        task("R3", "LLM_WIKI NITPICK code review", "Run strict senior review using LLM_WIKI engineering standards.", r3Criteria),
+        task("R4", "LLM attack-defense review", "Review every hardening artifact for attack coverage and missed exploit classes.", r4Criteria),
+        task("R5", "Strategic triage", "Prioritize reviewer findings into fix-now work and post-v0 backlog.", r5Criteria),
+        task("R6", "vt-agent-redteam cutover", "Ensure final repository, package, install, and workflow naming use vt-agent-redteam.", r6Criteria),
+        task("R7", "DOCX security traceability audit", "Re-read dense source documentation and verify implementation point by point.", r7Criteria),
+        task("R8", "Security pentest and exploitation review", "Run methodical pentest analysis and triage unresolved exploitable gaps.", r8Criteria),
+        task("R9", "Final team report", "Prepare technical and non-technical daily messages only after release governance closes.", r9Criteria),
+      ],
+    },
   ];
 }
 
@@ -443,6 +518,8 @@ function fileGroups() {
         repoFile("Codex transfer bundle", "docs/v0-implementation-plan.codex-transfer.md"),
         repoFile("Technical plan v1.1", "docs/v0-implementation-plan.md"),
         repoFile("Non-technical summary", "docs/v0-implementation-plan.summary.md"),
+        repoFile("Final release governance gate", "docs/final-release-governance.md"),
+        repoFile("Final release governance summary", "docs/final-release-governance.summary.md"),
         repoFile("Decision trail handoff", "docs/v0-implementation-plan.handoff.md"),
         repoFile("Boss-review verdict", "docs/v0-implementation-plan.review.md"),
         repoFile("Current repo status", "STATUS.md"),
@@ -452,13 +529,30 @@ function fileGroups() {
       title: "Canonical Specs",
       files: [
         repoFile("Spec v2.1 authority", "docs/exports/livekit-agent-red-team-hardening.md"),
+        repoFile("Spec v2.1 DOCX authority", "docs/exports/livekit-agent-red-team-hardening.docx"),
+        repoFile("Condensed brief DOCX", "docs/exports/livekit-redteam-condensed.docx"),
         repoFile("Condensed brief", "docs/exports/livekit-redteam-condensed.md"),
         repoFile("Executive summary", "docs/EXECUTIVE_SUMMARY.md"),
+        repoFile("Executive summary DOCX", "docs/exports/EXECUTIVE_SUMMARY.docx"),
         repoFile("Hardening solution", "docs/12-livekit-redteam-hardening-solution.md"),
         repoFile("Coverage matrix", "docs/11-agent-coverage-matrix.md"),
         repoFile("Tooling dossier", "docs/08-tooling-dossier.md"),
         repoFile("Policy coverage", "docs/07-corpus-policy-coverage.md"),
         repoFile("Real-agent proof", "docs/10-livekit-real-agent-proof.md"),
+      ],
+    },
+    {
+      title: "Release Governance Evidence",
+      files: [
+        repoFile("PostHog feature flag evidence", "docs/release-governance/posthog-feature-flag.md"),
+        repoFile("Integration and E2E evidence", "docs/release-governance/integration-e2e-evidence.md"),
+        repoFile("LLM_WIKI NITPICK review", "docs/release-governance/nitpick-llm-wiki-review.md"),
+        repoFile("LLM attack-defense review", "docs/release-governance/llm-attack-defense-review.md"),
+        repoFile("Strategic triage", "docs/release-governance/strategic-triage.md"),
+        repoFile("Repo/package cutover", "docs/release-governance/repo-package-cutover.md"),
+        repoFile("DOCX security traceability", "docs/release-governance/docx-security-traceability.md"),
+        repoFile("Security pentest", "docs/release-governance/security-pentest.md"),
+        repoFile("Final daily report", "docs/release-governance/final-daily-report.md"),
       ],
     },
     {

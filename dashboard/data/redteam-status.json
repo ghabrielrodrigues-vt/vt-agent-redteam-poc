@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-31T03:31:26.698Z",
+  "generatedAt": "2026-05-31T03:46:48.378Z",
   "git": {
     "branch": "main",
-    "isDirty": false,
-    "shortStatus": "clean working tree",
-    "aheadBehind": "ahead 1, behind 0",
-    "ahead": 1,
+    "isDirty": true,
+    "shortStatus": "uncommitted changes present",
+    "aheadBehind": "ahead 0, behind 0",
+    "ahead": 0,
     "behind": 0,
     "remote": "git@github.com:ghabrielrodrigues-vt/vt-agent-redteam-poc.git"
   },
@@ -26,6 +26,15 @@
           "Can S1 start with only the language-tutor manifest, without secrets, database, or deploy mutations?",
           "Will the consumer workflow and install path pin the framework release at v0.1.0?",
           "Does the language-tutor policy profile declare honest coverage before validation?"
+        ]
+      },
+      {
+        "iteration": "Final release governance",
+        "status": "planned",
+        "questions": [
+          "Can release readiness be blocked unless PostHog flagging, non-stub E2E evidence, cost guardrail proof, and security reviews are complete?",
+          "Will Strategic View triage reviewer findings into fix-now work versus post-v0 backlog before any team-facing final report?",
+          "Is repository/package cutover to vt-agent-redteam treated as a release gate, not cleanup?"
         ]
       },
       {
@@ -147,8 +156,8 @@
   },
   "progress": {
     "done": 7,
-    "total": 17,
-    "percent": 41
+    "total": 26,
+    "percent": 27
   },
   "nextAction": {
     "title": "S1 - language-tutor manifest",
@@ -181,7 +190,7 @@
       "detail": "Last captured pytest suite size."
     },
     {
-      "value": "1",
+      "value": "0",
       "label": "Commits ahead",
       "detail": "Local framework branch versus origin/main."
     }
@@ -713,6 +722,229 @@
       ],
       "done": 0,
       "total": 3
+    },
+    {
+      "id": "phase-1d",
+      "name": "Phase 1D - Final release governance",
+      "tasks": [
+        {
+          "id": "R1",
+          "title": "PostHog feature-flag release gate",
+          "detail": "Release only behind an explicit PostHog feature flag with rollback evidence.",
+          "criteria": [
+            {
+              "label": "PostHog release flag policy documented",
+              "done": true
+            },
+            {
+              "label": "Feature flag key, owner, rollout plan, and rollback recorded",
+              "done": false
+            },
+            {
+              "label": "Release path proven guarded by PostHog flag",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 1,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "R2",
+          "title": "Integration and E2E tests",
+          "detail": "Prove the red-team tool works through integration and end-to-end runs.",
+          "criteria": [
+            {
+              "label": "Integration test plan recorded",
+              "done": false
+            },
+            {
+              "label": "Non-stub E2E test with the red-team tool executed",
+              "done": false
+            },
+            {
+              "label": "Cost guardrail integration evidence captured",
+              "done": false
+            },
+            {
+              "label": "CI or local run evidence linked",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 4,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "R3",
+          "title": "LLM_WIKI NITPICK code review",
+          "detail": "Run strict senior review using LLM_WIKI engineering standards.",
+          "criteria": [
+            {
+              "label": "LLM_WIKI NITPICK review report exists",
+              "done": false
+            },
+            {
+              "label": "Language/tool-specific senior review applied",
+              "done": false
+            },
+            {
+              "label": "All nitpick findings resolved or dispositioned",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "R4",
+          "title": "LLM attack-defense review",
+          "detail": "Review every hardening artifact for attack coverage and missed exploit classes.",
+          "criteria": [
+            {
+              "label": "LLM attack-defense review report exists",
+              "done": false
+            },
+            {
+              "label": "Each red-team hardening artifact reviewed",
+              "done": false
+            },
+            {
+              "label": "Uncovered attack classes mapped to fixes or backlog",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "R5",
+          "title": "Strategic triage",
+          "detail": "Prioritize reviewer findings into fix-now work and post-v0 backlog.",
+          "criteria": [
+            {
+              "label": "Strategic View consumed reviewer reports",
+              "done": false
+            },
+            {
+              "label": "Immediate fixes prioritized",
+              "done": false
+            },
+            {
+              "label": "Cost guardrail status triaged",
+              "done": false
+            },
+            {
+              "label": "Post-v0 backlog created for deferrable work",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 4,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "R6",
+          "title": "vt-agent-redteam cutover",
+          "detail": "Ensure final repository, package, install, and workflow naming use vt-agent-redteam.",
+          "criteria": [
+            {
+              "label": "Final repo/package naming plan exists",
+              "done": false
+            },
+            {
+              "label": "Repository final name is vt-agent-redteam",
+              "done": false
+            },
+            {
+              "label": "Package/install/workflow references final name",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "R7",
+          "title": "DOCX security traceability audit",
+          "detail": "Re-read dense source documentation and verify implementation point by point.",
+          "criteria": [
+            {
+              "label": "Dense DOCX security documentation audit exists",
+              "done": false
+            },
+            {
+              "label": "Point-by-point implementation traceability recorded",
+              "done": false
+            },
+            {
+              "label": "All deviations classified as fix-now or backlog",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "R8",
+          "title": "Security pentest and exploitation review",
+          "detail": "Run methodical pentest analysis and triage unresolved exploitable gaps.",
+          "criteria": [
+            {
+              "label": "Security pentest report exists",
+              "done": false
+            },
+            {
+              "label": "Exploit attempts and metrics recorded",
+              "done": false
+            },
+            {
+              "label": "Unresolved exploitable gaps triaged",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "pending"
+        },
+        {
+          "id": "R9",
+          "title": "Final team report",
+          "detail": "Prepare technical and non-technical daily messages only after release governance closes.",
+          "criteria": [
+            {
+              "label": "Final technical daily message drafted",
+              "done": false
+            },
+            {
+              "label": "Final non-technical daily message drafted",
+              "done": false
+            },
+            {
+              "label": "Final team-ready state report included",
+              "done": false
+            }
+          ],
+          "criteriaComplete": 0,
+          "criteriaTotal": 3,
+          "done": false,
+          "status": "pending"
+        }
+      ],
+      "done": 0,
+      "total": 9
     }
   ],
   "architecture": {
@@ -808,6 +1040,10 @@
   ],
   "commits": [
     {
+      "hash": "87980cf",
+      "message": "docs(dashboard): refresh strategic snapshot"
+    },
+    {
       "hash": "8be3829",
       "message": "fix(dashboard): focus strategic view on questions"
     },
@@ -822,10 +1058,6 @@
     {
       "hash": "b23e047",
       "message": "fix(dashboard): handle malformed local routes"
-    },
-    {
-      "hash": "4ed189b",
-      "message": "fix(dashboard): avoid snapshot churn while serving"
     }
   ],
   "fileGroups": [
@@ -847,9 +1079,9 @@
           "path": "docs/v0-implementation-plan.codex-transfer.md",
           "exists": true,
           "href": "/docs/v0-implementation-plan.codex-transfer.md",
-          "lines": 172,
-          "size": 11165,
-          "updatedAt": "2026-05-31T03:25:17.507Z",
+          "lines": 180,
+          "size": 11647,
+          "updatedAt": "2026-05-31T03:45:09.099Z",
           "note": null
         },
         {
@@ -857,9 +1089,9 @@
           "path": "docs/v0-implementation-plan.md",
           "exists": true,
           "href": "/docs/v0-implementation-plan.md",
-          "lines": 568,
-          "size": 46878,
-          "updatedAt": "2026-05-30T19:58:28.712Z",
+          "lines": 613,
+          "size": 51103,
+          "updatedAt": "2026-05-31T03:45:26.026Z",
           "note": null
         },
         {
@@ -867,9 +1099,29 @@
           "path": "docs/v0-implementation-plan.summary.md",
           "exists": true,
           "href": "/docs/v0-implementation-plan.summary.md",
-          "lines": 102,
-          "size": 9698,
-          "updatedAt": "2026-05-30T19:58:39.949Z",
+          "lines": 118,
+          "size": 10320,
+          "updatedAt": "2026-05-31T03:43:28.758Z",
+          "note": null
+        },
+        {
+          "label": "Final release governance gate",
+          "path": "docs/final-release-governance.md",
+          "exists": true,
+          "href": "/docs/final-release-governance.md",
+          "lines": 241,
+          "size": 7198,
+          "updatedAt": "2026-05-31T03:45:25.935Z",
+          "note": null
+        },
+        {
+          "label": "Final release governance summary",
+          "path": "docs/final-release-governance.summary.md",
+          "exists": true,
+          "href": "/docs/final-release-governance.summary.md",
+          "lines": 48,
+          "size": 1475,
+          "updatedAt": "2026-05-31T03:45:25.982Z",
           "note": null
         },
         {
@@ -918,6 +1170,26 @@
           "note": null
         },
         {
+          "label": "Spec v2.1 DOCX authority",
+          "path": "docs/exports/livekit-agent-red-team-hardening.docx",
+          "exists": true,
+          "href": "/docs/exports/livekit-agent-red-team-hardening.docx",
+          "lines": 1469,
+          "size": 385948,
+          "updatedAt": "2026-05-28T14:00:26.029Z",
+          "note": null
+        },
+        {
+          "label": "Condensed brief DOCX",
+          "path": "docs/exports/livekit-redteam-condensed.docx",
+          "exists": true,
+          "href": "/docs/exports/livekit-redteam-condensed.docx",
+          "lines": 1217,
+          "size": 321523,
+          "updatedAt": "2026-05-28T14:29:08.758Z",
+          "note": null
+        },
+        {
           "label": "Condensed brief",
           "path": "docs/exports/livekit-redteam-condensed.md",
           "exists": true,
@@ -935,6 +1207,16 @@
           "lines": 89,
           "size": 5327,
           "updatedAt": "2026-05-28T13:05:33.117Z",
+          "note": null
+        },
+        {
+          "label": "Executive summary DOCX",
+          "path": "docs/exports/EXECUTIVE_SUMMARY.docx",
+          "exists": true,
+          "href": "/docs/exports/EXECUTIVE_SUMMARY.docx",
+          "lines": 119,
+          "size": 26980,
+          "updatedAt": "2026-05-28T13:06:46.988Z",
           "note": null
         },
         {
@@ -985,6 +1267,101 @@
           "lines": 201,
           "size": 7599,
           "updatedAt": "2026-05-27T18:24:11.250Z",
+          "note": null
+        }
+      ]
+    },
+    {
+      "title": "Release Governance Evidence",
+      "files": [
+        {
+          "label": "PostHog feature flag evidence",
+          "path": "docs/release-governance/posthog-feature-flag.md",
+          "exists": false,
+          "href": null,
+          "lines": null,
+          "size": null,
+          "updatedAt": null,
+          "note": null
+        },
+        {
+          "label": "Integration and E2E evidence",
+          "path": "docs/release-governance/integration-e2e-evidence.md",
+          "exists": false,
+          "href": null,
+          "lines": null,
+          "size": null,
+          "updatedAt": null,
+          "note": null
+        },
+        {
+          "label": "LLM_WIKI NITPICK review",
+          "path": "docs/release-governance/nitpick-llm-wiki-review.md",
+          "exists": false,
+          "href": null,
+          "lines": null,
+          "size": null,
+          "updatedAt": null,
+          "note": null
+        },
+        {
+          "label": "LLM attack-defense review",
+          "path": "docs/release-governance/llm-attack-defense-review.md",
+          "exists": false,
+          "href": null,
+          "lines": null,
+          "size": null,
+          "updatedAt": null,
+          "note": null
+        },
+        {
+          "label": "Strategic triage",
+          "path": "docs/release-governance/strategic-triage.md",
+          "exists": false,
+          "href": null,
+          "lines": null,
+          "size": null,
+          "updatedAt": null,
+          "note": null
+        },
+        {
+          "label": "Repo/package cutover",
+          "path": "docs/release-governance/repo-package-cutover.md",
+          "exists": false,
+          "href": null,
+          "lines": null,
+          "size": null,
+          "updatedAt": null,
+          "note": null
+        },
+        {
+          "label": "DOCX security traceability",
+          "path": "docs/release-governance/docx-security-traceability.md",
+          "exists": false,
+          "href": null,
+          "lines": null,
+          "size": null,
+          "updatedAt": null,
+          "note": null
+        },
+        {
+          "label": "Security pentest",
+          "path": "docs/release-governance/security-pentest.md",
+          "exists": false,
+          "href": null,
+          "lines": null,
+          "size": null,
+          "updatedAt": null,
+          "note": null
+        },
+        {
+          "label": "Final daily report",
+          "path": "docs/release-governance/final-daily-report.md",
+          "exists": false,
+          "href": null,
+          "lines": null,
+          "size": null,
+          "updatedAt": null,
           "note": null
         }
       ]

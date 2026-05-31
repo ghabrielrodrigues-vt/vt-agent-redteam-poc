@@ -96,6 +96,22 @@ We declare v0 shipped when, on a real PR against a real branch:
 2. A Slack alert lands in `#student-experience-v3-launch` with the full payload;
 3. The corresponding row appears in `redteam.redteam_runs` with `is_stub_response = false` and `transcript_source = "agent_native_transcript"`;
 4. The block can be cleared either by fixing the underlying issue or by a recorded override in `redteam.overrides` (with the override audit table showing who approved, when, and why);
-5. All three manifests exist and validate.
+5. All three manifests exist and validate;
+6. The final release governance gate closes.
 
-Estimated end-to-end timeline: three weeks from kickoff. Two weeks for framework changes; one week for the SOO integration; a few days for the deploy gate and Slack drill.
+The final release governance gate adds:
+
+- PostHog feature-flag protection for release;
+- integration and E2E evidence for the red-team tool;
+- strict LLM_WIKI NITPICK code review;
+- LLM attack-defense review;
+- Strategic View triage of reviewer reports;
+- final `vt-agent-redteam` repository/package cutover;
+- dense DOCX security traceability audit;
+- security pentest and exploitation review;
+- final technical and non-technical daily messages after all checks close.
+
+Estimated end-to-end timeline: three weeks from kickoff plus the final governance
+window. Two weeks for framework changes; one week for the SOO integration; a few
+days for the deploy gate and Slack drill; 3–5 days for final governance if the
+reviews do not uncover blockers.

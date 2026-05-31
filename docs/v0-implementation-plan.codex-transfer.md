@@ -1,6 +1,8 @@
 # Codex Transfer Bundle — vt-agent-redteam v0 Implementation
 
-**Purpose:** everything Codex (or any non-Claude agent) needs to pick up the v0 implementation from where Claude left off as of `git HEAD = ad551b8` (2026-05-30).
+**Purpose:** everything Codex (or any non-Claude agent) needs to pick up the v0
+implementation after Phase 1A/F7 closure and the addition of the final Phase 1D
+release-governance gate (2026-05-31).
 
 This file is the **single entry point**. Read it first; everything else is reachable from here.
 
@@ -74,10 +76,16 @@ Local branch is pushed to `origin/main`. Tag `v0.1.0` is pushed.
    and S7 Supabase JWT require explicit user involvement.
 3. **Use framework tag `v0.1.0`.** Consumer workflow references should pin the
    reusable workflow/package to the release tag.
-4. **Keep dashboard/review reports updated after each delivery iteration.**
+4. **Finish Phase 1D before any final release-ready communication.** Phase 1D is
+   the new final release governance gate: PostHog flag, integration/E2E tests,
+   LLM_WIKI NITPICK review, LLM attack-defense review, Strategic View triage,
+   `vt-agent-redteam` repo/package cutover, DOCX security traceability audit,
+   pentest/exploitation review, and final daily report.
+5. **Keep dashboard/review reports updated after each delivery iteration.**
 
 Phase 1A has shipped. Phase 1B is the consumer-repo integration (manifests +
 workflow YAML + Supabase migration in `student-onboarding-orchestration`).
+Phase 1D closes the release after implementation and rollout-control work.
 
 ---
 
