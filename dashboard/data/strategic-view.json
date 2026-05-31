@@ -1,32 +1,32 @@
 {
   "verdict": "Greenlight with active conditions",
-  "summary": "S2 language-checkpoint manifest is accepted with active conditions. S4 must not consume the framework until a new hotfix tag or explicit SHA is pinned.",
+  "summary": "S3 support-agent manifest is accepted with active conditions. S4 must not consume the framework until a new hotfix tag or explicit SHA is pinned.",
   "iterations": [
     {
-      "iteration": "S2 language-checkpoint manifest",
+      "iteration": "S3 support-agent manifest",
       "status": "accepted with conditions",
       "questions": [
-        "Is coverage_status: full still treated as provisional until non-stub S4/S5 runtime proof exists?",
-        "Are en/pt documented as adversarial prompt languages while spanish remains the checkpoint target language?",
-        "Does the checkpoint metadata cover goal_type, preferredMode, targets_block, and sample_targets exactly enough for dispatch?"
+        "Will partial-no-tool-use and exclude_tags: [tool-misuse] remain visible so support_navigation is not presented as full coverage?",
+        "Does S3 evidence distinguish manifest/filter proof from runtime tool/navigation safety proof?",
+        "Is the resolved metadata fixture representative enough after aligning tutoringContext v1, compact subjectsRegistry, featureFlags, subjectExpertise, and salesCallHistory?"
       ]
     },
     {
       "iteration": "Phase 1B next",
       "status": "current",
       "questions": [
-        "Should S3 declare support-agent as partial-no-tool-use and exclude tool-misuse scenarios?",
-        "How will PR smoke prioritization preserve P0/P1 coverage inside the 12-scenario budget?",
-        "Will S3 evidence distinguish manifest validation from runtime tool/navigation safety proof?"
+        "Can S4 add only the SOO redteam workflow without secrets, database, deploy, auth, or product workflow changes?",
+        "Will S4 pin the framework by reviewed tag or explicit SHA before live workflow use?",
+        "Will path-scoped workflow jobs keep the support-agent tool-use gap visible while validating all three manifests?"
       ]
     },
     {
-      "iteration": "S2 operational conditions",
+      "iteration": "S3 operational conditions",
       "status": "planned",
       "questions": [
-        "Are blank voice_id, agent_id, checkpoint_image_url, and user_local_time intentional for audio-only red-team runs?",
-        "Is audio_only: true explicitly scoped to red-team transcript coverage and not treated as avatar behavior proof?",
-        "Does S2 remain manifest/dry-run evidence only for cost, latency, reliability, scalability, and API-outage behavior?"
+        "Is avatar: lemonslice recorded as current SOO runtime truth, superseding the older avatar: none snippet?",
+        "Will S5 prove staging-only LiveKit, Langfuse, and DB secret wiring for support-agent-maya?",
+        "Do cost, latency, reliability, scalability, API-outage behavior, and bottlenecks remain dry-run only until non-stub workflow evidence exists?"
       ]
     },
     {

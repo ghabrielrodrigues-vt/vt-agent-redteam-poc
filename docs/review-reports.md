@@ -549,3 +549,65 @@ Non-blocking findings:
 - S2 dry-run: capped PR scenario selection to 12 of 36 scenarios.
 - S2 dry-run result: 12/12 passed through the local stub path; OpenAI
   moderation was skipped in offline mode.
+
+## S3 Review: SOO support-agent Manifest
+
+### Strategic View
+
+Verdict: accepted with active conditions.
+
+Questions captured for follow-up:
+
+- `partial-no-tool-use` and `exclude_tags: [tool-misuse]` must remain visible;
+  support-agent must not be presented as full `support_navigation` coverage.
+- `avatar: lemonslice` is accepted as current SOO runtime truth. The older
+  `avatar: none` snippet is superseded for Maya in this repo.
+- S3 dry-run evidence proves manifest/filter shape only. Runtime coverage
+  remains unproven until a non-stub Langfuse run.
+- S4 must pin the framework hotfix tag or explicit SHA before live workflow
+  use.
+- S5 must prove staging-only LiveKit, Langfuse, and DB secrets for
+  `support-agent-maya`.
+- The first non-stub run must verify dispatch correlation metadata and no
+  fixture-shape runtime failure.
+- Operational metrics remain dry-run only until live workflow/runtime evidence
+  exists.
+
+### Review Agent Findings
+
+Initial blockers:
+
+- The first S3 fixture used `subjectsRegistry` entries shaped as `{label,
+  slug}`. The support-agent normalizer accepts compact `{n, s, ...}` rows, so
+  the registry would have been dropped before reaching the prompt.
+- The first `tutoringContext` fixture missed the current v1 token-route
+  fields: `version`, `hasAssignedPrivateTutor`,
+  `hasActiveTutorMatchOrRequest`, `shouldOfferTutorHelp`, and
+  `prioritySubjectNames`.
+
+Fixes applied:
+
+- Updated `tutoringContext` to match `SupportAgentTutoringContextV1`.
+- Updated `subjectsRegistry` to compact `{n, s, f, q, l, p, d, sp}` rows.
+- Limited `featureFlags` to the current `languages` allow-list.
+- Updated `subjectExpertise` to include `display_name`.
+- Added representative `salesCallHistory` shape.
+
+Final Review Agent verdict: blockers cleared.
+
+Remaining non-blocking concern:
+
+- The tool-use gap is honest only while `tool-misuse` stays excluded and
+  dashboard/status continue to show `partial-no-tool-use`.
+
+### Validation
+
+- SOO branch: `redteam/v0-language-tutor-manifest`.
+- SOO file added: `agents/support-agent/.redteam/manifest.yaml`.
+- SOO commit: `feat(redteam): add support agent manifest`.
+- `vt-redteam validate-manifest
+  agents/support-agent/.redteam/manifest.yaml`: passed.
+- S3 dry-run: capped PR scenario selection to 12 of 20 scenarios after
+  excluding unsupported tool-use coverage.
+- S3 dry-run result: 12/12 passed through the local stub path; OpenAI
+  moderation was skipped in offline mode.

@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-05-31T12:03:44.000Z",
+  "updatedAt": "2026-05-31T12:14:09.000Z",
   "serviceGuarantee": "The service is kept healthy by phase-end fitness checks: deterministic tests, non-stub integration/E2E runs, cost guardrail proof, latency budgets, API-outage simulations, concurrency/load checks, and bottleneck triage. Until those checks are measured, the dashboard marks the phase as partial or pending.",
   "summaryCards": [
     {
@@ -72,31 +72,31 @@
       "phaseId": "phase-1b",
       "phase": "Phase 1B - SOO integration",
       "status": "partial",
-      "evidence": "S1 and S2 manifests validate locally. PR dry-runs for language-tutor and language-checkpoint each cap selection to 12 of 36 smoke scenarios and pass through the local stub path. Default Langfuse path dispatches LiveKit before polling. Non-stub runtime evidence still pending.",
+      "evidence": "S1, S2, and S3 manifests validate locally. PR dry-runs for language-tutor and language-checkpoint each cap selection to 12 of 36 smoke scenarios; support-agent caps selection to 12 of 20 after excluding tool-misuse. All three pass through the local stub path. Default Langfuse path dispatches LiveKit before polling. Non-stub runtime evidence still pending.",
       "checks": [
         {
           "name": "Cost",
           "status": "partial",
-          "metric": "S1/S2 manifest budgets remain max_cost_usd_per_run=5.00 and max_scenarios_per_pr=12; each dry-run selected 12 rows with no provider cost.",
+          "metric": "S1/S2/S3 manifest budgets remain max_cost_usd_per_run=5.00 and max_scenarios_per_pr=12; each dry-run selected 12 rows with no provider cost.",
           "next": "Record actual run_summary cost per SOO agent in a non-stub run and prove budget_exhausted behavior."
         },
         {
           "name": "Latency",
           "status": "partial",
-          "metric": "S1/S2 dry-runs each completed 12 scenarios locally; real LiveKit/Langfuse p50/p95 not measured.",
+          "metric": "S1/S2/S3 dry-runs each completed 12 scenarios locally; real LiveKit/Langfuse p50/p95 not measured.",
           "next": "Record p50/p95 per scenario and total workflow time from the first non-stub SOO workflow."
         },
         {
           "name": "Scalability",
-          "status": "planned",
-          "metric": "Two of three SOO manifests exist; path-scoped workflow jobs still pending.",
+          "status": "partial",
+          "metric": "Three of three SOO manifests exist; path-scoped workflow jobs still pending.",
           "next": "Test simultaneous agent path changes and workflow fan-out."
         },
         {
           "name": "Reliability",
           "status": "partial",
-          "metric": "language-tutor and language-checkpoint validate-manifest passed; framework full suite passed with 104 tests after S1 hotfix.",
-          "next": "Add support-agent manifest, cut or pin a framework hotfix tag/SHA before S4, then capture SOO workflow evidence and non-stub integration run."
+          "metric": "language-tutor, language-checkpoint, and support-agent validate-manifest passed; framework full suite passed with 104 tests after S1 hotfix.",
+          "next": "Cut or pin a framework hotfix tag/SHA before S4, then capture SOO workflow evidence and non-stub integration run."
         },
         {
           "name": "API outage",
@@ -107,7 +107,7 @@
         {
           "name": "Bottlenecks",
           "status": "partial",
-          "metric": "S1/S2 manifests include top-level redteam_run_id/redteam_scenario_id metadata; runtime trace search latency not measured.",
+          "metric": "S1/S2/S3 manifests include top-level redteam_run_id/redteam_scenario_id metadata; runtime trace search latency and support-agent tool-use gap are not measured.",
           "next": "Record slowest stage from SOO run."
         }
       ]
