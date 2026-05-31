@@ -56,6 +56,12 @@ Required evidence file:
 docs/release-governance/integration-e2e-evidence.md
 ```
 
+Operational status source:
+
+```text
+docs/operational-metrics/status.json
+```
+
 Acceptance:
 
 - Integration test scope is documented.
@@ -121,6 +127,12 @@ Required evidence file:
 
 ```text
 docs/release-governance/strategic-triage.md
+```
+
+Strategic View must also consume:
+
+```text
+docs/operational-metrics/status.json
 ```
 
 Acceptance:

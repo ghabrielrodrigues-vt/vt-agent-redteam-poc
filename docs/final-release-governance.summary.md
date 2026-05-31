@@ -36,6 +36,15 @@ docs/release-governance/
 
 No item should be marked done from chat memory alone.
 
+Operational evidence is tracked separately in:
+
+```text
+docs/operational-metrics/status.json
+```
+
+That file must be updated at each phase end with cost, latency, scalability,
+reliability, API-outage behavior, and bottlenecks.
+
 ## Outcome
 
 When this phase closes, the team can receive a final state report with:

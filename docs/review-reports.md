@@ -380,3 +380,53 @@ Final Review Agent verdict: cleared.
 - Dashboard snapshot shows S1 as current.
 - Dashboard snapshot shows Phase 1D after Phase 1C, with R1-R9 pending and
   0/9 tasks done.
+
+## Plan Update Review: Phase-End Operational Metrics
+
+### Strategic View
+
+Verdict: accepted as a governance addition, not yet release-sufficient evidence.
+
+Rationale:
+
+- The dashboard now tracks cost, latency, scalability, reliability, API-outage
+  behavior, and bottlenecks per phase.
+- S1 remains current; operational readiness does not block starting S1.
+- Final release remains blocked until Phase 1D and operational metrics close.
+
+Strategic conditions:
+
+- Cost gate must prove `max_cost_usd_per_run -> budget_exhausted -> exit 2`.
+- Latency must report p50/p95 scenario and full-run duration.
+- Reliability must simulate failures for Langfuse, OpenAI Moderation, LiveKit,
+  Postgres/Supabase writes, and Slack.
+- OpenAI Moderation outage behavior needs triage because the current scorer
+  treats provider failure as inconclusive/pass.
+- Scalability must test workflow fan-out / simultaneous checks or explicitly
+  accept quota and CI risk.
+- Bottlenecks must name measured limits for Langfuse trace search, LiveKit
+  dispatch, OpenAI calls, DB writes, and GitHub Actions concurrency.
+
+### Review Agent Findings
+
+Blockers: none.
+
+Non-blocking concerns:
+
+- Operational status is maintained as manual JSON. This is acceptable for the
+  dashboard MVP, but future drift risk remains.
+- Phase 1A is now functionally closed but operationally partial. This is honest
+  and creates retroactive follow-up evidence work.
+
+Fix applied after review:
+
+- Added explicit failure-mode cards for LiveKit API outage, Postgres/Supabase
+  write outage, and Slack webhook outage.
+
+### Validation
+
+- `node --check dashboard/dashboard.js`: passed.
+- `node --check dashboard/scripts/redteam-dashboard.mjs`: passed.
+- `git diff --check`: passed.
+- Dashboard snapshot shows S1 as current and operational readiness loaded from
+  `docs/operational-metrics/status.json`.

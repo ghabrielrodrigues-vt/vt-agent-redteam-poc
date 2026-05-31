@@ -15,6 +15,7 @@ const llmWikiRoot = "/Users/gupy/LLM_WIKI";
 const outputPath = path.join(dashboardRoot, "data", "redteam-status.json");
 const testStatusPath = path.join(dashboardRoot, "data", "test-status.json");
 const strategicViewPath = path.join(dashboardRoot, "data", "strategic-view.json");
+const operationalMetricsPath = path.join(repoRoot, "docs", "operational-metrics", "status.json");
 
 const args = new Set(process.argv.slice(2));
 const portArgIndex = process.argv.indexOf("--port");
@@ -186,6 +187,21 @@ function testStatus() {
     summary: "No test-status.json captured yet",
     command: "cd prototype && .venv/bin/python -m pytest",
     verifiedAt: null,
+  };
+}
+
+function operationalReadiness() {
+  if (existsSync(operationalMetricsPath)) {
+    return JSON.parse(readFileSync(operationalMetricsPath, "utf8"));
+  }
+
+  return {
+    updatedAt: null,
+    serviceGuarantee: "No operational metrics status file found yet.",
+    summaryCards: [],
+    phaseGates: [],
+    failureModes: [],
+    bottlenecks: [],
   };
 }
 
@@ -520,6 +536,9 @@ function fileGroups() {
         repoFile("Non-technical summary", "docs/v0-implementation-plan.summary.md"),
         repoFile("Final release governance gate", "docs/final-release-governance.md"),
         repoFile("Final release governance summary", "docs/final-release-governance.summary.md"),
+        repoFile("Operational metrics protocol", "docs/operational-metrics/README.md"),
+        repoFile("Operational metrics summary", "docs/operational-metrics/README.summary.md"),
+        repoFile("Operational metrics status", "docs/operational-metrics/status.json"),
         repoFile("Decision trail handoff", "docs/v0-implementation-plan.handoff.md"),
         repoFile("Boss-review verdict", "docs/v0-implementation-plan.review.md"),
         repoFile("Current repo status", "STATUS.md"),
@@ -635,6 +654,7 @@ function buildStatus() {
     git,
     testStatus: tests,
     strategicView: strategicView(phases),
+    operationalReadiness: operationalReadiness(),
     currentTask,
     progress: {
       done,

@@ -1,0 +1,280 @@
+{
+  "updatedAt": "2026-05-31T00:00:00.000Z",
+  "serviceGuarantee": "The service is kept healthy by phase-end fitness checks: deterministic tests, non-stub integration/E2E runs, cost guardrail proof, latency budgets, API-outage simulations, concurrency/load checks, and bottleneck triage. Until those checks are measured, the dashboard marks the phase as partial or pending.",
+  "summaryCards": [
+    {
+      "label": "Operational closure",
+      "value": "partial",
+      "detail": "Phase 1A has framework tests and workflow evidence, but not the full phase-end operational package."
+    },
+    {
+      "label": "Cost guardrail",
+      "value": "pending",
+      "detail": "Needs integration proof for max_cost_usd_per_run and budget_exhausted behavior."
+    },
+    {
+      "label": "API outage behavior",
+      "value": "mixed",
+      "detail": "Langfuse timeout is unit-tested; OpenAI Moderation outage currently degrades to inconclusive/pass."
+    },
+    {
+      "label": "Concurrency/load",
+      "value": "not tested",
+      "detail": "Scenario-level concurrency and many simultaneous checks still need measurement."
+    }
+  ],
+  "phaseGates": [
+    {
+      "phaseId": "phase-1a",
+      "phase": "Phase 1A - Framework hardening",
+      "status": "partial",
+      "evidence": "101 pytest tests, green reusable workflow fixture, v0.1.0 tag install proof.",
+      "checks": [
+        {
+          "name": "Cost",
+          "status": "pending",
+          "metric": "estimated_cost_usd exists in run_summary.json; guardrail proof missing",
+          "next": "Add integration test for max_cost_usd_per_run -> budget_exhausted."
+        },
+        {
+          "name": "Latency",
+          "status": "partial",
+          "metric": "Langfuse polling timeout paths unit-tested; no p50/p95 phase metric yet",
+          "next": "Capture scenario duration p50/p95 from non-stub run_summary."
+        },
+        {
+          "name": "Scalability",
+          "status": "pending",
+          "metric": "Harness scenarios execute sequentially in one process",
+          "next": "Run controlled concurrency/load test for parallel checks."
+        },
+        {
+          "name": "Reliability",
+          "status": "measured",
+          "metric": "101 tests passed; fixture GitHub Action passed",
+          "next": "Extend to non-stub SOO integration evidence."
+        },
+        {
+          "name": "API outage",
+          "status": "partial",
+          "metric": "Langfuse no-trace timeout returns stub-marked timeout; OpenAI outage passes inconclusive",
+          "next": "Decide whether OpenAI outage should fail closed, fail open, or degrade with explicit warning."
+        },
+        {
+          "name": "Bottlenecks",
+          "status": "pending",
+          "metric": "Known candidates: Langfuse polling, LiveKit room creation, OpenAI scorer calls, Postgres writes, workflow fan-out",
+          "next": "Measure each candidate during Phase 1B/1C runs."
+        }
+      ]
+    },
+    {
+      "phaseId": "phase-1b",
+      "phase": "Phase 1B - SOO integration",
+      "status": "planned",
+      "evidence": "Must be captured after S1-S7 work.",
+      "checks": [
+        {
+          "name": "Cost",
+          "status": "planned",
+          "metric": "PR smoke expected near $0.01; deploy expected near $0.025",
+          "next": "Record actual run_summary cost per SOO agent."
+        },
+        {
+          "name": "Latency",
+          "status": "planned",
+          "metric": "scenario_timeout_seconds target from manifest",
+          "next": "Record p50/p95 per scenario and total workflow time."
+        },
+        {
+          "name": "Scalability",
+          "status": "planned",
+          "metric": "Three agent manifests and path-scoped workflow jobs",
+          "next": "Test simultaneous agent path changes and workflow fan-out."
+        },
+        {
+          "name": "Reliability",
+          "status": "planned",
+          "metric": "validate-manifest + non-stub integration run",
+          "next": "Capture SOO workflow evidence."
+        },
+        {
+          "name": "API outage",
+          "status": "planned",
+          "metric": "Langfuse/OpenAI/LiveKit/Postgres/Slack outage scenarios",
+          "next": "Run failure injection or mocked outage tests."
+        },
+        {
+          "name": "Bottlenecks",
+          "status": "planned",
+          "metric": "Trace correlation, room dispatch, storage writes",
+          "next": "Record slowest stage from SOO run."
+        }
+      ]
+    },
+    {
+      "phaseId": "phase-1c",
+      "phase": "Phase 1C - Rollout controls",
+      "status": "planned",
+      "evidence": "Must be captured after deploy gate and Slack drill.",
+      "checks": [
+        {
+          "name": "Cost",
+          "status": "planned",
+          "metric": "Deploy gate cost from run_summary.json",
+          "next": "Record deploy-mode cost and abort behavior."
+        },
+        {
+          "name": "Latency",
+          "status": "planned",
+          "metric": "Deploy gate added time",
+          "next": "Record total added CI/deploy latency."
+        },
+        {
+          "name": "Scalability",
+          "status": "planned",
+          "metric": "Deploy workflow concurrency",
+          "next": "Test concurrent deploy-gate invocations where safe."
+        },
+        {
+          "name": "Reliability",
+          "status": "planned",
+          "metric": "Deliberately failing scenario blocks deploy",
+          "next": "Capture block, alert, and override evidence."
+        },
+        {
+          "name": "API outage",
+          "status": "planned",
+          "metric": "Slack and storage outage behavior",
+          "next": "Verify alert failure does not hide gate result."
+        },
+        {
+          "name": "Bottlenecks",
+          "status": "planned",
+          "metric": "Gate calculation, alert delivery, artifact upload",
+          "next": "Record slowest rollout-control stage."
+        }
+      ]
+    },
+    {
+      "phaseId": "phase-1d",
+      "phase": "Phase 1D - Final release governance",
+      "status": "planned",
+      "evidence": "Must be captured after reviewer reports and pentest.",
+      "checks": [
+        {
+          "name": "Cost",
+          "status": "planned",
+          "metric": "Cost guardrail proof required by R2/R5",
+          "next": "Strategic View triages any unresolved cost gap."
+        },
+        {
+          "name": "Latency",
+          "status": "planned",
+          "metric": "Final p50/p95 latency report",
+          "next": "Include latency in final daily report only after measured."
+        },
+        {
+          "name": "Scalability",
+          "status": "planned",
+          "metric": "Concurrency/load review",
+          "next": "Include load-tested concurrency level and bottlenecks."
+        },
+        {
+          "name": "Reliability",
+          "status": "planned",
+          "metric": "Integration/E2E + pentest + review closure",
+          "next": "No final readiness claim before R1-R8 close."
+        },
+        {
+          "name": "API outage",
+          "status": "planned",
+          "metric": "Outage behavior disposition",
+          "next": "Classify fail-open/fail-closed choices before release."
+        },
+        {
+          "name": "Bottlenecks",
+          "status": "planned",
+          "metric": "Final bottleneck list",
+          "next": "Classify as fix-now or post-v0 backlog."
+        }
+      ]
+    }
+  ],
+  "failureModes": [
+    {
+      "name": "Langfuse API does not respond",
+      "status": "partial",
+      "currentBehavior": "The Langfuse runner backs off until timeout. If no trace appears, it returns a stub-marked timeout result. Stub presence forces the gate into the stub/incomplete path instead of silently passing real coverage.",
+      "evidence": "prototype/tests/test_langfuse_runner.py covers timeout and no-match paths.",
+      "gap": "Needs non-stub SOO outage simulation and latency metrics."
+    },
+    {
+      "name": "OpenAI Moderation API does not respond",
+      "status": "risk",
+      "currentBehavior": "The scorer currently returns passed=True with error detail, treating the result as inconclusive/pass.",
+      "evidence": "prototype/src/vt_agent_redteam/scorers/openai_moderation.py catches API exceptions.",
+      "gap": "Strategic decision needed: fail closed, fail open with explicit warning, or degrade with separate gate state."
+    },
+    {
+      "name": "LiveKit API does not respond",
+      "status": "planned",
+      "currentBehavior": "LiveKit room creation/dispatch paths are expected to surface dispatch errors and scenario timeouts, but the release dashboard has no measured outage evidence yet.",
+      "evidence": "LiveKit runner paths create/delete rooms and rely on scenario timeout budgets.",
+      "gap": "Need failure injection for room creation, dispatch timeout, and cleanup failure."
+    },
+    {
+      "name": "Postgres/Supabase write path does not respond",
+      "status": "planned",
+      "currentBehavior": "Result persistence is required for durable evidence and dashboards. Current dashboard does not yet show measured write-failure behavior for consumer runs.",
+      "evidence": "Postgres/Supabase writer code exists with redaction before write.",
+      "gap": "Need integration test for write outage, permission denial, and recovery/disposition."
+    },
+    {
+      "name": "Slack webhook does not respond",
+      "status": "planned",
+      "currentBehavior": "Slack alerting is a rollout-control channel. Alert failure must not hide gate failure, but evidence is not captured yet.",
+      "evidence": "Slack alert wiring is tracked in Phase 1C and final governance.",
+      "gap": "Need controlled alert failure test and expected fallback/reporting behavior."
+    },
+    {
+      "name": "Many checks run at the same time",
+      "status": "not-tested",
+      "currentBehavior": "One harness process runs scenarios sequentially. GitHub Actions can fan out by agent/job, but scenario-level parallelism and provider limits are not measured yet.",
+      "evidence": "Harness loop processes scenarios one by one.",
+      "gap": "Need controlled concurrency test and max safe parallel jobs."
+    }
+  ],
+  "bottlenecks": [
+    {
+      "name": "Langfuse trace polling",
+      "risk": "high",
+      "why": "Every non-stub agent-native transcript depends on trace ingestion and metadata search latency.",
+      "measurement": "p50/p95 trace search time and timeout rate."
+    },
+    {
+      "name": "LiveKit room dispatch",
+      "risk": "medium",
+      "why": "Room creation and agent dispatch are external calls with timeout and cleanup requirements.",
+      "measurement": "room creation time, dispatch success rate, cleanup failure rate."
+    },
+    {
+      "name": "OpenAI scorer calls",
+      "risk": "medium",
+      "why": "Moderation API failures currently degrade to inconclusive/pass.",
+      "measurement": "API error rate, added latency, disposition by gate."
+    },
+    {
+      "name": "Database writes",
+      "risk": "medium",
+      "why": "Durable evidence and dashboards depend on Postgres/Supabase writes after redaction.",
+      "measurement": "write latency, write failure rate, permission failures."
+    },
+    {
+      "name": "Workflow fan-out",
+      "risk": "medium",
+      "why": "Multiple agents and PR paths can trigger concurrent checks; provider quotas and CI minutes may become the limiting factor.",
+      "measurement": "parallel job count, total CI time, provider 429s."
+    }
+  ]
+}

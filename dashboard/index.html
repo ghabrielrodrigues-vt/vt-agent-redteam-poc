@@ -27,6 +27,7 @@
         <a href="#current-stage">Current</a>
         <a id="currentTaskNav" href="#task-f2">#F2</a>
         <a href="#phase-map">Phase Map</a>
+        <a href="#operational-readiness">Ops</a>
         <a href="#task-f1">#F1</a>
         <a href="#task-f2">#F2</a>
         <a href="#task-f3">#F3</a>
@@ -120,6 +121,30 @@
           <p class="panel-note">F = framework, S = SOO integration, C = rollout controls.</p>
         </div>
         <div class="lane-grid" id="phaseLanes"></div>
+      </section>
+
+      <section class="panel ops-panel" id="operational-readiness" aria-label="Operational readiness">
+        <div class="panel-header">
+          <div>
+            <div class="label">Operational Readiness</div>
+            <h2>Cost, latency, scale, reliability</h2>
+          </div>
+          <p class="panel-note" id="opsUpdatedAt">Loading operational evidence.</p>
+        </div>
+        <p class="ops-guarantee" id="opsGuarantee">Loading service guarantee.</p>
+        <div class="ops-summary-grid" id="opsSummaryGrid"></div>
+        <div class="ops-layout">
+          <div>
+            <h3>Phase-end checks</h3>
+            <div class="ops-phase-grid" id="opsPhaseGrid"></div>
+          </div>
+          <div>
+            <h3>Failure modes</h3>
+            <div class="ops-failure-list" id="opsFailureList"></div>
+            <h3>Bottlenecks</h3>
+            <div class="ops-bottleneck-list" id="opsBottleneckList"></div>
+          </div>
+        </div>
       </section>
 
       <section class="details-stack" aria-label="Supporting details">

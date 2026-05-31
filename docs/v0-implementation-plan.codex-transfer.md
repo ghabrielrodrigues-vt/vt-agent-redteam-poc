@@ -81,7 +81,10 @@ Local branch is pushed to `origin/main`. Tag `v0.1.0` is pushed.
    LLM_WIKI NITPICK review, LLM attack-defense review, Strategic View triage,
    `vt-agent-redteam` repo/package cutover, DOCX security traceability audit,
    pentest/exploitation review, and final daily report.
-5. **Keep dashboard/review reports updated after each delivery iteration.**
+5. **Update operational metrics at every phase end.** The dashboard reads
+   `docs/operational-metrics/status.json` for cost, latency, scalability,
+   reliability, API-outage behavior, and bottlenecks.
+6. **Keep dashboard/review reports updated after each delivery iteration.**
 
 Phase 1A has shipped. Phase 1B is the consumer-repo integration (manifests +
 workflow YAML + Supabase migration in `student-onboarding-orchestration`).

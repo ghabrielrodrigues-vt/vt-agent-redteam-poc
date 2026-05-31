@@ -111,6 +111,10 @@ The final release governance gate adds:
 - security pentest and exploitation review;
 - final technical and non-technical daily messages after all checks close.
 
+Every phase also gets an operational metrics pass. The dashboard now tracks
+cost, latency, scalability, reliability, API-outage behavior, and bottlenecks
+from `docs/operational-metrics/status.json`.
+
 Estimated end-to-end timeline: three weeks from kickoff plus the final governance
 window. Two weeks for framework changes; one week for the SOO integration; a few
 days for the deploy gate and Slack drill; 3–5 days for final governance if the

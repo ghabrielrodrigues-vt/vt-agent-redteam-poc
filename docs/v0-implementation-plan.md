@@ -496,6 +496,35 @@ complexity.
 
 ---
 
+## 5.2 Phase-end operational metrics
+
+Every phase now requires an operational validation pass. Feature completion is
+not enough by itself.
+
+Canonical protocol:
+
+- `docs/operational-metrics/README.md`
+- `docs/operational-metrics/README.summary.md`
+- `docs/operational-metrics/status.json`
+
+Required checks at the end of each phase:
+
+- **Cost:** actual run cost, budget cap behavior, and
+  `max_cost_usd_per_run` / `budget_exhausted` proof where applicable.
+- **Latency:** p50/p95 scenario and run duration, plus timeout behavior.
+- **Scalability:** behavior under many simultaneous checks, including workflow
+  fan-out and provider limits.
+- **Reliability:** deterministic, integration, and E2E evidence that the service
+  still works after the phase.
+- **API outage:** Langfuse, OpenAI, LiveKit, Postgres, and Slack failure modes
+  must be tested or explicitly triaged.
+- **Bottlenecks:** slowest or most fragile path must be named and measured.
+
+The dashboard reads `docs/operational-metrics/status.json` and surfaces the
+current evidence level for every phase.
+
+---
+
 ## 6. Acceptance criteria — v0 ship gate
 
 Maps to spec section 17.7 (numbered identically) with v0 deviations marked `(*)`.
@@ -592,6 +621,12 @@ Run this in order. Each step has an explicit "done means" so there's no ambiguit
 - [ ] **R7 done means:** `docs/release-governance/docx-security-traceability.md` maps dense DOCX/source requirements point by point to implementation evidence, accepted deviation, or backlog.
 - [ ] **R8 done means:** `docs/release-governance/security-pentest.md` records pentest methodology, exploit attempts, metrics, and unresolved exploitable gaps with triage.
 - [ ] **R9 done means:** `docs/release-governance/final-daily-report.md` contains technical and non-technical daily messages, and neither claims final readiness before R1-R8 are complete and Strategic View clears unresolved reviewer blockers.
+
+### Operational metrics
+
+- [ ] **Each phase done means:** `docs/operational-metrics/status.json` is updated with cost, latency, scalability, reliability, API-outage behavior, and bottleneck status for that phase.
+- [ ] **API-outage done means:** Langfuse, OpenAI, LiveKit, Postgres, and Slack behavior are tested or explicitly triaged with fail-open/fail-closed/degraded semantics.
+- [ ] **Scale done means:** expected concurrent checks and workflow fan-out are tested or assigned a post-v0 backlog item with risk accepted by Strategic View.
 
 ---
 

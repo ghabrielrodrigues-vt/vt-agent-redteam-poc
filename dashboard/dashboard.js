@@ -38,6 +38,14 @@ function statusTone(status) {
   return "";
 }
 
+function opsTone(status) {
+  const normalized = String(status ?? "").toLowerCase().replace(/\s+/g, "-");
+  if (["measured", "passing", "green", "ok"].includes(normalized)) return "ok";
+  if (["partial", "mixed", "planned"].includes(normalized)) return "warn";
+  if (["risk", "blocked", "failing", "not-tested", "pending"].includes(normalized)) return "danger";
+  return "neutral";
+}
+
 function renderMetricGrid(metrics) {
   const grid = $("#metricGrid");
   grid.innerHTML = "";
@@ -274,6 +282,104 @@ function renderRisks(risks) {
   }
 }
 
+function renderOperationalReadiness(readiness) {
+  if (!readiness) return;
+  setText("#opsUpdatedAt", `Updated ${formatDate(readiness.updatedAt)}`);
+  setText("#opsGuarantee", readiness.serviceGuarantee);
+
+  const summaryRoot = $("#opsSummaryGrid");
+  summaryRoot.innerHTML = "";
+  for (const item of readiness.summaryCards ?? []) {
+    const card = document.createElement("div");
+    card.className = className("ops-summary-card", opsTone(item.value));
+    const label = document.createElement("span");
+    label.textContent = item.label;
+    const value = document.createElement("strong");
+    value.textContent = item.value;
+    const detail = document.createElement("p");
+    detail.textContent = item.detail;
+    card.append(label, value, detail);
+    summaryRoot.appendChild(card);
+  }
+
+  const phaseRoot = $("#opsPhaseGrid");
+  phaseRoot.innerHTML = "";
+  for (const phase of readiness.phaseGates ?? []) {
+    const card = document.createElement("article");
+    card.className = className("ops-phase-card", opsTone(phase.status));
+
+    const header = document.createElement("div");
+    header.className = "ops-card-header";
+    const title = document.createElement("strong");
+    title.textContent = phase.phase;
+    const status = document.createElement("span");
+    status.textContent = phase.status;
+    header.append(title, status);
+
+    const evidence = document.createElement("p");
+    evidence.className = "ops-evidence";
+    evidence.textContent = phase.evidence;
+
+    const checks = document.createElement("div");
+    checks.className = "ops-checks";
+    for (const check of phase.checks ?? []) {
+      const row = document.createElement("div");
+      row.className = className("ops-check", opsTone(check.status));
+      const name = document.createElement("strong");
+      name.textContent = check.name;
+      const metric = document.createElement("span");
+      metric.textContent = check.metric;
+      const next = document.createElement("small");
+      next.textContent = check.next;
+      row.append(name, metric, next);
+      checks.appendChild(row);
+    }
+
+    card.append(header, evidence, checks);
+    phaseRoot.appendChild(card);
+  }
+
+  const failureRoot = $("#opsFailureList");
+  failureRoot.innerHTML = "";
+  for (const mode of readiness.failureModes ?? []) {
+    const item = document.createElement("article");
+    item.className = className("ops-side-card", opsTone(mode.status));
+    item.innerHTML = `
+      <div class="ops-card-header">
+        <strong></strong>
+        <span></span>
+      </div>
+      <p></p>
+      <small></small>
+    `;
+    item.querySelector("strong").textContent = mode.name;
+    item.querySelector("span").textContent = mode.status;
+    item.querySelector("p").textContent = mode.currentBehavior;
+    item.querySelector("small").textContent = `Gap: ${mode.gap}`;
+    failureRoot.appendChild(item);
+  }
+
+  const bottleneckRoot = $("#opsBottleneckList");
+  bottleneckRoot.innerHTML = "";
+  for (const bottleneck of readiness.bottlenecks ?? []) {
+    const item = document.createElement("article");
+    item.className = className("ops-side-card", opsTone(bottleneck.risk === "high" ? "risk" : "planned"));
+    item.innerHTML = `
+      <div class="ops-card-header">
+        <strong></strong>
+        <span></span>
+      </div>
+      <p></p>
+      <small></small>
+    `;
+    item.querySelector("strong").textContent = bottleneck.name;
+    item.querySelector("span").textContent = bottleneck.risk;
+    item.querySelector("p").textContent = bottleneck.why;
+    item.querySelector("small").textContent = `Measure: ${bottleneck.measurement}`;
+    bottleneckRoot.appendChild(item);
+  }
+}
+
 function renderCommits(commits) {
   const root = $("#commitList");
   root.innerHTML = "";
@@ -328,6 +434,7 @@ function renderStatus(data) {
   renderCharts(data);
   renderCriticalPath(data);
   renderPhaseLanes(data.phases);
+  renderOperationalReadiness(data.operationalReadiness);
   renderArchitecture(data.architecture.flow, data.architecture.feedbackChannels);
   renderOverview(data.overview);
   renderFileMap(data.fileGroups);

@@ -16,8 +16,8 @@
       "status": "planned",
       "questions": [
         "Can release readiness be blocked unless PostHog flagging, non-stub E2E evidence, cost guardrail proof, and security reviews are complete?",
-        "Will Strategic View triage reviewer findings into fix-now work versus post-v0 backlog before any team-facing final report?",
-        "Is repository/package cutover to vt-agent-redteam treated as a release gate, not cleanup?"
+        "Are cost, latency, scalability, reliability, API-outage behavior, and bottlenecks measured before each phase is closed?",
+        "Will Strategic View triage reviewer findings and vt-agent-redteam cutover into fix-now work versus post-v0 backlog before any final report?"
       ]
     },
     {
