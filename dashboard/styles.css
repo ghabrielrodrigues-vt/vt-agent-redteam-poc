@@ -373,6 +373,11 @@ h3 {
   width: 0%;
 }
 
+.stage-actions {
+  display: grid;
+  gap: 10px;
+}
+
 .next-action {
   background: linear-gradient(135deg, rgba(248, 242, 254, 0.9), rgba(253, 233, 243, 0.68));
   border: 1px solid rgba(198, 149, 244, 0.42);
@@ -380,6 +385,11 @@ h3 {
   display: grid;
   gap: 7px;
   padding: 14px;
+}
+
+.next-action.secondary {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(247, 250, 255, 0.86));
+  border-color: rgba(151, 166, 190, 0.34);
 }
 
 .next-action strong {

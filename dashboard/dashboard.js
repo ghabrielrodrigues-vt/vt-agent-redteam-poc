@@ -130,6 +130,12 @@ function findTaskPhase(phases, taskId) {
   return phases.find((phase) => phase.tasks.some((task) => task.id === taskId));
 }
 
+function findFollowingTask(phases, taskId) {
+  const tasks = phases.flatMap((phase) => phase.tasks);
+  const currentIndex = tasks.findIndex((task) => task.id === taskId);
+  return tasks.slice(Math.max(currentIndex + 1, 0)).find((task) => !task.done && task.status !== "manual");
+}
+
 function phaseShortName(phase) {
   return phase?.name?.replace(/\s+-\s+.*$/, "")?.replace("Phase ", "Phase ") ?? "Phase";
 }
@@ -157,8 +163,7 @@ function renderCriticalPath(data) {
   const currentPhase = findTaskPhase(data.phases, current.id) ?? data.phases.find((phase) => phase.done < phase.total) ?? data.phases[0];
   const currentTask = tasks.find((task) => task.id === current.id) ?? current;
   const phaseTasks = currentPhase?.tasks ?? [];
-  const currentIndex = tasks.findIndex((task) => task.id === current.id);
-  const nextTask = tasks.slice(Math.max(currentIndex + 1, 0)).find((task) => !task.done && task.status !== "manual");
+  const nextTask = findFollowingTask(data.phases, current.id);
 
   setText("#criticalNow", `${current.id}: ${current.title}`);
 
@@ -454,6 +459,9 @@ function renderStatus(data) {
 
   setText("#nextActionTitle", data.nextAction.title);
   setText("#nextActionBody", data.nextAction.detail);
+  const followingTask = findFollowingTask(data.phases, current.id);
+  setText("#followingActionTitle", followingTask ? `${followingTask.id} - ${followingTask.title}` : "No queued action");
+  setText("#followingActionBody", followingTask?.detail ?? "All non-manual implementation tasks are complete.");
 
   setText("#gitSignal", `${data.git.shortStatus}; ${data.git.aheadBehind}`);
   setText("#testSignal", `${data.testStatus.summary}`);
