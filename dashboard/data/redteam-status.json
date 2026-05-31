@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-31T11:45:43.352Z",
+  "generatedAt": "2026-05-31T11:50:48.820Z",
   "git": {
     "branch": "main",
-    "isDirty": true,
-    "shortStatus": "uncommitted changes present",
+    "isDirty": false,
+    "shortStatus": "clean working tree",
     "aheadBehind": "ahead 0, behind 0",
     "ahead": 0,
     "behind": 0,
@@ -1330,6 +1330,14 @@
   ],
   "commits": [
     {
+      "hash": "3315fd3",
+      "message": "fix(dashboard): improve strategic view layout"
+    },
+    {
+      "hash": "d1d921d",
+      "message": "fix(framework): dispatch before Langfuse polling"
+    },
+    {
       "hash": "82516fd",
       "message": "docs(dashboard): refresh operational readiness snapshot"
     },
@@ -1340,14 +1348,6 @@
     {
       "hash": "0b3f667",
       "message": "docs(plan): add final release governance gate"
-    },
-    {
-      "hash": "87980cf",
-      "message": "docs(dashboard): refresh strategic snapshot"
-    },
-    {
-      "hash": "8be3829",
-      "message": "fix(dashboard): focus strategic view on questions"
     }
   ],
   "fileGroups": [
