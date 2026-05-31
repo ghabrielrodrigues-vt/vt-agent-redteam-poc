@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-31T03:15:43.415Z",
+  "generatedAt": "2026-05-31T03:26:55.722Z",
   "git": {
     "branch": "main",
     "isDirty": true,
@@ -17,8 +17,17 @@
   },
   "strategicView": {
     "verdict": "Greenlight with active conditions",
-    "summary": "Phase 1A is now 6/7; F3-F6 are accepted and the next strategic control point is F7 release tagging.",
+    "summary": "Phase 1A is now 7/7; framework v0.1.0 is tagged and the next strategic control point is Phase 1B SOO integration.",
     "iterations": [
+      {
+        "iteration": "F7 release tag",
+        "status": "accepted",
+        "result": "Framework package version bumped to 0.1.0, commit bd3b1bef7fffd20dde1b1a36348199810ea6cae9 pushed to main, annotated tag v0.1.0 pushed, GitHub tag ref is visible, and pip install from the v0.1.0 tag built and installed vt-agent-redteam-0.1.0.",
+        "tag": "v0.1.0",
+        "commit": "bd3b1bef7fffd20dde1b1a36348199810ea6cae9",
+        "tagObjectSha": "ac348b6ab497b40a97c5570d34595a9e16725e20",
+        "installTarget": "git+ssh://git@github.com/ghabrielrodrigues-vt/vt-agent-redteam-poc.git@v0.1.0#subdirectory=prototype"
+      },
       {
         "iteration": "F6 acceptance evidence",
         "status": "accepted",
@@ -76,7 +85,7 @@
       {
         "iteration": "Current iteration",
         "status": "current",
-        "result": "F7 is active with 0/3 criteria complete. Finish this before starting SOO integration work."
+        "result": "S1 is active with 1/6 criteria complete. Finish this before starting SOO integration work."
       },
       {
         "iteration": "F1 delivery",
@@ -91,37 +100,49 @@
     ]
   },
   "currentTask": {
-    "id": "F7",
-    "title": "v0.1.0 release tag",
-    "detail": "Tag framework once F1-F6 are stable and documented.",
+    "id": "S1",
+    "title": "language-tutor manifest",
+    "detail": "Create the first SOO manifest for the tutor agent.",
     "criteria": [
       {
-        "label": "pyproject version bumped to 0.1.0",
+        "label": "language-tutor manifest exists",
         "done": false
       },
       {
-        "label": "git tag v0.1.0 exists locally",
+        "label": "agent_name declared",
         "done": false
       },
       {
-        "label": "Install target resolves from tag",
+        "label": "policy profile declared",
+        "done": false
+      },
+      {
+        "label": "Expected profile references language_tutor",
+        "done": false
+      },
+      {
+        "label": "LiveKit staging/production config exists",
+        "done": true
+      },
+      {
+        "label": "validate-manifest evidence captured",
         "done": false
       }
     ],
-    "criteriaComplete": 0,
-    "criteriaTotal": 3,
+    "criteriaComplete": 1,
+    "criteriaTotal": 6,
     "done": false,
     "status": "current",
-    "phase": "Phase 1A - Framework hardening"
+    "phase": "Phase 1B - SOO integration"
   },
   "progress": {
-    "done": 6,
+    "done": 7,
     "total": 17,
-    "percent": 35
+    "percent": 41
   },
   "nextAction": {
-    "title": "F7 - v0.1.0 release tag",
-    "detail": "Tag framework once F1-F6 are stable and documented."
+    "title": "S1 - language-tutor manifest",
+    "detail": "Create the first SOO manifest for the tutor agent."
   },
   "metrics": [
     {
@@ -365,24 +386,28 @@
           "criteria": [
             {
               "label": "pyproject version bumped to 0.1.0",
-              "done": false
+              "done": true
             },
             {
               "label": "git tag v0.1.0 exists locally",
-              "done": false
+              "done": true
+            },
+            {
+              "label": "Remote tag visible on GitHub",
+              "done": true
             },
             {
               "label": "Install target resolves from tag",
-              "done": false
+              "done": true
             }
           ],
-          "criteriaComplete": 0,
-          "criteriaTotal": 3,
-          "done": false,
-          "status": "current"
+          "criteriaComplete": 4,
+          "criteriaTotal": 4,
+          "done": true,
+          "status": "done"
         }
       ],
-      "done": 6,
+      "done": 7,
       "total": 7
     },
     {
@@ -422,7 +447,7 @@
           "criteriaComplete": 1,
           "criteriaTotal": 6,
           "done": false,
-          "status": "pending"
+          "status": "current"
         },
         {
           "id": "S2",
@@ -773,24 +798,24 @@
   ],
   "commits": [
     {
+      "hash": "bd3b1be",
+      "message": "release(framework): bump package to v0.1.0"
+    },
+    {
+      "hash": "b23e047",
+      "message": "fix(dashboard): handle malformed local routes"
+    },
+    {
+      "hash": "4ed189b",
+      "message": "fix(dashboard): avoid snapshot churn while serving"
+    },
+    {
+      "hash": "519f1f6",
+      "message": "docs(framework): record F6 actions acceptance"
+    },
+    {
       "hash": "c5420a3",
       "message": "feat(framework): redteam mvp dashboard and gates"
-    },
-    {
-      "hash": "7bbaffd",
-      "message": "docs: AGENTS.md + codex-transfer bundle for cross-tool portability"
-    },
-    {
-      "hash": "ad551b8",
-      "message": "feat(framework): F1 LangfuseTraceRunner — agent_native_transcript path"
-    },
-    {
-      "hash": "ba08f21",
-      "message": "docs: v0 plan v1.1 — resolve boss-review conditions"
-    },
-    {
-      "hash": "9b2ace1",
-      "message": "docs: v2.1 spec hardening — Mermaid diagrams, condensed brief, executive summary"
     }
   ],
   "fileGroups": [
@@ -812,9 +837,9 @@
           "path": "docs/v0-implementation-plan.codex-transfer.md",
           "exists": true,
           "href": "/docs/v0-implementation-plan.codex-transfer.md",
-          "lines": 169,
-          "size": 11588,
-          "updatedAt": "2026-05-30T22:18:09.854Z",
+          "lines": 172,
+          "size": 11165,
+          "updatedAt": "2026-05-31T03:25:17.507Z",
           "note": null
         },
         {
@@ -1044,7 +1069,7 @@
           "href": "/prototype/pyproject.toml",
           "lines": 56,
           "size": 1061,
-          "updatedAt": "2026-05-23T17:00:50.000Z",
+          "updatedAt": "2026-05-31T03:21:32.258Z",
           "note": null
         }
       ]

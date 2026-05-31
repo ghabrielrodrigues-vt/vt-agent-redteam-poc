@@ -258,3 +258,74 @@ Validation after post-acceptance review:
 - `git diff --check`: passed.
 - `dashboard/data/redteam-status.json` regenerates with F6 at 4/4 and F7 as
   current.
+
+## F7 Review: v0.1.0 Release Tag
+
+### Strategic View
+
+Verdict: accepted.
+
+Rationale:
+
+- Phase 1A framework work is complete.
+- `prototype/pyproject.toml` is bumped to `0.1.0`.
+- `vt_agent_redteam.__version__` is bumped to `0.1.0`.
+- `prototype/README.md` now labels the prototype as `v0.1.0`.
+- Main branch contains release commit
+  `bd3b1bef7fffd20dde1b1a36348199810ea6cae9`.
+- Annotated tag `v0.1.0` is pushed.
+
+Release evidence:
+
+- Remote tag visible on GitHub: `refs/tags/v0.1.0`.
+- Tag object SHA: `ac348b6ab497b40a97c5570d34595a9e16725e20`.
+- Tag target commit: `bd3b1bef7fffd20dde1b1a36348199810ea6cae9`.
+- Install target:
+  `git+ssh://git@github.com/ghabrielrodrigues-vt/vt-agent-redteam-poc.git@v0.1.0#subdirectory=prototype`.
+- Install from v0.1.0 tag resolved.
+- Pip built wheel `vt_agent_redteam-0.1.0-py3-none-any.whl`.
+- Pip output: `Successfully installed vt-agent-redteam-0.1.0`.
+- Installed metadata reports version `0.1.0`.
+
+### Review Agent Findings
+
+Blocking acceptance item:
+
+- None pending.
+
+Non-blocking concern:
+
+- The install verification used `--no-deps` to isolate Git/tag/package
+  resolution. The console script was not executed in that clean venv because
+  runtime dependencies were intentionally skipped. Local project venv validation
+  covered `vt-redteam --version`.
+
+Validated locally:
+
+- `cd prototype && .venv/bin/python -m pytest`: 101 passed, 20 warnings.
+- `cd prototype && .venv/bin/vt-redteam --version`: `vt-agent-redteam 0.1.0`.
+- `node --check dashboard/scripts/redteam-dashboard.mjs`: passed.
+- `git diff --check`: passed.
+
+### Post-Release Review
+
+Strategic View verdict: accepted. Close Phase 1A and promote S1 as current.
+
+Review Agent verdict: no blockers.
+
+Verified after review:
+
+- `HEAD`, `origin/main`, and `v0.1.0^{}` point to
+  `bd3b1bef7fffd20dde1b1a36348199810ea6cae9`.
+- Local tag is annotated: object
+  `ac348b6ab497b40a97c5570d34595a9e16725e20`, target `bd3b1be`.
+- Remote tag exists: `refs/tags/v0.1.0` at
+  `ac348b6ab497b40a97c5570d34595a9e16725e20`.
+- `dashboard/data/redteam-status.json` shows F7 at 4/4 done and S1 as the
+  current task.
+
+Residual non-blocking notes:
+
+- Dashboard release criteria are evidence-document driven rather than live
+  network checks.
+- Tag is unsigned; no current release policy requires signed tags.

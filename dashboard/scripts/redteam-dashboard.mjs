@@ -121,6 +121,14 @@ function hasGreenActionsEvidence() {
   return existsSync(path.join(repoRoot, ".github/workflows/redteam.yml")) && (hasLegacyTransferEvidence || (hasRunUrl && hasHeadSha));
 }
 
+function f7ReleaseEvidence() {
+  const reviewReport = read("docs/review-reports.md");
+  return {
+    remoteTag: /refs\/tags\/v0\.1\.0|Remote tag visible on GitHub/i.test(reviewReport),
+    installResolved: /Successfully installed vt-agent-redteam-0\.1\.0|Install from v0\.1\.0 tag resolved/i.test(reviewReport),
+  };
+}
+
 function hasAbs(absPath, pattern) {
   return pattern.test(readAbs(absPath));
 }
@@ -298,10 +306,12 @@ function buildTasks() {
     criterion("Green Actions run recorded", hasGreenActionsEvidence()),
   ];
 
+  const f7Evidence = f7ReleaseEvidence();
   const f7Criteria = [
     criterion("pyproject version bumped to 0.1.0", has("prototype/pyproject.toml", /version\s*=\s*["']0\.1\.0["']/)),
     criterion("git tag v0.1.0 exists locally", Boolean(run("git", ["tag", "--list", "v0.1.0"]))),
-    criterion("Install target resolves from tag", Boolean(run("git", ["tag", "--list", "v0.1.0"])) && has("prototype/pyproject.toml", /vt-agent-redteam|vt_agent_redteam/)),
+    criterion("Remote tag visible on GitHub", f7Evidence.remoteTag),
+    criterion("Install target resolves from tag", f7Evidence.installResolved),
   ];
 
   const s1Criteria = manifestCriteria("language-tutor", "language_tutor");

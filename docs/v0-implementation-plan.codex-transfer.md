@@ -41,11 +41,11 @@ These are non-negotiable and apply to every action you take in this repo:
 `git log --oneline -5` (most recent first):
 
 ```
-ad551b8 feat(framework): F1 LangfuseTraceRunner — agent_native_transcript path
-ba08f21 docs: v0 plan v1.1 — resolve boss-review conditions
-9b2ace1 docs: v2.1 spec hardening — Mermaid diagrams, condensed brief, executive summary
-535d304 docs: add v0 implementation plan, summary, handoff, and boss review
-5b80a43 feat: direct-llm runner + manifest validate + threshold enforcement + Phase 1 schema
+bd3b1be release(framework): bump package to v0.1.0
+b23e047 fix(dashboard): handle malformed local routes
+4ed189b fix(dashboard): avoid snapshot churn while serving
+519f1f6 docs(framework): record F6 actions acceptance
+c5420a3 feat(framework): redteam mvp dashboard and gates
 ```
 
 Phase 1A progress:
@@ -53,28 +53,31 @@ Phase 1A progress:
 | Task | Status | Where |
 |------|--------|-------|
 | F1 LangfuseTraceRunner + 17 unit tests | ✅ Done | `prototype/src/vt_agent_redteam/runners/langfuse_trace_runner.py`, `prototype/tests/test_langfuse_runner.py`, exported via `prototype/src/vt_agent_redteam/runners/__init__.py` |
-| F2 manifest_loader extensions (`coverage_status`, `exclude_tags`) | Not started | Pending. Plan §3 F2. |
-| F3 Severity precedence gate + override read path | Not started | Plan §3 F3. Requires plan §2.6 + §2.7 transcribed into framework code. |
-| F4 PII redaction at write | Not started | Plan §3 F4. Closes spec §15.3 documented gap. |
-| F5 CLI flags `--mode`, `--environment`, `--enforce-threshold` | Not started | Plan §3 F5. |
-| F6 Reusable workflow YAML | Not started | Plan §3 F6. |
-| F7 Tag v0.1.0 | Not started | Final Phase 1A step. |
+| F2 manifest_loader extensions (`coverage_status`, `exclude_tags`) | ✅ Done | `prototype/src/vt_agent_redteam/types.py`, `prototype/src/vt_agent_redteam/manifest_loader.py`, ADR-002. |
+| F3 Severity precedence gate + override read path | ✅ Done | `prototype/src/vt_agent_redteam/harness.py`, `prototype/src/vt_agent_redteam/storage/postgres_writer.py`, `prototype/tests/test_override_gate.py`, ADR-003. |
+| F4 PII redaction at write | ✅ Done | `prototype/src/vt_agent_redteam/storage/redaction.py`, writer redaction path, `prototype/tests/test_redaction.py`, ADR-005. |
+| F5 CLI flags `--mode`, `--environment`, `--enforce-threshold` | ✅ Done | `prototype/src/vt_agent_redteam/cli.py`, manifest-driven runner modes, run summary smoke tests. |
+| F6 Reusable workflow YAML | ✅ Done | `.github/workflows/redteam.yml`, fixture manifest, green Actions run `26701859150`. |
+| F7 Tag v0.1.0 | ✅ Done | `prototype/pyproject.toml` version `0.1.0`, tag `v0.1.0`, pip install from tag resolves. |
 
-Test suite as of `ad551b8`: **62/62 passing in 9.46s** (zero regressions from the F1 addition).
+Test suite as of `bd3b1be`: **101/101 passing in 9.71s**.
 
-Local commits ahead of `origin/main`: **4**. No push has been performed.
+Local branch is pushed to `origin/main`. Tag `v0.1.0` is pushed.
 
 ---
 
 ## 4. What to do next — recommended sequence
 
-1. **Read the plan §3 F2** then implement it. F2 is small (Pydantic schema extension for two new fields in `prototype/src/vt_agent_redteam/types.py`) with at most one new test file. Estimate: 30–45 min. Plan-deviation risk: low.
-2. **F3 next.** This is the most substantive remaining Phase 1A task. The plan §2.6 + §2.7 transcribed the severity assignment table and the spec §13 precedence table verbatim — your job is to translate those tables into `harness.py` code plus a new `test_severity_gate.py` exercising at least eight cases (every row of the §2.7 table).
-3. **F4.** PII redaction at write time. Plan §3 F4 spec — regex strips (SSN, phone, email, credit card, `synthetic.learner_id`) plus spaCy NER. The `response_hash` must be computed pre-redaction. New file `prototype/src/vt_agent_redteam/storage/redaction.py`, new test `test_redaction.py`.
-4. **F5 (CLI), F6 (workflow YAML), F7 (tag v0.1.0).** These are sequential plumbing tasks.
-5. **Author the remaining ADRs.** Plan §7 lists six total. ADR-001 is done; author ADR-002 alongside F2, ADR-005 alongside F3, etc. Each ≤ 1 page using Michael Nygard's Context-Decision-Status-Consequences format.
+1. **Start Phase 1B in `student-onboarding-orchestration`.** First target: S1
+   language-tutor manifest at `agents/language-tutor/.redteam/manifest.yaml`.
+2. **Do not start SOO database or secrets work without Ask First.** S5 secrets
+   and S7 Supabase JWT require explicit user involvement.
+3. **Use framework tag `v0.1.0`.** Consumer workflow references should pin the
+   reusable workflow/package to the release tag.
+4. **Keep dashboard/review reports updated after each delivery iteration.**
 
-After Phase 1A ships (tag `v0.1.0`), Phase 1B is the consumer-repo integration (manifests + workflow YAML + Supabase migration in `student-onboarding-orchestration`).
+Phase 1A has shipped. Phase 1B is the consumer-repo integration (manifests +
+workflow YAML + Supabase migration in `student-onboarding-orchestration`).
 
 ---
 
