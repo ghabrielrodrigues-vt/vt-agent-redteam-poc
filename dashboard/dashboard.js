@@ -63,6 +63,13 @@ const STATIC_COPY = {
     "meta.needsAttention": "Needs attention",
     "meta.latestFive": "Latest 5",
     "meta.glossary": "Dashboard vocabulary",
+    "tokens.title": "Token spend",
+    "tokens.input": "Input",
+    "tokens.cached": "Cached",
+    "tokens.output": "Output",
+    "tokens.reasoning": "Reasoning",
+    "tokens.sessions": "sessions",
+    "tokens.updated": "updated",
   },
   pt: {
     "hero.eyebrow": "LiveKit Agents Red Team MVP",
@@ -115,6 +122,13 @@ const STATIC_COPY = {
     "meta.needsAttention": "Precisa de atencao",
     "meta.latestFive": "Ultimos 5",
     "meta.glossary": "Vocabulario do dashboard",
+    "tokens.title": "Tokens gastos",
+    "tokens.input": "Input",
+    "tokens.cached": "Cached",
+    "tokens.output": "Output",
+    "tokens.reasoning": "Reasoning",
+    "tokens.sessions": "sessoes",
+    "tokens.updated": "atualizado",
   },
 };
 
@@ -369,6 +383,17 @@ function formatDate(value) {
     minute: "2-digit",
     second: "2-digit",
   });
+}
+
+function formatCompactNumber(value) {
+  return new Intl.NumberFormat(state.language === "pt" ? "pt-BR" : "en", {
+    maximumFractionDigits: 1,
+    notation: "compact",
+  }).format(Number(value ?? 0));
+}
+
+function formatNumber(value) {
+  return new Intl.NumberFormat(state.language === "pt" ? "pt-BR" : "en").format(Number(value ?? 0));
 }
 
 function statusTone(status) {
@@ -821,6 +846,19 @@ function renderCommits(commits) {
   }
 }
 
+function renderTokenCounter(usage) {
+  if (!usage) return;
+  setText("#tokenCounterValue", formatCompactNumber(usage.totalTokens));
+  setText(
+    "#tokenCounterMeta",
+    `${formatNumber(usage.sessionCount)} ${t("tokens.sessions")} · ${t("tokens.updated")} ${formatDate(usage.updatedAt)}`
+  );
+  setText("#tokenInputValue", formatCompactNumber(usage.inputTokens));
+  setText("#tokenCachedValue", formatCompactNumber(usage.cachedInputTokens));
+  setText("#tokenOutputValue", formatCompactNumber(usage.outputTokens));
+  setText("#tokenReasoningValue", formatCompactNumber(usage.reasoningOutputTokens));
+}
+
 function renderStatus(data) {
   state.lastData = data;
   applyStaticCopy();
@@ -874,6 +912,7 @@ function renderStatus(data) {
   renderRisks(data.risks);
   renderCommits(data.commits);
   renderGlossary();
+  renderTokenCounter(data.tokenUsage);
 }
 
 function renderLoadError(error) {

@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-05-31T12:27:34.100Z",
+  "generatedAt": "2026-05-31T12:44:31.184Z",
   "git": {
     "branch": "main",
-    "isDirty": false,
-    "shortStatus": "clean working tree",
+    "isDirty": true,
+    "shortStatus": "uncommitted changes present",
     "aheadBehind": "ahead 0, behind 0",
     "ahead": 0,
     "behind": 0,
@@ -413,6 +413,48 @@
         "risk": "medium",
         "why": "Multiple agents and PR paths can trigger concurrent checks; provider quotas and CI minutes may become the limiting factor.",
         "measurement": "parallel job count, total CI time, provider 429s."
+      }
+    ]
+  },
+  "tokenUsage": {
+    "source": "Codex local session logs",
+    "scope": "Red Team MVP project sessions since 2026-05-30",
+    "updatedAt": "2026-05-31T12:44:31.062Z",
+    "sessionCount": 4,
+    "inputTokens": 194229797,
+    "cachedInputTokens": 185490560,
+    "outputTokens": 525587,
+    "reasoningOutputTokens": 157108,
+    "totalTokens": 194755384,
+    "effectiveInputTokens": 8739237,
+    "sessions": [
+      {
+        "id": "019e7b19-79cc-7b71-ba5e-0519571acd0e",
+        "label": "Ler contexto vt4s e redteam",
+        "totalTokens": 166295381,
+        "updatedAt": "2026-05-31T12:44:31.062Z",
+        "contextWindow": 258400
+      },
+      {
+        "id": "019e7b57-8ac3-7f62-a159-2b9282616e8a",
+        "label": "Criar checklist de revisão",
+        "totalTokens": 17646867,
+        "updatedAt": "2026-05-31T12:25:32.464Z",
+        "contextWindow": 258400
+      },
+      {
+        "id": "019e7b57-b2b5-7591-8e53-e385433f7fbd",
+        "label": "Definir atualização da Strategic Vue",
+        "totalTokens": 8293247,
+        "updatedAt": "2026-05-31T12:25:22.016Z",
+        "contextWindow": 258400
+      },
+      {
+        "id": "019e7b57-dfb0-79f0-a509-d01f5276e7ba",
+        "label": "Investigar F2 do red team",
+        "totalTokens": 2519889,
+        "updatedAt": "2026-05-31T12:22:46.273Z",
+        "contextWindow": 258400
       }
     ]
   },
@@ -1330,24 +1372,24 @@
   ],
   "commits": [
     {
+      "hash": "380f338",
+      "message": "feat(dashboard): make phase map collapsible"
+    },
+    {
+      "hash": "f0acafb",
+      "message": "feat(dashboard): add glossary and language toggle"
+    },
+    {
+      "hash": "45b543f",
+      "message": "docs(dashboard): sync S4 status snapshot"
+    },
+    {
       "hash": "f27cdd7",
       "message": "docs(dashboard): refresh S4 status snapshot"
     },
     {
       "hash": "29e49e1",
       "message": "docs(dashboard): record S4 workflow review"
-    },
-    {
-      "hash": "870e53b",
-      "message": "docs(dashboard): sync S3 status snapshot"
-    },
-    {
-      "hash": "5ab2cc1",
-      "message": "docs(dashboard): refresh S3 status snapshot"
-    },
-    {
-      "hash": "c84f4f1",
-      "message": "docs(dashboard): record S3 support agent review"
     }
   ],
   "fileGroups": [

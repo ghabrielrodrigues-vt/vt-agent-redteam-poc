@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { execFileSync } from "node:child_process";
-import { createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { closeSync, createReadStream, existsSync, mkdirSync, openSync, readFileSync, readSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { createServer } from "node:http";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -16,6 +16,12 @@ const outputPath = path.join(dashboardRoot, "data", "redteam-status.json");
 const testStatusPath = path.join(dashboardRoot, "data", "test-status.json");
 const strategicViewPath = path.join(dashboardRoot, "data", "strategic-view.json");
 const operationalMetricsPath = path.join(repoRoot, "docs", "operational-metrics", "status.json");
+const codexHome = "/Users/gupy/.codex";
+const codexSessionsRoot = path.join(codexHome, "sessions");
+const codexSessionIndexPath = path.join(codexHome, "session_index.jsonl");
+const tokenTrackingStart = new Date("2026-05-30T00:00:00Z");
+const tokenThreadPattern = /red.?team|vt4s|strategic|revis[aã]o|f2|checklist/i;
+const tokenThreadExcludePattern = /keep pr 1667/i;
 
 const args = new Set(process.argv.slice(2));
 const portArgIndex = process.argv.indexOf("--port");
@@ -110,6 +116,33 @@ function readAbs(absPath) {
   return existsSync(absPath) ? readFileSync(absPath, "utf8") : "";
 }
 
+function readFirstLine(absPath) {
+  if (!existsSync(absPath)) return "";
+  const fd = openSync(absPath, "r");
+  try {
+    const buffer = Buffer.alloc(1024 * 1024);
+    const bytesRead = readSync(fd, buffer, 0, buffer.length, 0);
+    return buffer.subarray(0, bytesRead).toString("utf8").split("\n", 1)[0];
+  } finally {
+    closeSync(fd);
+  }
+}
+
+function readJsonl(filePath) {
+  if (!existsSync(filePath)) return [];
+  return readFileSync(filePath, "utf8")
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
+}
+
 function has(relativePath, pattern) {
   return pattern.test(read(relativePath));
 }
@@ -202,6 +235,109 @@ function operationalReadiness() {
     phaseGates: [],
     failureModes: [],
     bottlenecks: [],
+  };
+}
+
+function sessionIndex() {
+  const index = new Map();
+  for (const entry of readJsonl(codexSessionIndexPath)) {
+    if (entry.id) index.set(entry.id, entry.thread_name ?? "Untitled session");
+  }
+  return index;
+}
+
+function collectSessionFiles(root, files = []) {
+  if (!existsSync(root)) return files;
+  for (const name of readdirSync(root)) {
+    const absPath = path.join(root, name);
+    const stat = statSync(absPath);
+    if (stat.isDirectory()) {
+      collectSessionFiles(absPath, files);
+    } else if (name.endsWith(".jsonl") && stat.mtime >= tokenTrackingStart) {
+      files.push(absPath);
+    }
+  }
+  return files;
+}
+
+function sessionMeta(filePath) {
+  const firstLine = readFirstLine(filePath);
+  if (!firstLine) return null;
+  try {
+    const entry = JSON.parse(firstLine);
+    return entry.type === "session_meta" ? entry.payload : null;
+  } catch {
+    return null;
+  }
+}
+
+function latestTokenCount(filePath) {
+  let latest = null;
+  for (const entry of readJsonl(filePath)) {
+    if (entry.type === "event_msg" && entry.payload?.type === "token_count") {
+      latest = {
+        timestamp: entry.timestamp,
+        usage: entry.payload.info?.total_token_usage ?? {},
+        contextWindow: entry.payload.info?.model_context_window ?? null,
+      };
+    }
+  }
+  return latest;
+}
+
+function addUsage(a, b) {
+  return {
+    inputTokens: a.inputTokens + (b.input_tokens ?? 0),
+    cachedInputTokens: a.cachedInputTokens + (b.cached_input_tokens ?? 0),
+    outputTokens: a.outputTokens + (b.output_tokens ?? 0),
+    reasoningOutputTokens: a.reasoningOutputTokens + (b.reasoning_output_tokens ?? 0),
+    totalTokens: a.totalTokens + (b.total_tokens ?? 0),
+  };
+}
+
+function tokenUsage() {
+  const names = sessionIndex();
+  const sessions = [];
+  let totals = {
+    inputTokens: 0,
+    cachedInputTokens: 0,
+    outputTokens: 0,
+    reasoningOutputTokens: 0,
+    totalTokens: 0,
+  };
+
+  for (const filePath of collectSessionFiles(codexSessionsRoot)) {
+    const meta = sessionMeta(filePath);
+    if (!meta?.id) continue;
+
+    const threadName = names.get(meta.id) ?? "Untitled session";
+    const isProjectCwd = meta.cwd === workspaceRoot || meta.cwd === repoRoot || meta.cwd === sooRoot;
+    const isRelevantName = tokenThreadPattern.test(threadName);
+    const isExcluded = tokenThreadExcludePattern.test(threadName);
+    if (!isProjectCwd || !isRelevantName || isExcluded) continue;
+
+    const latest = latestTokenCount(filePath);
+    if (!latest) continue;
+
+    totals = addUsage(totals, latest.usage);
+    sessions.push({
+      id: meta.id,
+      label: threadName,
+      totalTokens: latest.usage.total_tokens ?? 0,
+      updatedAt: latest.timestamp,
+      contextWindow: latest.contextWindow,
+    });
+  }
+
+  sessions.sort((a, b) => b.totalTokens - a.totalTokens);
+  return {
+    source: "Codex local session logs",
+    scope: "Red Team MVP project sessions since 2026-05-30",
+    updatedAt: sessions.reduce((latest, item) => (!latest || item.updatedAt > latest ? item.updatedAt : latest), null),
+    sessionCount: sessions.length,
+    ...totals,
+    effectiveInputTokens: totals.inputTokens - totals.cachedInputTokens,
+    sessions,
   };
 }
 
@@ -655,6 +791,7 @@ function buildStatus() {
     testStatus: tests,
     strategicView: strategicView(phases),
     operationalReadiness: operationalReadiness(),
+    tokenUsage: tokenUsage(),
     currentTask,
     progress: {
       done,

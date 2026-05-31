@@ -72,7 +72,7 @@ button {
   gap: 18px;
   margin: 0 auto;
   max-width: 1720px;
-  padding: 24px;
+  padding: 24px 24px 132px;
 }
 
 .hero-panel,
@@ -216,6 +216,92 @@ h3 {
   background: var(--success-100);
   border-color: rgba(43, 182, 115, 0.28);
   color: #0b6b40;
+}
+
+.token-counter {
+  backdrop-filter: blur(18px);
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(198, 149, 244, 0.46);
+  border-radius: 8px;
+  bottom: 18px;
+  box-shadow: var(--shadow-md);
+  color: var(--purple-950);
+  display: grid;
+  gap: 8px;
+  left: 18px;
+  max-width: min(300px, calc(100vw - 36px));
+  padding: 12px;
+  position: fixed;
+  z-index: 50;
+}
+
+.token-counter-top {
+  align-items: end;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.token-counter-top span {
+  color: var(--gray-600);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.token-counter-top strong {
+  color: var(--purple-800);
+  font-family: var(--font-mono);
+  font-size: 1.45rem;
+  font-weight: 900;
+  line-height: 0.95;
+}
+
+.token-counter-meta {
+  color: var(--gray-600);
+  font-size: 0.7rem;
+  font-weight: 750;
+  line-height: 1.25;
+}
+
+.token-counter-breakdown {
+  display: grid;
+  gap: 6px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+}
+
+.token-counter-breakdown div {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 7px;
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 6px;
+}
+
+.token-counter-breakdown dt {
+  color: var(--gray-600);
+  font-size: 0.58rem;
+  font-weight: 900;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.token-counter-breakdown dd {
+  color: var(--purple-900);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1.1;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .quick-task-link.current {
@@ -1644,5 +1730,16 @@ h3 {
 
   .detail-panel summary {
     align-items: start;
+  }
+
+  .token-counter {
+    bottom: 12px;
+    left: 12px;
+    max-width: none;
+    right: 12px;
+  }
+
+  .token-counter-breakdown {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
