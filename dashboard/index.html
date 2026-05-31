@@ -248,7 +248,6 @@
     <aside
       class="token-counter"
       id="tokenCounter"
-      role="button"
       tabindex="0"
       aria-expanded="true"
       aria-label="Collapse token usage counter"
@@ -278,6 +277,29 @@
           <dd id="tokenReasoningValue">--</dd>
         </div>
       </dl>
+      <button class="token-counter-details" id="tokenUsageDialogButton" type="button" data-i18n="tokens.detailsButton">
+        Explain spend
+      </button>
     </aside>
+    <dialog class="token-dialog" id="tokenUsageDialog" aria-labelledby="tokenDialogTitle">
+      <div class="token-dialog-shell">
+        <div class="token-dialog-header">
+          <div>
+            <span class="label" data-i18n="tokens.dialogEyebrow">Usage report</span>
+            <h2 id="tokenDialogTitle" data-i18n="tokens.dialogTitle">How tokens were spent</h2>
+          </div>
+          <button class="token-dialog-close" id="tokenUsageDialogClose" type="button" data-i18n="tokens.close">Close</button>
+        </div>
+        <p class="token-dialog-summary" id="tokenDialogSummary">Loading token usage report.</p>
+        <div class="token-dialog-stat-grid" id="tokenDialogStats"></div>
+        <div class="token-dialog-section">
+          <h3 data-i18n="tokens.heavyUsersTitle">Heavy users</h3>
+          <ol class="token-heavy-list" id="tokenHeavyUsers"></ol>
+        </div>
+        <p class="token-dialog-note" data-i18n="tokens.billingNote">
+          Billing can differ from this local operational view. This report uses Codex local session logs and includes cached input, output, and reasoning tokens.
+        </p>
+      </div>
+    </dialog>
   </body>
 </html>

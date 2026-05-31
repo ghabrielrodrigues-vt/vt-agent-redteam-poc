@@ -75,6 +75,15 @@ const STATIC_COPY = {
     "tokens.collapseTitle": "Click to collapse token usage counter",
     "tokens.expandLabel": "Expand token usage counter",
     "tokens.expandTitle": "Click to expand token usage counter",
+    "tokens.detailsButton": "Explain spend",
+    "tokens.dialogEyebrow": "Usage report",
+    "tokens.dialogTitle": "How tokens were spent",
+    "tokens.close": "Close",
+    "tokens.heavyUsersTitle": "Heavy users",
+    "tokens.billingNote": "Billing can differ from this local operational view. This report uses Codex local session logs and includes cached input, output, and reasoning tokens.",
+    "tokens.total": "Total",
+    "tokens.effectiveInput": "Input minus cache",
+    "tokens.source": "Source",
   },
   pt: {
     "hero.eyebrow": "LiveKit Agents Red Team MVP",
@@ -138,6 +147,15 @@ const STATIC_COPY = {
     "tokens.collapseTitle": "Clique para colapsar o contador de tokens",
     "tokens.expandLabel": "Expandir contador de tokens",
     "tokens.expandTitle": "Clique para expandir o contador de tokens",
+    "tokens.detailsButton": "Explicar gasto",
+    "tokens.dialogEyebrow": "Relatorio de uso",
+    "tokens.dialogTitle": "Como os tokens foram gastos",
+    "tokens.close": "Fechar",
+    "tokens.heavyUsersTitle": "Heavy users",
+    "tokens.billingNote": "A cobranca pode diferir desta visao operacional local. Este relatorio usa logs locais do Codex e inclui input cached, output e reasoning tokens.",
+    "tokens.total": "Total",
+    "tokens.effectiveInput": "Input sem cache",
+    "tokens.source": "Fonte",
   },
 };
 
@@ -410,6 +428,13 @@ function formatCompactNumber(value) {
 
 function formatNumber(value) {
   return new Intl.NumberFormat(state.language === "pt" ? "pt-BR" : "en").format(Number(value ?? 0));
+}
+
+function formatPercent(value) {
+  return new Intl.NumberFormat(state.language === "pt" ? "pt-BR" : "en", {
+    maximumFractionDigits: 1,
+    style: "percent",
+  }).format(Number(value ?? 0));
 }
 
 function statusTone(status) {
@@ -873,6 +898,62 @@ function renderTokenCounter(usage) {
   setText("#tokenCachedValue", formatCompactNumber(usage.cachedInputTokens));
   setText("#tokenOutputValue", formatCompactNumber(usage.outputTokens));
   setText("#tokenReasoningValue", formatCompactNumber(usage.reasoningOutputTokens));
+  renderTokenDialog(usage);
+}
+
+function renderTokenDialog(usage) {
+  const statsRoot = $("#tokenDialogStats");
+  const heavyRoot = $("#tokenHeavyUsers");
+  if (!statsRoot || !heavyRoot) return;
+
+  const topSession = usage.sessions?.[0];
+  const topShare = usage.totalTokens ? (topSession?.totalTokens ?? 0) / usage.totalTokens : 0;
+  const summary =
+    state.language === "pt"
+      ? `Fonte: ${usage.source}. Escopo: ${usage.scope}. Total de ${formatNumber(usage.totalTokens)} tokens em ${formatNumber(usage.sessionCount)} sessoes. Maior consumo: ${topSession?.label ?? "n/a"} (${formatPercent(topShare)}).`
+      : `Source: ${usage.source}. Scope: ${usage.scope}. Total ${formatNumber(usage.totalTokens)} tokens across ${formatNumber(usage.sessionCount)} sessions. Heaviest use: ${topSession?.label ?? "n/a"} (${formatPercent(topShare)}).`;
+  setText("#tokenDialogSummary", summary);
+
+  const stats = [
+    [t("tokens.total"), usage.totalTokens],
+    [t("tokens.effectiveInput"), usage.effectiveInputTokens],
+    [t("tokens.cached"), usage.cachedInputTokens],
+    [t("tokens.output"), usage.outputTokens],
+    [t("tokens.reasoning"), usage.reasoningOutputTokens],
+  ];
+
+  statsRoot.innerHTML = "";
+  for (const [label, value] of stats) {
+    const item = document.createElement("article");
+    item.className = "token-dialog-stat";
+    item.innerHTML = `<span></span><strong></strong>`;
+    item.querySelector("span").textContent = label;
+    item.querySelector("strong").textContent = formatCompactNumber(value);
+    statsRoot.appendChild(item);
+  }
+
+  heavyRoot.innerHTML = "";
+  for (const session of usage.sessions?.slice(0, 6) ?? []) {
+    const share = usage.totalTokens ? session.totalTokens / usage.totalTokens : 0;
+    const item = document.createElement("li");
+    item.className = "token-heavy-item";
+    item.innerHTML = `
+      <div class="token-heavy-top">
+        <strong></strong>
+        <span></span>
+      </div>
+      <div class="token-heavy-bar"><span></span></div>
+      <small></small>
+    `;
+    item.querySelector("strong").textContent = session.label;
+    item.querySelector(".token-heavy-top span").textContent = formatCompactNumber(session.totalTokens);
+    item.querySelector(".token-heavy-bar span").style.width = `${Math.round(share * 100)}%`;
+    item.querySelector("small").textContent =
+      state.language === "pt"
+        ? `${formatPercent(share)} do total · atualizado ${formatDate(session.updatedAt)}`
+        : `${formatPercent(share)} of total · updated ${formatDate(session.updatedAt)}`;
+    heavyRoot.appendChild(item);
+  }
 }
 
 function updateTokenCounterChrome() {
@@ -887,6 +968,16 @@ function updateTokenCounterChrome() {
 function toggleTokenCounter() {
   state.tokenCounterCollapsed = !state.tokenCounterCollapsed;
   updateTokenCounterChrome();
+}
+
+function openTokenUsageDialog(event) {
+  event?.stopPropagation();
+  $("#tokenUsageDialog")?.showModal();
+}
+
+function closeTokenUsageDialog(event) {
+  event?.stopPropagation();
+  $("#tokenUsageDialog")?.close();
 }
 
 function renderStatus(data) {
@@ -980,11 +1071,21 @@ for (const button of document.querySelectorAll("[data-lang-button]")) {
 }
 
 const tokenCounter = $("#tokenCounter");
-tokenCounter?.addEventListener("click", toggleTokenCounter);
+tokenCounter?.addEventListener("click", (event) => {
+  if (event.target instanceof Element && event.target.closest("button")) return;
+  toggleTokenCounter();
+});
 tokenCounter?.addEventListener("keydown", (event) => {
+  if (event.target !== tokenCounter) return;
   if (event.key !== "Enter" && event.key !== " ") return;
   event.preventDefault();
   toggleTokenCounter();
+});
+
+$("#tokenUsageDialogButton")?.addEventListener("click", openTokenUsageDialog);
+$("#tokenUsageDialogClose")?.addEventListener("click", closeTokenUsageDialog);
+$("#tokenUsageDialog")?.addEventListener("click", (event) => {
+  if (event.target === event.currentTarget) closeTokenUsageDialog(event);
 });
 
 $("#refreshButton").addEventListener("click", loadStatus);
