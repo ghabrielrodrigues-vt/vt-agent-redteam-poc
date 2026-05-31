@@ -611,3 +611,67 @@ Remaining non-blocking concern:
   excluding unsupported tool-use coverage.
 - S3 dry-run result: 12/12 passed through the local stub path; OpenAI
   moderation was skipped in offline mode.
+
+## S4 Review: SOO redteam Workflow
+
+### Strategic View
+
+Verdict: approved with tracked deviation.
+
+Questions captured for follow-up:
+
+- Reusable workflow preference is superseded by the stronger requirement that
+  SOO jobs consume environment-scoped `redteam` secrets.
+- Dashboard copy should say direct thin SOO jobs use an explicit framework SHA
+  pin, not reusable workflow call.
+- S5 must prove the `redteam` environment contains staging-only secrets before
+  any live run is trusted.
+- `write-results` and `enforce-threshold` make S6/S7 DB readiness required
+  before non-dry live acceptance.
+- No prod/canary trigger is present; keep that absent until a later phase or
+  ADR explicitly opts in.
+- Path scoping must be proven in Actions: one agent path change should run only
+  the matching redteam job.
+- Fork PR behavior must be accepted: secret-backed jobs skip external fork PRs.
+- Operational metrics remain pending until a non-stub workflow run exists.
+
+### Review Agent Findings
+
+Initial blocker:
+
+- The first workflow candidate invoked the framework reusable workflow with
+  `secrets: inherit`. GitHub reusable workflow calls cannot consume SOO
+  environment-scoped secrets from the caller's `redteam` environment, so the
+  planned S5 secret model would not work.
+
+Fix applied:
+
+- Replaced reusable workflow calls with direct thin SOO jobs bound to
+  `environment: redteam`.
+- Each job installs the pinned `vt-agent-redteam` package, validates its
+  manifest, prepares a stable `REDTEAM_RUN_ID`, runs `vt-redteam` in
+  `agent-native-transcript` mode, writes results, enforces threshold, and
+  uploads a per-agent summary artifact.
+- Kept PR trigger scoped to `agents/**` plus the workflow file.
+- Kept per-agent `dorny/paths-filter@v3` fan-out.
+- Kept fork PR guard so secret-backed jobs do not run on external forks.
+- Kept staging target environment only; no production or canary trigger was
+  added.
+
+Final Review Agent verdict: blockers cleared.
+
+Remaining non-blocking concern:
+
+- Direct SOO jobs duplicate framework reusable workflow logic. This is accepted
+  for S4 to preserve environment-secret segregation, but future framework step
+  drift must be watched.
+
+### Validation
+
+- SOO branch: `redteam/v0-language-tutor-manifest`.
+- SOO file added: `.github/workflows/redteam.yml`.
+- SOO commit: `ci(redteam): add SOO redteam workflow`.
+- YAML parse: passed.
+- `git diff --check`: passed.
+- `vt-redteam validate-manifest` passed for `language-tutor`,
+  `language-checkpoint`, and `support-agent`.

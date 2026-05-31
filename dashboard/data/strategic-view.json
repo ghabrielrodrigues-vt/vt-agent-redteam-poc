@@ -1,32 +1,32 @@
 {
   "verdict": "Greenlight with active conditions",
-  "summary": "S3 support-agent manifest is accepted with active conditions. S4 must not consume the framework until a new hotfix tag or explicit SHA is pinned.",
+  "summary": "S4 SOO redteam workflow is approved with a tracked deviation: direct thin SOO jobs use an explicit framework SHA pin so environment-scoped redteam secrets can be enforced.",
   "iterations": [
     {
-      "iteration": "S3 support-agent manifest",
+      "iteration": "S4 SOO redteam workflow",
       "status": "accepted with conditions",
       "questions": [
-        "Will partial-no-tool-use and exclude_tags: [tool-misuse] remain visible so support_navigation is not presented as full coverage?",
-        "Does S3 evidence distinguish manifest/filter proof from runtime tool/navigation safety proof?",
-        "Is the resolved metadata fixture representative enough after aligning tutoringContext v1, compact subjectsRegistry, featureFlags, subjectExpertise, and salesCallHistory?"
+        "Is the reusable-workflow preference explicitly superseded by the stronger environment-scoped secret requirement?",
+        "Will one agent path change prove only the matching redteam job runs in GitHub Actions?",
+        "Do direct thin SOO jobs keep framework/package execution pinned to an explicit SHA?"
       ]
     },
     {
       "iteration": "Phase 1B next",
       "status": "current",
       "questions": [
-        "Can S4 add only the SOO redteam workflow without secrets, database, deploy, auth, or product workflow changes?",
-        "Will S4 pin the framework by reviewed tag or explicit SHA before live workflow use?",
-        "Will path-scoped workflow jobs keep the support-agent tool-use gap visible while validating all three manifests?"
+        "Can S5 prove the redteam environment contains staging-only LiveKit, Langfuse, OpenAI, DB, and Slack secrets without printing sensitive values?",
+        "Can S5 confirm support-agent-maya emits Langfuse correlation metadata despite using MAYA_LANGFUSE_* internally?",
+        "Does write-results plus enforce-threshold stay blocked from trusted live acceptance until S6/S7 DB readiness is proven?"
       ]
     },
     {
-      "iteration": "S3 operational conditions",
+      "iteration": "S4 operational conditions",
       "status": "planned",
       "questions": [
-        "Is avatar: lemonslice recorded as current SOO runtime truth, superseding the older avatar: none snippet?",
-        "Will S5 prove staging-only LiveKit, Langfuse, and DB secret wiring for support-agent-maya?",
-        "Do cost, latency, reliability, scalability, API-outage behavior, and bottlenecks remain dry-run only until non-stub workflow evidence exists?"
+        "Are no prod/canary triggers present before explicit later phase approval?",
+        "Do fork PRs skip secret-backed jobs as intended?",
+        "Do operational metrics remain pending until non-stub workflow evidence exists?"
       ]
     },
     {
