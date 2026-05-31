@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-31T11:50:48.820Z",
+  "generatedAt": "2026-05-31T12:06:50.090Z",
   "git": {
     "branch": "main",
     "isDirty": false,
@@ -17,25 +17,33 @@
   },
   "strategicView": {
     "verdict": "Greenlight with active conditions",
-    "summary": "S1 language-tutor manifest is accepted with active conditions. S4 must not consume the framework until a new hotfix tag or explicit SHA is pinned.",
+    "summary": "S2 language-checkpoint manifest is accepted with active conditions. S4 must not consume the framework until a new hotfix tag or explicit SHA is pinned.",
     "iterations": [
       {
-        "iteration": "S1 language-tutor manifest",
+        "iteration": "S2 language-checkpoint manifest",
         "status": "accepted with conditions",
         "questions": [
-          "Will S4 pin a new framework hotfix tag or explicit SHA before the consumer workflow depends on the dispatch-before-Langfuse path?",
-          "Is it documented that en/pt are adversarial prompt languages while spanish is the target tutor language?",
-          "Are fixtures.*, synthetic.*, and env.API_BASE_URL intentionally deferred to workflow execution?",
-          "Does the dashboard keep S1 operational evidence as manifest/dry-run only until non-stub runtime proof exists?"
+          "Is coverage_status: full still treated as provisional until non-stub S4/S5 runtime proof exists?",
+          "Are en/pt documented as adversarial prompt languages while spanish remains the checkpoint target language?",
+          "Does the checkpoint metadata cover goal_type, preferredMode, targets_block, and sample_targets exactly enough for dispatch?"
         ]
       },
       {
         "iteration": "Phase 1B next",
         "status": "current",
         "questions": [
-          "Should S2 reuse the S1 manifest pattern for language-checkpoint without secrets, database, deploy, or auth changes?",
+          "Should S3 declare support-agent as partial-no-tool-use and exclude tool-misuse scenarios?",
           "How will PR smoke prioritization preserve P0/P1 coverage inside the 12-scenario budget?",
-          "Will S2/S3 evidence distinguish schema validation from runtime safety proof?"
+          "Will S3 evidence distinguish manifest validation from runtime tool/navigation safety proof?"
+        ]
+      },
+      {
+        "iteration": "S2 operational conditions",
+        "status": "planned",
+        "questions": [
+          "Are blank voice_id, agent_id, checkpoint_image_url, and user_local_time intentional for audio-only red-team runs?",
+          "Is audio_only: true explicitly scoped to red-team transcript coverage and not treated as avatar behavior proof?",
+          "Does S2 remain manifest/dry-run evidence only for cost, latency, reliability, scalability, and API-outage behavior?"
         ]
       },
       {
@@ -106,7 +114,7 @@
         "iteration": "Current iteration",
         "status": "current",
         "questions": [
-          "Is S2 the right next control point with 1/6 criteria complete?",
+          "Is S3 the right next control point with 1/8 criteria complete?",
           "Are Ask First boundaries still protected before secrets, database, or deploy work?"
         ]
       },
@@ -129,7 +137,7 @@
     ]
   },
   "operationalReadiness": {
-    "updatedAt": "2026-05-31T11:40:15.000Z",
+    "updatedAt": "2026-05-31T12:03:44.000Z",
     "serviceGuarantee": "The service is kept healthy by phase-end fitness checks: deterministic tests, non-stub integration/E2E runs, cost guardrail proof, latency budgets, API-outage simulations, concurrency/load checks, and bottleneck triage. Until those checks are measured, the dashboard marks the phase as partial or pending.",
     "summaryCards": [
       {
@@ -202,31 +210,31 @@
         "phaseId": "phase-1b",
         "phase": "Phase 1B - SOO integration",
         "status": "partial",
-        "evidence": "S1 manifest validates locally; PR dry-run now caps language-tutor selection to 12 of 36 smoke scenarios; default Langfuse path now dispatches LiveKit before polling. Non-stub runtime evidence still pending.",
+        "evidence": "S1 and S2 manifests validate locally. PR dry-runs for language-tutor and language-checkpoint each cap selection to 12 of 36 smoke scenarios and pass through the local stub path. Default Langfuse path dispatches LiveKit before polling. Non-stub runtime evidence still pending.",
         "checks": [
           {
             "name": "Cost",
             "status": "partial",
-            "metric": "Manifest budget remains max_cost_usd_per_run=5.00 and max_scenarios_per_pr=12; dry-run selected 12 rows with no provider cost.",
+            "metric": "S1/S2 manifest budgets remain max_cost_usd_per_run=5.00 and max_scenarios_per_pr=12; each dry-run selected 12 rows with no provider cost.",
             "next": "Record actual run_summary cost per SOO agent in a non-stub run and prove budget_exhausted behavior."
           },
           {
             "name": "Latency",
             "status": "partial",
-            "metric": "Dry-run completed 12 scenarios locally; real LiveKit/Langfuse p50/p95 not measured.",
+            "metric": "S1/S2 dry-runs each completed 12 scenarios locally; real LiveKit/Langfuse p50/p95 not measured.",
             "next": "Record p50/p95 per scenario and total workflow time from the first non-stub SOO workflow."
           },
           {
             "name": "Scalability",
             "status": "planned",
-            "metric": "Three agent manifests and path-scoped workflow jobs",
+            "metric": "Two of three SOO manifests exist; path-scoped workflow jobs still pending.",
             "next": "Test simultaneous agent path changes and workflow fan-out."
           },
           {
             "name": "Reliability",
             "status": "partial",
-            "metric": "language-tutor validate-manifest passed; framework full suite passed with 104 tests after S1 hotfix.",
-            "next": "Cut or pin a framework hotfix tag/SHA before S4, then capture SOO workflow evidence and non-stub integration run."
+            "metric": "language-tutor and language-checkpoint validate-manifest passed; framework full suite passed with 104 tests after S1 hotfix.",
+            "next": "Add support-agent manifest, cut or pin a framework hotfix tag/SHA before S4, then capture SOO workflow evidence and non-stub integration run."
           },
           {
             "name": "API outage",
@@ -237,7 +245,7 @@
           {
             "name": "Bottlenecks",
             "status": "partial",
-            "metric": "Trace correlation hotfix adds top-level redteam_run_id/redteam_scenario_id metadata and dispatches LiveKit before Langfuse polling; runtime trace search latency not measured.",
+            "metric": "S1/S2 manifests include top-level redteam_run_id/redteam_scenario_id metadata; runtime trace search latency not measured.",
             "next": "Record slowest stage from SOO run."
           }
         ]
@@ -409,12 +417,12 @@
     ]
   },
   "currentTask": {
-    "id": "S2",
-    "title": "language-checkpoint manifest",
-    "detail": "Create the checkpoint agent manifest and trace binding.",
+    "id": "S3",
+    "title": "support-agent manifest",
+    "detail": "Create Maya/support-agent manifest with partial tool-use coverage noted.",
     "criteria": [
       {
-        "label": "language-checkpoint manifest exists",
+        "label": "support-agent manifest exists",
         "done": false
       },
       {
@@ -426,7 +434,7 @@
         "done": false
       },
       {
-        "label": "Expected profile references k12_learner",
+        "label": "Expected profile references support_navigation",
         "done": false
       },
       {
@@ -436,22 +444,30 @@
       {
         "label": "validate-manifest evidence captured",
         "done": false
+      },
+      {
+        "label": "support-agent declares partial-no-tool-use",
+        "done": false
+      },
+      {
+        "label": "support-agent excludes tool-misuse",
+        "done": false
       }
     ],
     "criteriaComplete": 1,
-    "criteriaTotal": 6,
+    "criteriaTotal": 8,
     "done": false,
     "status": "current",
     "phase": "Phase 1B - SOO integration"
   },
   "progress": {
-    "done": 8,
+    "done": 9,
     "total": 26,
-    "percent": 31
+    "percent": 35
   },
   "nextAction": {
-    "title": "S2 - language-checkpoint manifest",
-    "detail": "Create the checkpoint agent manifest and trace binding."
+    "title": "S3 - support-agent manifest",
+    "detail": "Create Maya/support-agent manifest with partial tool-use coverage noted."
   },
   "metrics": [
     {
@@ -765,19 +781,19 @@
           "criteria": [
             {
               "label": "language-checkpoint manifest exists",
-              "done": false
+              "done": true
             },
             {
               "label": "agent_name declared",
-              "done": false
+              "done": true
             },
             {
               "label": "policy profile declared",
-              "done": false
+              "done": true
             },
             {
               "label": "Expected profile references k12_learner",
-              "done": false
+              "done": true
             },
             {
               "label": "LiveKit staging/production config exists",
@@ -785,13 +801,13 @@
             },
             {
               "label": "validate-manifest evidence captured",
-              "done": false
+              "done": true
             }
           ],
-          "criteriaComplete": 1,
+          "criteriaComplete": 6,
           "criteriaTotal": 6,
-          "done": false,
-          "status": "current"
+          "done": true,
+          "status": "done"
         },
         {
           "id": "S3",
@@ -834,7 +850,7 @@
           "criteriaComplete": 1,
           "criteriaTotal": 8,
           "done": false,
-          "status": "pending"
+          "status": "current"
         },
         {
           "id": "S4",
@@ -933,7 +949,7 @@
           "status": "manual"
         }
       ],
-      "done": 1,
+      "done": 2,
       "total": 7
     },
     {
@@ -1330,24 +1346,24 @@
   ],
   "commits": [
     {
+      "hash": "cf40ba4",
+      "message": "docs(dashboard): record S2 checkpoint manifest review"
+    },
+    {
+      "hash": "066da81",
+      "message": "fix(dashboard): add following current-stage action"
+    },
+    {
+      "hash": "69948d1",
+      "message": "fix(dashboard): make critical path phase-aware"
+    },
+    {
+      "hash": "09f7a5b",
+      "message": "docs(dashboard): refresh strategic layout snapshot"
+    },
+    {
       "hash": "3315fd3",
       "message": "fix(dashboard): improve strategic view layout"
-    },
-    {
-      "hash": "d1d921d",
-      "message": "fix(framework): dispatch before Langfuse polling"
-    },
-    {
-      "hash": "82516fd",
-      "message": "docs(dashboard): refresh operational readiness snapshot"
-    },
-    {
-      "hash": "10628fe",
-      "message": "docs(dashboard): add operational readiness metrics"
-    },
-    {
-      "hash": "0b3f667",
-      "message": "docs(plan): add final release governance gate"
     }
   ],
   "fileGroups": [
@@ -1440,8 +1456,8 @@
           "exists": true,
           "href": "/docs/operational-metrics/status.json",
           "lines": 281,
-          "size": 12117,
-          "updatedAt": "2026-05-31T11:45:40.197Z",
+          "size": 12231,
+          "updatedAt": "2026-05-31T12:04:05.030Z",
           "note": null
         },
         {
