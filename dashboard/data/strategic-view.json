@@ -1,11 +1,20 @@
 {
   "verdict": "Greenlight with active conditions",
-  "summary": "Phase 1A is now 5/7; F3-F5 are accepted and the next strategic control point is F6 reusable workflow packaging.",
+  "summary": "Phase 1A is now 6/7; F3-F6 are accepted and the next strategic control point is F7 release tagging.",
   "iterations": [
     {
+      "iteration": "F6 acceptance evidence",
+      "status": "accepted",
+      "result": "Green Actions run recorded for the framework fixture manifest: run 26701859150 on head c5420a3d98f24b8c714cd3f70db0d9ad3efd102b. The red-team gate job validated the manifest, prepared REDTEAM_RUN_ID, executed vt-redteam, and uploaded run_summary.json successfully.",
+      "runUrl": "https://github.com/ghabrielrodrigues-vt/vt-agent-redteam-poc/actions/runs/26701859150",
+      "runId": "26701859150",
+      "headSha": "c5420a3d98f24b8c714cd3f70db0d9ad3efd102b",
+      "artifact": "run_summary.json"
+    },
+    {
       "iteration": "F6 implementation",
-      "status": "in-review",
-      "result": "Reusable workflow YAML and fixture manifest are implemented. Local fixture dry-run writes run_summary.json and workflow contract tests pass. Pending condition: actual green GitHub Actions run evidence before F6 can be accepted as done."
+      "status": "accepted",
+      "result": "Reusable workflow YAML and fixture manifest are implemented. Local fixture dry-run writes run_summary.json, workflow contract tests pass, and the required GitHub Actions evidence is now recorded."
     },
     {
       "iteration": "F5 review hardening",

@@ -11,7 +11,7 @@ cycle after the dashboard was created. It captures:
 - Fixes applied.
 - Validation evidence.
 
-Current status after these reviews: Phase 1A is at 5/7, with F6 as the next
+Current status after these reviews: Phase 1A is at 6/7, with F7 as the next
 current task.
 
 ## F3 Review: Severity Gate and Overrides
@@ -165,9 +165,13 @@ Final Review Agent verdict: cleared.
 | F3 Severity gate and overrides | Accepted | Blockers cleared | Done |
 | F4 Redaction at write | Accepted | Blocker cleared | Done |
 | F5 Manifest-driven CLI modes | Accepted | Blockers cleared | Done |
-| F6 Reusable workflow | Implementation-complete | Acceptance evidence pending | Current |
+| F6 Reusable workflow | Accepted | Green Actions run recorded | Done |
 
-## Open Watch Items for F6
+## F6 Closure Notes and Downstream Watch Items
+
+F6-specific acceptance is closed by the green fixture run recorded below. The
+items here remain downstream guardrails for consumer-repo rollout and later
+Phase 1B/S6 work.
 
 - Reusable workflow must provide Langfuse secrets.
 - Reusable workflow must provide stable `REDTEAM_RUN_ID`.
@@ -183,7 +187,7 @@ Final Review Agent verdict: cleared.
 
 ### Strategic View
 
-Verdict: implementation-complete, not done.
+Verdict: accepted after green Actions evidence.
 
 Rationale:
 
@@ -198,17 +202,22 @@ Rationale:
   dry-run behavior.
 - Workflow uploads `run_summary.json` as an artifact.
 
-Remaining condition:
+Acceptance evidence:
 
-- A real green GitHub Actions run against the fixture manifest must be recorded
-  before F6 is marked done.
+- Green Actions run recorded for the framework fixture manifest:
+  https://github.com/ghabrielrodrigues-vt/vt-agent-redteam-poc/actions/runs/26701859150
+- Run id: `26701859150`.
+- Head SHA: `c5420a3d98f24b8c714cd3f70db0d9ad3efd102b`.
+- Job `red-team gate` completed successfully after validating the fixture
+  manifest, preparing a stable run id, running the red-team gate, and uploading
+  `run_summary.json`.
 
 ### Review Agent Findings
 
 Blocking acceptance item:
 
-- F6 cannot be fully accepted until the plan's explicit acceptance criterion is
-  satisfied: one green Actions run against the framework repo fixture manifest.
+- Cleared: the plan's explicit acceptance criterion is now satisfied by the
+  green Actions run recorded above.
 
 Non-blocking concerns:
 
@@ -225,4 +234,27 @@ Validated locally:
 - Fixture dry-run writes `run_summary.json`.
 - `tests/test_workflow_contract.py` passes.
 - Full local suite passes: 101 tests.
-- Dashboard correctly keeps F6 at 3/4, current.
+- Dashboard should now mark F6 at 4/4 and promote F7 as current after data
+  regeneration.
+
+### Post-Acceptance Review
+
+Strategic View verdict: accepted. Promote F7 as current.
+
+Review Agent verdict: no blockers.
+
+Non-blocking improvements applied after review:
+
+- Tightened the dashboard evidence detector so F6 requires either legacy
+  transfer-bundle evidence or both a GitHub Actions run URL and a head SHA in
+  this review report.
+- Renamed the F6 watch section to separate closed F6 acceptance from downstream
+  rollout guardrails.
+- Added structured run metadata to the strategic-view source data.
+
+Validation after post-acceptance review:
+
+- `node --check dashboard/scripts/redteam-dashboard.mjs`: passed.
+- `git diff --check`: passed.
+- `dashboard/data/redteam-status.json` regenerates with F6 at 4/4 and F7 as
+  current.

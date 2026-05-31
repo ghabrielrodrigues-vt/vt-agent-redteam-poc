@@ -113,6 +113,14 @@ function has(relativePath, pattern) {
   return pattern.test(read(relativePath));
 }
 
+function hasGreenActionsEvidence() {
+  const reviewReport = read("docs/review-reports.md");
+  const hasLegacyTransferEvidence = has("docs/v0-implementation-plan.codex-transfer.md", /green Actions run|Actions run/i);
+  const hasRunUrl = /https:\/\/github\.com\/ghabrielrodrigues-vt\/vt-agent-redteam-poc\/actions\/runs\/\d+/i.test(reviewReport);
+  const hasHeadSha = /Head SHA:\s*`?[a-f0-9]{40}`?/i.test(reviewReport);
+  return existsSync(path.join(repoRoot, ".github/workflows/redteam.yml")) && (hasLegacyTransferEvidence || (hasRunUrl && hasHeadSha));
+}
+
 function hasAbs(absPath, pattern) {
   return pattern.test(readAbs(absPath));
 }
@@ -287,7 +295,7 @@ function buildTasks() {
     criterion("Framework reusable workflow exists", existsSync(path.join(repoRoot, ".github/workflows/redteam.yml"))),
     criterion("Workflow exposes inputs and secrets", has(".github/workflows/redteam.yml", /workflow_call/) && has(".github/workflows/redteam.yml", /secrets:/)),
     criterion("Workflow supports fixture manifest run", has(".github/workflows/redteam.yml", /fixture|manifest/i)),
-    criterion("Green Actions run recorded", has("docs/v0-implementation-plan.codex-transfer.md", /green Actions run|Actions run/i) && existsSync(path.join(repoRoot, ".github/workflows/redteam.yml"))),
+    criterion("Green Actions run recorded", hasGreenActionsEvidence()),
   ];
 
   const f7Criteria = [

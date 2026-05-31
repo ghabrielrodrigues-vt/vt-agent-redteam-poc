@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-31T03:10:42.291Z",
+  "generatedAt": "2026-05-31T03:15:43.415Z",
   "git": {
     "branch": "main",
     "isDirty": true,
     "shortStatus": "uncommitted changes present",
-    "aheadBehind": "ahead 5, behind 0",
-    "ahead": 5,
+    "aheadBehind": "ahead 0, behind 0",
+    "ahead": 0,
     "behind": 0,
     "remote": "git@github.com:ghabrielrodrigues-vt/vt-agent-redteam-poc.git"
   },
@@ -17,12 +17,21 @@
   },
   "strategicView": {
     "verdict": "Greenlight with active conditions",
-    "summary": "Phase 1A is now 5/7; F3-F5 are accepted and the next strategic control point is F6 reusable workflow packaging.",
+    "summary": "Phase 1A is now 6/7; F3-F6 are accepted and the next strategic control point is F7 release tagging.",
     "iterations": [
       {
+        "iteration": "F6 acceptance evidence",
+        "status": "accepted",
+        "result": "Green Actions run recorded for the framework fixture manifest: run 26701859150 on head c5420a3d98f24b8c714cd3f70db0d9ad3efd102b. The red-team gate job validated the manifest, prepared REDTEAM_RUN_ID, executed vt-redteam, and uploaded run_summary.json successfully.",
+        "runUrl": "https://github.com/ghabrielrodrigues-vt/vt-agent-redteam-poc/actions/runs/26701859150",
+        "runId": "26701859150",
+        "headSha": "c5420a3d98f24b8c714cd3f70db0d9ad3efd102b",
+        "artifact": "run_summary.json"
+      },
+      {
         "iteration": "F6 implementation",
-        "status": "in-review",
-        "result": "Reusable workflow YAML and fixture manifest are implemented. Local fixture dry-run writes run_summary.json and workflow contract tests pass. Pending condition: actual green GitHub Actions run evidence before F6 can be accepted as done."
+        "status": "accepted",
+        "result": "Reusable workflow YAML and fixture manifest are implemented. Local fixture dry-run writes run_summary.json, workflow contract tests pass, and the required GitHub Actions evidence is now recorded."
       },
       {
         "iteration": "F5 review hardening",
@@ -67,7 +76,7 @@
       {
         "iteration": "Current iteration",
         "status": "current",
-        "result": "F6 is active with 3/4 criteria complete. Finish this before starting SOO integration work."
+        "result": "F7 is active with 0/3 criteria complete. Finish this before starting SOO integration work."
       },
       {
         "iteration": "F1 delivery",
@@ -82,41 +91,37 @@
     ]
   },
   "currentTask": {
-    "id": "F6",
-    "title": "Reusable workflow",
-    "detail": "Package framework workflow for repo consumers and CI reuse.",
+    "id": "F7",
+    "title": "v0.1.0 release tag",
+    "detail": "Tag framework once F1-F6 are stable and documented.",
     "criteria": [
       {
-        "label": "Framework reusable workflow exists",
-        "done": true
+        "label": "pyproject version bumped to 0.1.0",
+        "done": false
       },
       {
-        "label": "Workflow exposes inputs and secrets",
-        "done": true
+        "label": "git tag v0.1.0 exists locally",
+        "done": false
       },
       {
-        "label": "Workflow supports fixture manifest run",
-        "done": true
-      },
-      {
-        "label": "Green Actions run recorded",
+        "label": "Install target resolves from tag",
         "done": false
       }
     ],
-    "criteriaComplete": 3,
-    "criteriaTotal": 4,
+    "criteriaComplete": 0,
+    "criteriaTotal": 3,
     "done": false,
     "status": "current",
     "phase": "Phase 1A - Framework hardening"
   },
   "progress": {
-    "done": 5,
+    "done": 6,
     "total": 17,
-    "percent": 29
+    "percent": 35
   },
   "nextAction": {
-    "title": "F6 - Reusable workflow",
-    "detail": "Package framework workflow for repo consumers and CI reuse."
+    "title": "F7 - v0.1.0 release tag",
+    "detail": "Tag framework once F1-F6 are stable and documented."
   },
   "metrics": [
     {
@@ -145,7 +150,7 @@
       "detail": "Last captured pytest suite size."
     },
     {
-      "value": "5",
+      "value": "0",
       "label": "Commits ahead",
       "detail": "Local framework branch versus origin/main."
     }
@@ -345,13 +350,13 @@
             },
             {
               "label": "Green Actions run recorded",
-              "done": false
+              "done": true
             }
           ],
-          "criteriaComplete": 3,
+          "criteriaComplete": 4,
           "criteriaTotal": 4,
-          "done": false,
-          "status": "current"
+          "done": true,
+          "status": "done"
         },
         {
           "id": "F7",
@@ -374,10 +379,10 @@
           "criteriaComplete": 0,
           "criteriaTotal": 3,
           "done": false,
-          "status": "pending"
+          "status": "current"
         }
       ],
-      "done": 5,
+      "done": 6,
       "total": 7
     },
     {
@@ -768,6 +773,10 @@
   ],
   "commits": [
     {
+      "hash": "c5420a3",
+      "message": "feat(framework): redteam mvp dashboard and gates"
+    },
+    {
       "hash": "7bbaffd",
       "message": "docs: AGENTS.md + codex-transfer bundle for cross-tool portability"
     },
@@ -782,10 +791,6 @@
     {
       "hash": "9b2ace1",
       "message": "docs: v2.1 spec hardening — Mermaid diagrams, condensed brief, executive summary"
-    },
-    {
-      "hash": "535d304",
-      "message": "docs: add v0 implementation plan, summary, handoff, and boss review"
     }
   ],
   "fileGroups": [
