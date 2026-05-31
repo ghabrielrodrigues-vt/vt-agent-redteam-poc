@@ -245,8 +245,11 @@ h3 {
 
 .token-counter.collapsed {
   gap: 0;
-  min-width: 162px;
-  padding: 10px 12px;
+  height: 44px;
+  min-width: 44px;
+  padding: 0;
+  place-items: center;
+  width: 44px;
 }
 
 .token-counter.collapsed .token-counter-meta,
@@ -256,10 +259,17 @@ h3 {
 
 .token-counter.collapsed .token-counter-top {
   align-items: center;
+  gap: 0;
+  justify-content: center;
 }
 
+.token-counter.collapsed .token-counter-top span:not(.token-counter-icon),
 .token-counter.collapsed .token-counter-top strong {
-  font-size: 1.05rem;
+  display: none;
+}
+
+.token-counter.collapsed .token-counter-icon {
+  display: inline-grid;
 }
 
 .token-counter-top {
@@ -267,6 +277,16 @@ h3 {
   display: flex;
   gap: 12px;
   justify-content: space-between;
+}
+
+.token-counter-icon {
+  color: var(--purple-800);
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 1.1rem;
+  font-weight: 950;
+  line-height: 1;
+  place-items: center;
 }
 
 .token-counter-top span {
