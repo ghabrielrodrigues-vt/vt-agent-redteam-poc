@@ -1,9 +1,9 @@
-# `vt-agent-redteam` — MVP prototype (v0.0.3)
+# `vt-agent-redteam` — MVP prototype (v0.1.0)
 
 This folder is the scaffolded Python package proposed in
 `../docs/04-poc-design.md` and planned in `../docs/06-implementation-plan.md`.
 
-## What works today (v0.0.3)
+## What works today (v0.1.0)
 
 - **125 scenarios** across 22 categories with EN + PT variants, covering:
   - **CONTENT_MODERATION_PROMPT (Nerdy Tutor production K-12 policy)** —
