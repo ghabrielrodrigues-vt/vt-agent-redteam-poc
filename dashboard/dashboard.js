@@ -7,6 +7,7 @@ const state = {
   timer: null,
   lastData: null,
   taskOpen: new Map(),
+  phaseOpen: new Map(),
   language: localStorage.getItem("redteam-dashboard-language") || "en",
 };
 
@@ -535,16 +536,33 @@ function renderCriticalPath(data) {
 function renderPhaseLanes(phases) {
   const grid = $("#phaseLanes");
   grid.innerHTML = "";
+  const defaultOpenPhase =
+    phases.find((phase) => phase.tasks.some((task) => task.status === "current")) ??
+    phases.find((phase) => phase.done < phase.total) ??
+    phases[0];
+
   for (const phase of phases) {
-    const lane = document.createElement("article");
+    const lane = document.createElement("details");
+    const phasePercent = phase.total ? Math.round((phase.done / phase.total) * 100) : 0;
+    const rememberedOpen = state.phaseOpen.get(phase.id);
     lane.className = "lane";
+    lane.open = rememberedOpen ?? phase.id === defaultOpenPhase?.id;
     lane.innerHTML = `
-      <div class="lane-heading">
-        <h3>${tx(phase.name)}</h3>
+      <summary class="lane-heading">
+        <div class="lane-title">
+          <h3>${tx(phase.name)}</h3>
+          <div class="lane-progress" aria-label="${phasePercent}%">
+            <span style="width: ${phasePercent}%"></span>
+          </div>
+        </div>
         <span>${phase.done}/${phase.total}</span>
-      </div>
+      </summary>
       <div class="task-list"></div>
     `;
+    lane.addEventListener("toggle", () => {
+      state.phaseOpen.set(phase.id, lane.open);
+    });
+
     const list = lane.querySelector(".task-list");
     for (const task of phase.tasks) {
       const card = document.createElement("details");
@@ -581,6 +599,26 @@ function renderPhaseLanes(phases) {
     }
     lane.id = phase.id;
     grid.appendChild(lane);
+  }
+  revealHashTarget();
+}
+
+function revealHashTarget() {
+  const id = decodeURIComponent(window.location.hash.replace(/^#/, ""));
+  if (!id) return;
+  const target = document.getElementById(id);
+  if (!target) return;
+
+  const lane = target.closest(".lane");
+  if (lane instanceof HTMLDetailsElement) {
+    lane.open = true;
+    state.phaseOpen.set(lane.id, true);
+  }
+
+  if (target.classList.contains("task-card") && target instanceof HTMLDetailsElement) {
+    target.open = true;
+    const taskId = target.id.replace(/^task-/, "").toUpperCase();
+    state.taskOpen.set(taskId, true);
   }
 }
 
@@ -873,6 +911,7 @@ for (const button of document.querySelectorAll("[data-lang-button]")) {
 }
 
 $("#refreshButton").addEventListener("click", loadStatus);
+window.addEventListener("hashchange", revealHashTarget);
 applyStaticCopy();
 renderGlossary();
 loadStatus();

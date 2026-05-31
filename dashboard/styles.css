@@ -521,16 +521,46 @@ h3 {
 
 .lane-heading {
   align-items: baseline;
+  cursor: pointer;
   display: flex;
   gap: 10px;
   justify-content: space-between;
+  list-style: none;
+}
+
+.lane-heading::-webkit-details-marker {
+  display: none;
+}
+
+.lane[open] .lane-heading {
   margin-bottom: 10px;
+}
+
+.lane-title {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  width: 100%;
 }
 
 .lane-heading span {
   color: var(--gray-600);
   font-size: 0.72rem;
   font-weight: 850;
+}
+
+.lane-progress {
+  background: var(--gray-200);
+  border-radius: 999px;
+  height: 6px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.lane-progress span {
+  background: linear-gradient(90deg, var(--purple-500), var(--purple-700));
+  display: block;
+  height: 100%;
 }
 
 .task-list {
