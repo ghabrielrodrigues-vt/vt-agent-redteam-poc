@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-05-31T12:15:29.850Z",
+  "generatedAt": "2026-05-31T12:17:05.559Z",
   "git": {
     "branch": "main",
     "isDirty": false,
     "shortStatus": "clean working tree",
-    "aheadBehind": "ahead 1, behind 0",
-    "ahead": 1,
+    "aheadBehind": "ahead 0, behind 0",
+    "ahead": 0,
     "behind": 0,
     "remote": "git@github.com:ghabrielrodrigues-vt/vt-agent-redteam-poc.git"
   },
@@ -476,7 +476,7 @@
       "detail": "Last captured pytest suite size."
     },
     {
-      "value": "1",
+      "value": "0",
       "label": "Commits ahead",
       "detail": "Local framework branch versus origin/main."
     }
@@ -1326,6 +1326,10 @@
   ],
   "commits": [
     {
+      "hash": "5ab2cc1",
+      "message": "docs(dashboard): refresh S3 status snapshot"
+    },
+    {
       "hash": "c84f4f1",
       "message": "docs(dashboard): record S3 support agent review"
     },
@@ -1340,10 +1344,6 @@
     {
       "hash": "066da81",
       "message": "fix(dashboard): add following current-stage action"
-    },
-    {
-      "hash": "69948d1",
-      "message": "fix(dashboard): make critical path phase-aware"
     }
   ],
   "fileGroups": [
