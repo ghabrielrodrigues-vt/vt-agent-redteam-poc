@@ -8,6 +8,7 @@ const state = {
   lastData: null,
   taskOpen: new Map(),
   phaseOpen: new Map(),
+  tokenCounterCollapsed: false,
   language: localStorage.getItem("redteam-dashboard-language") || "en",
 };
 
@@ -70,8 +71,10 @@ const STATIC_COPY = {
     "tokens.reasoning": "Reasoning",
     "tokens.sessions": "sessions",
     "tokens.updated": "updated",
-    "tokens.hideLabel": "Hide token usage counter",
-    "tokens.hideTitle": "Click to hide token usage counter",
+    "tokens.collapseLabel": "Collapse token usage counter",
+    "tokens.collapseTitle": "Click to collapse token usage counter",
+    "tokens.expandLabel": "Expand token usage counter",
+    "tokens.expandTitle": "Click to expand token usage counter",
   },
   pt: {
     "hero.eyebrow": "LiveKit Agents Red Team MVP",
@@ -131,8 +134,10 @@ const STATIC_COPY = {
     "tokens.reasoning": "Reasoning",
     "tokens.sessions": "sessoes",
     "tokens.updated": "atualizado",
-    "tokens.hideLabel": "Ocultar contador de tokens",
-    "tokens.hideTitle": "Clique para ocultar o contador de tokens",
+    "tokens.collapseLabel": "Colapsar contador de tokens",
+    "tokens.collapseTitle": "Clique para colapsar o contador de tokens",
+    "tokens.expandLabel": "Expandir contador de tokens",
+    "tokens.expandTitle": "Clique para expandir o contador de tokens",
   },
 };
 
@@ -371,6 +376,7 @@ function applyStaticCopy() {
   for (const element of document.querySelectorAll("[data-i18n-title]")) {
     element.setAttribute("title", t(element.dataset.i18nTitle));
   }
+  updateTokenCounterChrome();
   for (const button of document.querySelectorAll("[data-lang-button]")) {
     const active = button.dataset.langButton === state.language;
     button.classList.toggle("active", active);
@@ -869,8 +875,18 @@ function renderTokenCounter(usage) {
   setText("#tokenReasoningValue", formatCompactNumber(usage.reasoningOutputTokens));
 }
 
-function hideTokenCounter() {
-  $("#tokenCounter")?.setAttribute("hidden", "");
+function updateTokenCounterChrome() {
+  const counter = $("#tokenCounter");
+  if (!counter) return;
+  counter.classList.toggle("collapsed", state.tokenCounterCollapsed);
+  counter.setAttribute("aria-expanded", String(!state.tokenCounterCollapsed));
+  counter.setAttribute("aria-label", t(state.tokenCounterCollapsed ? "tokens.expandLabel" : "tokens.collapseLabel"));
+  counter.setAttribute("title", t(state.tokenCounterCollapsed ? "tokens.expandTitle" : "tokens.collapseTitle"));
+}
+
+function toggleTokenCounter() {
+  state.tokenCounterCollapsed = !state.tokenCounterCollapsed;
+  updateTokenCounterChrome();
 }
 
 function renderStatus(data) {
@@ -964,11 +980,11 @@ for (const button of document.querySelectorAll("[data-lang-button]")) {
 }
 
 const tokenCounter = $("#tokenCounter");
-tokenCounter?.addEventListener("click", hideTokenCounter);
+tokenCounter?.addEventListener("click", toggleTokenCounter);
 tokenCounter?.addEventListener("keydown", (event) => {
   if (event.key !== "Enter" && event.key !== " ") return;
   event.preventDefault();
-  hideTokenCounter();
+  toggleTokenCounter();
 });
 
 $("#refreshButton").addEventListener("click", loadStatus);

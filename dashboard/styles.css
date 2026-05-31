@@ -236,15 +236,30 @@ h3 {
   z-index: 50;
 }
 
-.token-counter[hidden] {
-  display: none;
-}
-
 .token-counter:hover,
 .token-counter:focus-visible {
   border-color: var(--purple-500);
   box-shadow: 0 0 0 3px rgba(139, 61, 235, 0.12), var(--shadow-md);
   outline: 0;
+}
+
+.token-counter.collapsed {
+  gap: 0;
+  min-width: 162px;
+  padding: 10px 12px;
+}
+
+.token-counter.collapsed .token-counter-meta,
+.token-counter.collapsed .token-counter-breakdown {
+  display: none;
+}
+
+.token-counter.collapsed .token-counter-top {
+  align-items: center;
+}
+
+.token-counter.collapsed .token-counter-top strong {
+  font-size: 1.05rem;
 }
 
 .token-counter-top {
