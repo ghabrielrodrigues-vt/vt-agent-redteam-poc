@@ -11,33 +11,38 @@
     <main class="shell">
       <header class="hero-panel compact-hero">
         <div class="hero-copy">
-          <div class="eyebrow">LiveKit Agents Red Team MVP</div>
-          <h1>Red Team MVP Control Room</h1>
-          <p>Task-first operating view for framework delivery, SOO integration, deploy gates, canonical docs, and implementation risks.</p>
+          <div class="eyebrow" data-i18n="hero.eyebrow">LiveKit Agents Red Team MVP</div>
+          <h1 data-i18n="hero.title">Red Team MVP Control Room</h1>
+          <p data-i18n="hero.subtitle">Task-first operating view for framework delivery, SOO integration, deploy gates, canonical docs, and implementation risks.</p>
         </div>
         <div class="hero-status" aria-label="Current project status">
+          <div class="language-switch" aria-label="Language">
+            <button class="language-button" type="button" data-lang-button="en">EN</button>
+            <button class="language-button" type="button" data-lang-button="pt">PT</button>
+          </div>
           <span class="pill pill-live" id="syncState">Loading</span>
           <span class="pill" id="branchPill">Branch</span>
           <span class="pill" id="worktreePill">Worktree</span>
-          <button class="ghost-button" id="refreshButton" type="button">Refresh</button>
+          <button class="ghost-button" id="refreshButton" type="button" data-i18n="actions.refresh">Refresh</button>
         </div>
       </header>
 
       <nav class="quick-nav" aria-label="Quick navigation">
-        <a href="#current-stage">Current</a>
+        <a href="#current-stage" data-i18n="nav.current">Current</a>
         <a id="currentTaskNav" href="#task-loading">#--</a>
-        <a href="#phase-map">Phase Map</a>
-        <a href="#operational-readiness">Ops</a>
+        <a href="#phase-map" data-i18n="nav.phaseMap">Phase Map</a>
+        <a href="#operational-readiness" data-i18n="nav.ops">Ops</a>
         <span class="quick-task-links" id="quickTaskLinks" aria-label="Active phase task shortcuts"></span>
-        <a href="#watch-items">Risks</a>
-        <a href="#source-map">Files</a>
+        <a href="#watch-items" data-i18n="nav.risks">Risks</a>
+        <a href="#source-map" data-i18n="nav.files">Files</a>
+        <a href="#glossary" data-i18n="nav.glossary">Glossary</a>
       </nav>
 
       <section class="priority-grid" aria-label="Project command center">
         <article class="panel stage-panel" id="current-stage">
           <div class="panel-header">
             <div>
-              <div class="label">Current Stage</div>
+              <div class="label" data-i18n="labels.currentStage">Current Stage</div>
               <h2 id="currentStageTitle">Loading stage</h2>
             </div>
             <span class="status-dot" id="stageDot" aria-hidden="true"></span>
@@ -52,12 +57,12 @@
           </div>
           <div class="stage-actions">
             <div class="next-action">
-              <span class="label">Next Action</span>
+              <span class="label" data-i18n="labels.nextAction">Next Action</span>
               <strong id="nextActionTitle">Loading</strong>
               <p id="nextActionBody">The next implementation step will appear here.</p>
             </div>
             <div class="next-action secondary">
-              <span class="label">Following Action</span>
+              <span class="label" data-i18n="labels.followingAction">Following Action</span>
               <strong id="followingActionTitle">Loading</strong>
               <p id="followingActionBody">The follow-up implementation step will appear here.</p>
             </div>
@@ -67,20 +72,20 @@
         <article class="panel focus-chart-panel">
           <div class="panel-header compact">
             <div>
-              <div class="label">Delivery Focus</div>
-              <h2>Progress and targets</h2>
+              <div class="label" data-i18n="labels.deliveryFocus">Delivery Focus</div>
+              <h2 data-i18n="headings.progressTargets">Progress and targets</h2>
             </div>
           </div>
           <div class="chart-layout">
             <div class="ring-chart" id="progressRing" aria-label="Overall completion">
               <span id="ringValue">0%</span>
-              <small>complete</small>
+              <small data-i18n="labels.complete">complete</small>
             </div>
             <div class="bar-chart" id="phaseChart"></div>
           </div>
           <div class="critical-path" aria-label="Critical path">
             <div class="critical-header">
-              <span class="label">Critical Path</span>
+              <span class="label" data-i18n="labels.criticalPath">Critical Path</span>
               <strong id="criticalNow">Loading</strong>
             </div>
             <div class="path-rail" id="criticalRail"></div>
@@ -92,7 +97,7 @@
           <article class="panel strategic-panel">
             <div class="panel-header compact">
               <div>
-                <div class="label">Strategic View</div>
+                <div class="label" data-i18n="labels.strategicView">Strategic View</div>
                 <h2 id="strategicVerdict">Loading</h2>
               </div>
             </div>
@@ -103,8 +108,8 @@
           <article class="panel metrics-panel compact-metrics">
             <div class="panel-header compact">
               <div>
-                <div class="label">Essential Metrics</div>
-                <h2>At a glance</h2>
+                <div class="label" data-i18n="labels.essentialMetrics">Essential Metrics</div>
+                <h2 data-i18n="headings.atGlance">At a glance</h2>
               </div>
             </div>
             <div class="metric-grid" id="metricGrid"></div>
@@ -115,10 +120,10 @@
       <section class="phase-board panel" id="phase-map" aria-label="Development roadmap">
         <div class="panel-header">
           <div>
-            <div class="label">Execution Roadmap</div>
-            <h2>Phase map</h2>
+            <div class="label" data-i18n="labels.executionRoadmap">Execution Roadmap</div>
+            <h2 data-i18n="headings.phaseMap">Phase map</h2>
           </div>
-          <p class="panel-note">F = framework, S = SOO integration, C = rollout controls.</p>
+          <p class="panel-note" data-i18n="notes.phaseMap">F = framework, S = SOO integration, C = rollout controls.</p>
         </div>
         <div class="lane-grid" id="phaseLanes"></div>
       </section>
@@ -126,8 +131,8 @@
       <section class="panel ops-panel" id="operational-readiness" aria-label="Operational readiness">
         <div class="panel-header">
           <div>
-            <div class="label">Operational Readiness</div>
-            <h2>Cost, latency, scale, reliability</h2>
+            <div class="label" data-i18n="labels.operationalReadiness">Operational Readiness</div>
+            <h2 data-i18n="headings.ops">Cost, latency, scale, reliability</h2>
           </div>
           <p class="panel-note" id="opsUpdatedAt">Loading operational evidence.</p>
         </div>
@@ -135,13 +140,13 @@
         <div class="ops-summary-grid" id="opsSummaryGrid"></div>
         <div class="ops-layout">
           <div>
-            <h3>Phase-end checks</h3>
+            <h3 data-i18n="headings.phaseEndChecks">Phase-end checks</h3>
             <div class="ops-phase-grid" id="opsPhaseGrid"></div>
           </div>
           <div>
-            <h3>Failure modes</h3>
+            <h3 data-i18n="headings.failureModes">Failure modes</h3>
             <div class="ops-failure-list" id="opsFailureList"></div>
-            <h3>Bottlenecks</h3>
+            <h3 data-i18n="headings.bottlenecks">Bottlenecks</h3>
             <div class="ops-bottleneck-list" id="opsBottleneckList"></div>
           </div>
         </div>
@@ -151,10 +156,10 @@
         <details class="panel detail-panel" id="runtime-signals" open>
           <summary>
             <span>
-              <span class="label">Health</span>
-              <strong>Runtime signals</strong>
+              <span class="label" data-i18n="labels.health">Health</span>
+              <strong data-i18n="headings.runtimeSignals">Runtime signals</strong>
             </span>
-            <span class="summary-meta">Git, tests, sync</span>
+            <span class="summary-meta" data-i18n="meta.gitTestsSync">Git, tests, sync</span>
           </summary>
           <dl class="signal-list">
             <div>
@@ -162,11 +167,11 @@
               <dd id="gitSignal">Loading</dd>
             </div>
             <div>
-              <dt>Tests</dt>
+              <dt data-i18n="labels.tests">Tests</dt>
               <dd id="testSignal">Loading</dd>
             </div>
             <div>
-              <dt>Last Sync</dt>
+              <dt data-i18n="labels.lastSync">Last Sync</dt>
               <dd id="syncSignal">Loading</dd>
             </div>
           </dl>
@@ -175,10 +180,10 @@
         <details class="panel detail-panel" id="architecture">
           <summary>
             <span>
-              <span class="label">Architecture</span>
-              <strong>Red-team data path</strong>
+              <span class="label" data-i18n="labels.architecture">Architecture</span>
+              <strong data-i18n="headings.dataPath">Red-team data path</strong>
             </span>
-            <span class="summary-meta">Flow + feedback channels</span>
+            <span class="summary-meta" data-i18n="meta.flowFeedback">Flow + feedback channels</span>
           </summary>
           <div class="flow" id="architectureFlow"></div>
           <div class="feedback-grid" id="feedbackChannels"></div>
@@ -187,10 +192,10 @@
         <details class="panel detail-panel" id="project-overview">
           <summary>
             <span>
-              <span class="label">Project Overview</span>
-              <strong>What this MVP proves</strong>
+              <span class="label" data-i18n="labels.projectOverview">Project Overview</span>
+              <strong data-i18n="headings.mvpProves">What this MVP proves</strong>
             </span>
-            <span class="summary-meta">Boundaries and posture</span>
+            <span class="summary-meta" data-i18n="meta.boundaries">Boundaries and posture</span>
           </summary>
           <div id="overviewBlocks" class="overview-blocks"></div>
         </details>
@@ -198,10 +203,10 @@
         <details class="panel detail-panel" id="watch-items">
           <summary>
             <span>
-              <span class="label">Watch Items</span>
-              <strong>Open risks</strong>
+              <span class="label" data-i18n="labels.watchItems">Watch Items</span>
+              <strong data-i18n="headings.openRisks">Open risks</strong>
             </span>
-            <span class="summary-meta">Needs attention</span>
+            <span class="summary-meta" data-i18n="meta.needsAttention">Needs attention</span>
           </summary>
           <div id="riskList" class="risk-list"></div>
         </details>
@@ -209,8 +214,8 @@
         <details class="panel detail-panel" id="source-map">
           <summary>
             <span>
-              <span class="label">Source Map</span>
-              <strong>Canonical files and working surfaces</strong>
+              <span class="label" data-i18n="labels.sourceMap">Source Map</span>
+              <strong data-i18n="headings.canonicalFiles">Canonical files and working surfaces</strong>
             </span>
             <span class="summary-meta" id="fileCountLabel">Loading files</span>
           </summary>
@@ -220,12 +225,23 @@
         <details class="panel detail-panel" id="recent-activity">
           <summary>
             <span>
-              <span class="label">Recent Activity</span>
-              <strong>Local commits</strong>
+              <span class="label" data-i18n="labels.recentActivity">Recent Activity</span>
+              <strong data-i18n="headings.localCommits">Local commits</strong>
             </span>
-            <span class="summary-meta">Latest 5</span>
+            <span class="summary-meta" data-i18n="meta.latestFive">Latest 5</span>
           </summary>
           <ol id="commitList" class="commit-list"></ol>
+        </details>
+
+        <details class="panel detail-panel" id="glossary">
+          <summary>
+            <span>
+              <span class="label" data-i18n="labels.glossary">Glossary</span>
+              <strong data-i18n="headings.termsAcronyms">Terms and acronyms</strong>
+            </span>
+            <span class="summary-meta" data-i18n="meta.glossary">Dashboard vocabulary</span>
+          </summary>
+          <div class="glossary-grid" id="glossaryList"></div>
         </details>
       </section>
     </main>

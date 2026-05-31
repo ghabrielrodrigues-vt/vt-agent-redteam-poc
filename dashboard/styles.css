@@ -274,6 +274,37 @@ h3 {
   cursor: pointer;
 }
 
+.language-switch {
+  align-items: center;
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 999px;
+  display: inline-flex;
+  gap: 3px;
+  min-height: 31px;
+  padding: 3px;
+}
+
+.language-button {
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  color: var(--gray-600);
+  cursor: pointer;
+  font-size: 0.72rem;
+  font-weight: 900;
+  line-height: 1;
+  min-height: 24px;
+  padding: 6px 9px;
+}
+
+.language-button.active {
+  background: var(--purple-700);
+  color: var(--white);
+}
+
+.language-button:focus-visible,
+.ghost-button:focus-visible,
 .ghost-button:hover {
   border-color: var(--purple-500);
   box-shadow: 0 0 0 3px rgba(139, 61, 235, 0.12);
@@ -855,6 +886,33 @@ h3 {
   margin-top: 4px;
 }
 
+.glossary-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.glossary-card {
+  background: var(--gray-50);
+  border: 1px solid var(--gray-200);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.glossary-card h3 {
+  color: var(--purple-700);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  margin-bottom: 7px;
+}
+
+.glossary-card p {
+  color: var(--gray-700);
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.42;
+}
+
 .error-panel {
   background: var(--danger-100);
   border: 1px solid rgba(224, 67, 89, 0.38);
@@ -866,7 +924,8 @@ h3 {
   .top-grid,
   .middle-grid,
   .bottom-grid,
-  .file-map {
+  .file-map,
+  .glossary-grid {
     grid-template-columns: 1fr 1fr;
   }
 
@@ -900,7 +959,8 @@ h3 {
   .file-map,
   .metric-grid,
   .feedback-grid,
-  .overview-blocks {
+  .overview-blocks,
+  .glossary-grid {
     grid-template-columns: 1fr;
   }
 
